@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { soundFx } from './soundSystem.js?v=2.3.2';
+import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js';
 
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
@@ -232,9 +233,195 @@ export const setupUI = (handlers) => {
     $fillDrift.style.width = `${pct}%`;
   };
 
+  // ═══════════════════════════════════════════════════════════════
+  //  캐릭터 프리뷰 시스템 (Three.js 인 캔버스)
+  // ═══════════════════════════════════════════════════════════════
+  const makePreviewScene = () => {
+    const scene    = new THREE.Scene();
+    const ambLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const dirLight = new THREE.DirectionalLight(0xffeedd, 2.5);
+    dirLight.position.set(3, 6, 4);
+    const rimLight = new THREE.DirectionalLight(0x88ccff, 1.0);
+    rimLight.position.set(-3, 2, -3);
+    scene.add(ambLight, dirLight, rimLight);
+    return scene;
+  };
+
+  // ── 메인 화면 캐릭터 프리뷰 ──────────────────────────────────────
+  let mainPreviewRenderer = null;
+  let mainPreviewScene    = null;
+  let mainPreviewCamera   = null;
+  let mainPreviewModel    = null;
+  let mainPreviewRAF      = null;
+
+  const initMainCharPreview = (charId) => {
+    const canvas = document.getElementById('charPreviewCanvas');
+    if (!canvas) return;
+
+    // 이전 렌더러 정리
+    if (mainPreviewRenderer) { mainPreviewRenderer.dispose(); mainPreviewRenderer = null; }
+    if (mainPreviewRAF) { cancelAnimationFrame(mainPreviewRAF); mainPreviewRAF = null; }
+
+    const W = 320, H = 400;
+    canvas.width  = W;
+    canvas.height = H;
+
+    mainPreviewRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    mainPreviewRenderer.setSize(W, H);
+    mainPreviewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mainPreviewRenderer.setClearColor(0x000000, 0);
+
+    mainPreviewScene  = makePreviewScene();
+    mainPreviewCamera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
+    mainPreviewCamera.position.set(0, 4.5, 9);
+    mainPreviewCamera.lookAt(0, 2.2, 0);
+
+    const { bodyGroup } = makeCharacterModel(charId);
+    bodyGroup.scale.setScalar(1.6);
+    bodyGroup.position.y = -0.5;
+    mainPreviewModel = bodyGroup;
+    mainPreviewScene.add(bodyGroup);
+
+    // 캐릭터 이름 업데이트
+    const nameEl = document.getElementById('charPreviewName');
+    const info   = CHARACTER_LIST.find(c => c.id === charId);
+    if (nameEl && info) nameEl.textContent = `${info.emoji} ${info.name}`;
+
+    let rot = 0;
+    const loop = () => {
+      mainPreviewRAF = requestAnimationFrame(loop);
+      rot += 0.004; // 매우 천천히 360도 자동 회전
+      bodyGroup.rotation.y = rot;
+      mainPreviewRenderer.render(mainPreviewScene, mainPreviewCamera);
+    };
+    loop();
+  };
+
+  // ── 캐릭터 선택 화면 ────────────────────────────────────────────
+  const cardRenderers = []; // 개별 카드 렌더러 목록 (dispose용)
+
+  const disposeCardRenderers = () => {
+    cardRenderers.forEach(r => r.dispose());
+    cardRenderers.length = 0;
+  };
+
+  const buildCharSelectScreen = () => {
+    const grid = document.getElementById('charSelGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    disposeCardRenderers();
+
+    const currentId = loadSelectedCharacter();
+
+    CHARACTER_LIST.forEach(charInfo => {
+      const card = document.createElement('div');
+      card.className = 'char-card' + (charInfo.id === currentId ? ' selected' : '');
+      card.dataset.id = charInfo.id;
+
+      // 이모지
+      const emojiEl = document.createElement('div');
+      emojiEl.className = 'char-card-emoji';
+      emojiEl.textContent = charInfo.emoji;
+
+      // 3D 캔버스
+      const cvs = document.createElement('canvas');
+      cvs.width  = 216;
+      cvs.height = 272;
+
+      const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+      renderer.setSize(216, 272);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      cardRenderers.push(renderer);
+
+      const scene  = makePreviewScene();
+      const camera = new THREE.PerspectiveCamera(44, 216 / 272, 0.1, 100);
+      camera.position.set(0, 4.2, 8.5);
+      camera.lookAt(0, 2.0, 0);
+
+      const { bodyGroup } = makeCharacterModel(charInfo.id);
+      bodyGroup.scale.setScalar(1.5);
+      bodyGroup.position.y = -0.5;
+      scene.add(bodyGroup);
+
+      // 애니메이션 상태
+      let targetRot  = 0;
+      let currentRot = 0;
+      let isHovered  = false;
+      let rafId      = null;
+
+      const tick = () => {
+        rafId = requestAnimationFrame(tick);
+        if (isHovered) {
+          targetRot += 0.032; // hover 시 빙글빙글
+        } else {
+          // 정면(0rad)으로 스무스하게 복귀
+          targetRot = targetRot % (Math.PI * 2);
+          if (targetRot > Math.PI)  targetRot -= Math.PI * 2;
+          targetRot += (0 - targetRot) * 0.07;
+        }
+        currentRot += (targetRot - currentRot) * 0.18;
+        bodyGroup.rotation.y = currentRot;
+        renderer.render(scene, camera);
+      };
+      tick();
+
+      card.addEventListener('mouseenter', () => { isHovered = true; });
+      card.addEventListener('mouseleave', () => { isHovered = false; });
+
+      // 이름 / 설명 / 선택 배지
+      const nameEl  = document.createElement('div'); nameEl.className  = 'char-card-name';  nameEl.textContent = charInfo.name;
+      const descEl  = document.createElement('div'); descEl.className  = 'char-card-desc';  descEl.textContent = charInfo.desc;
+      const badge   = document.createElement('div'); badge.className   = 'char-card-badge'; badge.textContent  = 'SELECTED';
+
+      card.append(emojiEl, cvs, nameEl, descEl, badge);
+      grid.appendChild(card);
+
+      // 클릭: 캐릭터 선택 + 메인화면으로 복귀
+      card.addEventListener('click', () => {
+        soundFx.playClick();
+        saveSelectedCharacter(charInfo.id);
+        // 선택 표시 갱신
+        grid.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        // 메인 프리뷰 갱신
+        initMainCharPreview(charInfo.id);
+        // 0.35초 후 선택 화면 닫고 메인으로
+        setTimeout(() => {
+          document.getElementById('scCharSelect').classList.add('off');
+          document.getElementById('scStart').classList.remove('off');
+        }, 350);
+      });
+    });
+  };
+
+  // ── EDIT 버튼 / 캐릭터 프리뷰 클릭 → 선택 화면 열기 ──────────────
+  const openCharSelect = () => {
+    soundFx.playClick();
+    buildCharSelectScreen();
+    document.getElementById('scStart').classList.add('off');
+    document.getElementById('scCharSelect').classList.remove('off');
+  };
+
+  const btnEditChar   = document.getElementById('btnEditChar');
+  const charPrevWrap  = document.getElementById('charPreviewWrap');
+  const btnCharBack   = document.getElementById('btnCharBack');
+
+  if (btnEditChar)  btnEditChar.addEventListener('click',  (e) => { e.stopPropagation(); openCharSelect(); });
+  if (charPrevWrap) charPrevWrap.addEventListener('click', () => openCharSelect());
+  if (btnCharBack)  btnCharBack.addEventListener('click', () => {
+    soundFx.playClick();
+    document.getElementById('scCharSelect').classList.add('off');
+    document.getElementById('scStart').classList.remove('off');
+  });
+
+  // 메인화면 진입 시 현재 캐릭터 프리뷰 초기화
+  initMainCharPreview(loadSelectedCharacter());
+
   return {
     showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
-    updateDriftChargeUI, updateStageTitle
+    updateDriftChargeUI, updateStageTitle,
+    initMainCharPreview, loadSelectedCharacter,
   };
 };

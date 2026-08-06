@@ -1,30 +1,42 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+import { makeCharacterModel } from './characters.js';
 
-export const makeSkier = () => {
+export const makeSkier = (characterId = 'beta') => {
   const rootGroup = new THREE.Group();
-  const bodyGroup = new THREE.Group(); // 🏎️ 마리오 카트 스타일 Y축 80도 획 회전 전용 바디 그룹!
-  bodyGroup.rotation.reorder('YXZ');
 
-  const s = (c, rg=0.6, mt=0.1) => new THREE.MeshStandardMaterial({ color:c, roughness:rg, metalness:mt, emissive: c, emissiveIntensity: 0.15 });
+  // 인게임 방향 전환: 캐릭터 외형을 180도 회전시켜 정면을 바라보게 함
+  // (프리뷰는 makeCharacterModel을 직접 사용하므로 영향 없음)
+  const { bodyGroup: charBody } = makeCharacterModel(characterId);
+  charBody.rotation.y = Math.PI; // 외형만 180도 — 전진 방향을 바라봄
 
-  const skiMat = s(0x18182E, 0.2, 0.8);
-  const skiL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, 3.2), skiMat); skiL.position.set(-0.28, 0.03, 0.2); skiL.castShadow = true;
-  const skiR = skiL.clone(); skiR.position.set(0.28, 0.03, 0.2);
+  const bodyGroup = new THREE.Group(); // 게임 로직용 래퍼 (드리프트 Y축 회전 담당)
+  bodyGroup.rotation.reorder('YXZ'); // 🏎️ 마리오 카트 스타일 Y축 회전 전용!
+  bodyGroup.add(charBody);
 
-  const pants  = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.74, 0.5), s(0x152045)); pants.position.y = 0.44; pants.castShadow = true;
-  const jacket = new THREE.Mesh(new THREE.BoxGeometry(0.74, 1.1, 0.54), s(0x00E0FF)); jacket.position.y = 1.13; jacket.castShadow = true;
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.33, 14, 10), s(0xFF3300, 0.3, 0.2)); helmet.position.y = 2.04; helmet.castShadow = true;
-  const gogg   = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.18, 0.18), s(0xFFB000, 0.1, 0.9)); gogg.position.set(0, 2.03, 0.24);
 
-  const shadowGeo = new THREE.PlaneGeometry(1.8, 3.8); shadowGeo.rotateX(-Math.PI / 2);
-  const shadowMat = new THREE.MeshBasicMaterial({
-    color: 0x050015, transparent: true, opacity: 0.6, depthWrite: false,
+
+  // 부드러운 타원형 그림자 (캔버스 그라디언트 스프라이트)
+  const shadowCvs = document.createElement('canvas');
+  shadowCvs.width = 128; shadowCvs.height = 64;
+  const sCtx = shadowCvs.getContext('2d');
+  const sGrad = sCtx.createRadialGradient(64, 32, 2, 64, 32, 56);
+  sGrad.addColorStop(0,   'rgba(0,0,10,0.55)');
+  sGrad.addColorStop(0.55,'rgba(0,0,10,0.22)');
+  sGrad.addColorStop(1,   'rgba(0,0,10,0)');
+  sCtx.fillStyle = sGrad;
+  sCtx.fillRect(0, 0, 128, 64);
+
+  const shadowTex = new THREE.CanvasTexture(shadowCvs);
+  const shadowMat = new THREE.SpriteMaterial({
+    map: shadowTex, transparent: true, opacity: 0.7,
+    depthWrite: false, blending: THREE.NormalBlending,
   });
-  const shadowBlob = new THREE.Mesh(shadowGeo, shadowMat);
-  shadowBlob.position.y = 0.01;
+  const shadowBlob = new THREE.Sprite(shadowMat);
+  shadowBlob.scale.set(2.4, 1.1, 1);   // 가로로 넓은 타원
+  shadowBlob.position.set(0, 0.04, 0); // 지면 바로 위
 
-  bodyGroup.add(skiL, skiR, pants, jacket, helmet, gogg);
   rootGroup.add(bodyGroup, shadowBlob);
+
 
   // 🎯 3D 캔버스 빌보드 ! 느낌표 뱃지 (캐릭터 머리 위 Y = 2.8m 에 100% 찰떡 결합!)
   const createSurpriseBadgeSprite = () => {

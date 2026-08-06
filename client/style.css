@@ -231,3 +231,181 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   transition: opacity 0.15s ease-out;
 }
 
+/* ── 메인 화면 2열 레이아웃 ────────────────────────────────────────── */
+.start-main-row {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  margin-top: 8px;
+}
+.start-right-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── 캐릭터 프리뷰 (메인화면 왼쪽) ─────────────────────────────────── */
+.char-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+#charPreviewCanvas {
+  width: 160px;
+  height: 200px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(0, 240, 255, 0.35);
+  background: rgba(5, 10, 28, 0.55);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 28px rgba(0, 180, 255, 0.18), inset 0 0 20px rgba(0, 120, 255, 0.06);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  display: block;
+}
+.char-preview-wrap:hover #charPreviewCanvas {
+  border-color: rgba(0, 240, 255, 0.7);
+  box-shadow: 0 0 44px rgba(0, 200, 255, 0.38);
+}
+.char-preview-name {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(0, 240, 255, 0.9);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 220, 255, 0.5);
+}
+.btn-edit {
+  pointer-events: all;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #00F0FF;
+  background: rgba(0, 30, 60, 0.75);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 100px;
+  padding: 9px 24px;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.btn-edit:hover {
+  background: rgba(0, 60, 100, 0.9);
+  border-color: rgba(0, 240, 255, 0.85);
+  box-shadow: 0 0 20px rgba(0, 220, 255, 0.35);
+  transform: scale(1.05);
+}
+
+/* ── 캐릭터 선택 화면 ───────────────────────────────────────────────── */
+.charsel-header {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px 24px;
+}
+.charsel-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #00F0FF, #8080FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.btn-back {
+  position: absolute;
+  left: 32px;
+  pointer-events: all;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(255, 220, 140, 0.85);
+  background: rgba(20, 10, 40, 0.6);
+  border: 1px solid rgba(255, 200, 100, 0.3);
+  border-radius: 100px;
+  padding: 9px 22px;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, transform 0.2s, border-color 0.2s;
+}
+.btn-back:hover {
+  background: rgba(40, 20, 70, 0.9);
+  border-color: rgba(255, 200, 100, 0.7);
+  transform: translateX(-3px);
+}
+
+/* ── 캐릭터 카드 그리드 ──────────────────────────────────────────────── */
+.charsel-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  justify-content: center;
+  max-width: 820px;
+  padding: 0 20px;
+}
+.char-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 20px;
+  padding: 14px 12px 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 4, 22, 0.55);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s, background 0.25s;
+  width: 136px;
+}
+.char-card:hover {
+  border-color: rgba(0, 240, 255, 0.65);
+  box-shadow: 0 0 32px rgba(0, 200, 255, 0.22);
+  background: rgba(0, 20, 50, 0.72);
+  transform: translateY(-4px) scale(1.03);
+}
+.char-card.selected {
+  border-color: rgba(255, 215, 0, 0.85);
+  box-shadow: 0 0 36px rgba(255, 200, 0, 0.3), inset 0 0 14px rgba(255, 180, 0, 0.08);
+  background: rgba(30, 20, 5, 0.65);
+}
+.char-card canvas {
+  width: 108px;
+  height: 136px;
+  border-radius: 12px;
+  display: block;
+  background: transparent;
+}
+.char-card-name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+}
+.char-card-desc {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: rgba(180, 200, 255, 0.6);
+  text-transform: uppercase;
+}
+.char-card-emoji { font-size: 20px; line-height: 1; }
+.char-card.selected .char-card-name { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.6); }
+.char-card-badge {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #FFD700;
+  background: rgba(255,180,0,0.12);
+  border: 1px solid rgba(255,200,0,0.3);
+  border-radius: 100px;
+  padding: 3px 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.char-card.selected .char-card-badge { opacity: 1; }
