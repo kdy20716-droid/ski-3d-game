@@ -4,7 +4,9 @@ export const CFG = {
   SW: 90,              // Width Subdivisions
   SD: 200,             // Depth Subdivisions
   BASE_SPD: 24,        // Base Skiing Speed
-  MAX_SPD: 95,         // Max Speed
+  MAX_SPD: 95.0,       // 원래의 시원시원한 기본 최고 속도 (복구)
+  STAGE_SPEED_INC: 5.0,// 스테이지 통과 시 최고 속도 미세 상향
+  BOOSTER_SPEED_ADD: 35.0,// 부스트 발동 시 속도 추가
   ACCEL: 4.8,          // Acceleration
   TURN: 65.0,          // 좌우 회전력 (더 빠르고 민첩하게 반응하도록 상향)
   TURN_FAST: 95.0,     // Shift 고속 회전력 (즉각적인 고속 드리프트)

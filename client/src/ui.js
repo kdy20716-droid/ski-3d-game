@@ -77,17 +77,90 @@ export const setupUI = (handlers) => {
   const showScreen = (type, statsText = '') => {
     if (type === 'start') {
       scrStart.classList.remove('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
+      setMangaSpeedLines(false);
     } else if (type === 'game') {
       scrStart.classList.add('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
     } else if (type === 'pause') {
       scrPause.classList.remove('off');
+      setMangaSpeedLines(false); // 일시 정지 시 스피드 라인 100% 비활성화!
     } else if (type === 'unpause') {
       scrPause.classList.add('off');
     } else if (type === 'over') {
       document.getElementById('overStats').innerHTML = statsText;
       scrOver.classList.remove('off');
+      setMangaSpeedLines(false); // 게임 오버 시 스피드 라인 100% 비활성화!
     }
   };
 
-  return { showToast, showBonusToast, setBoosterUI, updateHUD, updateStageTitle, showScreen };
+  // ⚡ 사용자 업로드 이미지 100% 동일 만화/애니 방사형 흑백 집중선 Canvas 렌더러
+  const mangaCanvas = document.getElementById('mangaSpeedLinesCanvas');
+  let mangaCtx = null;
+  
+  const initMangaCanvas = () => {
+    if (!mangaCanvas) return;
+    mangaCanvas.width = window.innerWidth;
+    mangaCanvas.height = window.innerHeight;
+    mangaCtx = mangaCanvas.getContext('2d');
+    drawMangaLines();
+  };
+
+  const drawMangaLines = () => {
+    if (!mangaCtx || !mangaCanvas) return;
+    const w = mangaCanvas.width, h = mangaCanvas.height;
+    const cx = w / 2, cy = h / 2;
+    const maxR = Math.sqrt(cx * cx + cy * cy);
+    const baseInnerR = Math.min(w, h) * 0.44; // 화면 최외곽에 앙증맞게 밀어낸 초미니 여백 (0.44)
+
+    mangaCtx.clearRect(0, 0, w, h);
+    
+    // ⚡ 앙증맞게 짧고 은은하게 투명한 흰색 스피드 라인 60개
+    const lineCount = 60;
+
+    for (let i = 0; i < lineCount; i++) {
+      const angle = (i / lineCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.05;
+      
+      // 외곽 두께 슬림하게 조율
+      const outerThickness = (0.006 + Math.random() * 0.008);
+      
+      // 길이를 대폭 짧고 콤팩트하게 부여
+      const rStart = baseInnerR + Math.random() * (Math.min(w, h) * 0.07);
+      const rEnd = maxR;
+
+      // 안쪽 향하는 뾰족 얇은 끝점
+      const xTip = cx + Math.cos(angle) * rStart;
+      const yTip = cy + Math.sin(angle) * rStart;
+
+      // 모서리 외곽으로 향하는 두꺼운 베이스 2개 점
+      const xOuter1 = cx + Math.cos(angle - outerThickness) * rEnd;
+      const yOuter1 = cy + Math.sin(angle - outerThickness) * rEnd;
+      const xOuter2 = cx + Math.cos(angle + outerThickness) * rEnd;
+      const yOuter2 = cy + Math.sin(angle + outerThickness) * rEnd;
+
+      // 훨씬 더 은은하고 투명한 맑은 흰색 (0.18 ~ 0.46 투명도)
+      const alpha = 0.18 + Math.random() * 0.28;
+      mangaCtx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+
+      mangaCtx.beginPath();
+      mangaCtx.moveTo(xTip, yTip);
+      mangaCtx.lineTo(xOuter1, yOuter1);
+      mangaCtx.lineTo(xOuter2, yOuter2);
+      mangaCtx.closePath();
+      mangaCtx.fill();
+    }
+  };
+
+  window.addEventListener('resize', initMangaCanvas);
+  setTimeout(initMangaCanvas, 100);
+
+  const setMangaSpeedLines = (active) => {
+    if (!mangaCanvas) return;
+    if (active) {
+      drawMangaLines();
+      mangaCanvas.classList.add('active');
+    } else {
+      mangaCanvas.classList.remove('active');
+    }
+  };
+
+  return { showToast, showBonusToast, setBoosterUI, setMangaSpeedLines, updateHUD, updateStageTitle, showScreen };
 };

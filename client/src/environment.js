@@ -217,6 +217,21 @@ export const createEnvironment = (scene) => {
     }
   };
 
+  // ❄️ 둥근 동그라미 눈송이 텍스처 생성 (네모 파티클 ➔ 예쁜 동그라미 원형 파티클)
+  const createCircleSnowTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+    grad.addColorStop(0.7, 'rgba(240, 248, 255, 0.85)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(32, 32, 30, 0, Math.PI * 2); ctx.fill();
+    return new THREE.CanvasTexture(canvas);
+  };
+  const circleTexture = createCircleSnowTexture();
+
   // ── 3. Snow System ──
   const makeSnow = (numParticles) => {
     const pos = new Float32Array(numParticles * 3);
@@ -232,8 +247,8 @@ export const createEnvironment = (scene) => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     const pts = new THREE.Points(geo, new THREE.PointsMaterial({
-      color: 0xEEF5FF, size: 0.30, transparent: true, opacity: 0.82,
-      blending: THREE.AdditiveBlending, depthWrite: false,
+      color: 0xEEF5FF, size: 0.42, map: circleTexture, transparent: true, opacity: 0.88,
+      blending: THREE.AdditiveBlending, depthWrite: false, alphaTest: 0.01
     }));
     return { pts, pos, vel };
   };

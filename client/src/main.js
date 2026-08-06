@@ -1,16 +1,16 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=2.0.9';
-import { STAGES } from './stages.js?v=2.0.9';
-import { createSky } from './sky.js?v=2.0.9';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.0.9';
-import { makeSkier } from './skier.js?v=2.0.9';
-import { createEnvironment } from './environment.js?v=2.0.9';
-import { createDiamondArchSystem } from './diamondArch.js?v=2.0.9';
-import { createKickerRampSystem } from './kickerRamp.js?v=2.0.9';
-import { createSpawnManager } from './spawnManager.js?v=2.0.9';
-import { createDriftSystem } from './driftSystem.js?v=2.0.9';
-import { setupUI } from './ui.js?v=2.0.9';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.0.9';
+import { CFG } from './config.js?v=2.1.8';
+import { STAGES } from './stages.js?v=2.1.8';
+import { createSky } from './sky.js?v=2.1.8';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.1.8';
+import { makeSkier } from './skier.js?v=2.1.8';
+import { createEnvironment } from './environment.js?v=2.1.8';
+import { createDiamondArchSystem } from './diamondArch.js?v=2.1.8';
+import { createKickerRampSystem } from './kickerRamp.js?v=2.1.8';
+import { createSpawnManager } from './spawnManager.js?v=2.1.8';
+import { createDriftSystem } from './driftSystem.js?v=2.1.8';
+import { setupUI } from './ui.js?v=2.1.8';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.1.8';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -240,7 +240,7 @@ const update = (dt, time) => {
     G.was5sBooster = false;
   }
 
-  const currentMaxSpd = G.boosterTimer > 0 ? CFG.MAX_SPD * 1.38 : CFG.MAX_SPD;
+
 
   const left  = keys.has('ArrowLeft')  || keys.has('KeyA');
   const right = keys.has('ArrowRight') || keys.has('KeyD');
@@ -273,6 +273,15 @@ const update = (dt, time) => {
     G.isCharging = false;
     G.jumpCharge = 0;
   }
+
+  // 🏎️ 동적 최고 속도 계산 (원래의 340+ km/h 초고속 속도감 복구!)
+  const isBoosterActive = G.boosterTimer > 0;
+  const currentMaxSpd = CFG.MAX_SPD + (G.stage - 1) * 5.0 + (isBoosterActive ? 35.0 : 0);
+
+  // ⚡ 만화 방사형 흑백 집중선 오버레이 연출 (차징 중엔 꺼지고, 순수 부스트 주행 시만 고정 발동!)
+  const isShiftPressing = keys.has('ShiftLeft') || keys.has('ShiftRight');
+  const showSpeedLines = isBoosterActive && !G.isCharging && !isShiftPressing;
+  if (ui && ui.setMangaSpeedLines) ui.setMangaSpeedLines(showSpeedLines);
 
   // 🏎️ 4. 독립 드리프트 시스템 모듈 (driftSystem.js) 안전하게 구동
   let driftRes = null;
@@ -441,27 +450,31 @@ const update = (dt, time) => {
 
   // ── 6. 체크포인트 깃발 & STAGE 10 15km 피날레 거대 골대 통과 판정 ──
   if (G.pz <= -G.nextFlagDist) {
-    if (G.stage < STAGES.length) {
+    const isChallengeMode = G.mode === 'challenge';
+    
+    // 도전 모드이고 10스테이지 골대를 지난 경우: 완주 명예 종료!
+    if (isChallengeMode && G.stage >= 10) {
+      G.play = false;
+      if (ui) ui.showScreen('over', `🏆 <strong>CHALLENGE MODE CLEARED!</strong><br>최종 점수: <strong>${Math.floor(G.score)} pts</strong><br>글로벌 리더보드 등록 완료!`);
+    } else {
+      // 일반 모드 또는 10스테이지 미만: 다음 스테이지 진입 (11, 12... 1스테이지 배경 순환 무한 루프)
       G.stage += 1;
-      const sNext = STAGES[G.stage - 1];
-      triggerStageTransition(G.stage - 1);
+      const stageIdx = (G.stage - 1) % STAGES.length;
+      const sNext = STAGES[stageIdx];
+      triggerStageTransition(stageIdx);
       if (ui) ui.updateStageTitle(G.stage, sNext.name);
 
-      const isFinal = (G.stage === 10);
-      const nextStepDist = isFinal ? 15000 : 10000;
+      const isFinalGate = (G.stage === 10);
+      const nextStepDist = isFinalGate ? 15000 : 10000;
       G.nextFlagDist += nextStepDist;
       
-      env.spawnFlagGate(G.nextFlagDist, isFinal);
+      env.spawnFlagGate(G.nextFlagDist, isFinalGate);
 
-      if (isFinal) {
-        if (ui) ui.showToast('STAGE 10 FINAL', '15km 챔피언의 영광 피날레 코스 시작!');
+      if (isFinalGate) {
+        if (ui) ui.showToast('STAGE 10 FINAL', '15km 챔피언의 영광 피날레 코스!');
       } else {
         if (ui) ui.showToast(`STAGE ${G.stage}`, sNext.name);
       }
-    } else {
-      // 🎉 STAGE 10 (15km 피날레) 완주 챔피언 우승 스크린!
-      G.play = false;
-      if (ui) ui.showScreen('over', `🏆 <strong>ALL STAGES CLEARED — CHAMPION VICTORY!</strong><br>최종 점수: <strong>${Math.floor(G.score)} pts</strong><br>전설의 스키 챔피언 등극!`);
     }
   }
 

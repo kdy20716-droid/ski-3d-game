@@ -127,10 +127,11 @@ export const createKickerRampSystem = (scene) => {
   // AABB 콜라이더 및 순수 포물선 도약
   const checkCollisionAndLaunch = (G, showToast) => {
     for (const ramp of rampList) {
-      const minX = ramp.x - 14.0;
-      const maxX = ramp.x + 14.0;
-      const minZ = ramp.z - 25.0;
-      const maxZ = ramp.z + 12.0;
+      // 점프대 정밀 AABB 콜라이더 체크 (옆을 그냥 지날 때는 도약 안 하고 점프대 밟을 때만 정확 도약!)
+      const minX = ramp.x - 8.5;
+      const maxX = ramp.x + 8.5;
+      const minZ = ramp.z - 18.0;
+      const maxZ = ramp.z + 8.0;
 
       if (G.px >= minX && G.px <= maxX && G.pz >= minZ && G.pz <= maxZ) {
         if (!G.wasRampJump) {

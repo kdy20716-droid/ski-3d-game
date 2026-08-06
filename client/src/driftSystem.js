@@ -13,11 +13,26 @@ export const createDriftSystem = (scene, skierGroup) => {
     sprayLife[i] = 0;
   }
 
+  // ❄️ 둥근 동그라미 눈송이 텍스처 생성 (네모 파티클 ➔ 예쁜 동그라미 원형 파티클)
+  const createCircleSnowTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1.0)');
+    grad.addColorStop(0.7, 'rgba(240, 248, 255, 0.85)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(32, 32, 30, 0, Math.PI * 2); ctx.fill();
+    return new THREE.CanvasTexture(canvas);
+  };
+  const circleTexture = createCircleSnowTexture();
+
   const sprayGeo = new THREE.BufferGeometry();
   sprayGeo.setAttribute('position', new THREE.BufferAttribute(sprayPos, 3));
   const sprayMat = new THREE.PointsMaterial({
-    color: 0xFFFFFF, size: 0.50, transparent: true, opacity: 0.0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
+    color: 0xFFFFFF, size: 0.58, map: circleTexture, transparent: true, opacity: 0.0,
+    blending: THREE.AdditiveBlending, depthWrite: false, alphaTest: 0.01
   });
   const sprayPoints = new THREE.Points(sprayGeo, sprayMat);
   skierGroup.add(sprayPoints);
@@ -51,7 +66,8 @@ export const createDriftSystem = (scene, skierGroup) => {
 
     // ⚡ 2) Shift를 떼는 순간 발동하는 카트라이더 순간 부스터! (INSTANT BOOST!)
     if (wasDrifting && !isDrifting) {
-      G.spd = Math.min(95.0 * 1.35, G.spd + 18.5); // 앞으로 팍! 순간 스퍼트 가속!
+      G.boosterTimer = 1.2; // 순간 부스터 속도감 이펙트 & Max Speed +50km/h 한계 돌파!
+      G.spd += 6.0;         // 순발 팝 가속!
       if (ui) ui.showBonusToast('INSTANT BOOST! ⚡', true);
       lockedDriftDir = 0;
     }

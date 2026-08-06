@@ -143,8 +143,20 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
 }
 .over-stats { font-size: 16px; font-weight: 300; letter-spacing: 2px; color: rgba(255, 220, 140, 0.8); margin-bottom: 44px; line-height: 1.6; }
 
-/* Vignette */
-.vignette {
-  position: fixed; inset: 0; pointer-events: none; z-index: 5;
-  background: radial-gradient(ellipse at 50% 55%, transparent 42%, rgba(2,0,10,0.65) 100%);
+/* Manga Comic Speed Lines Canvas Overlay (사용자 업로드 이미지 100% 동일 방사형 흑백 집중선) */
+#mangaSpeedLinesCanvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 4;
+  opacity: 0; transition: opacity 0.10s ease-out;
+}
+
+#mangaSpeedLinesCanvas.active {
+  opacity: 0.95;
+  animation: pulseMangaLines 0.08s infinite alternate ease-in-out;
+}
+
+@keyframes pulseMangaLines {
+  0% { transform: scale(1.0) rotate(0deg); }
+  50% { transform: scale(1.02) rotate(0.3deg); }
+  100% { transform: scale(1.04) rotate(-0.3deg); }
 }
