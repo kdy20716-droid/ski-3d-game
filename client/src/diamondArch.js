@@ -1,14 +1,15 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { getTerrainY } from './terrain.js';
+import { soundFx } from './soundSystem.js';
 
 export const createDiamondArchSystem = (scene) => {
   const archItems = [];
 
   const diamondGeo = new THREE.OctahedronGeometry(2.4);
   const blueMat = new THREE.MeshStandardMaterial({ color: 0x00D0FF, emissive: 0x0088FF, emissiveIntensity: 0.8, metalness: 0.9, roughness: 0.1 });
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, emissive: 0xFF9900, emissiveIntensity: 1.8, metalness: 0.95, roughness: 0.05 });
+  const redMat  = new THREE.MeshStandardMaterial({ color: 0xFF2255, emissive: 0xFF0033, emissiveIntensity: 0.8, metalness: 0.9, roughness: 0.1 });
 
-  // 포물선 아치 스폰 (5개 다이아몬드, 정점 1개만 황금 1000점)
+  // 포물선 아치 스폰 (5개 다이아몬드, 정점 1개만 강렬한 붉은 300pt 다이아몬드)
   const spawnSingleArch = (archStartX, archStartZ, archLength, peakHeight) => {
     const count = 5;
     for (let k = 0; k < count; k++) {
@@ -16,7 +17,7 @@ export const createDiamondArchSystem = (scene) => {
       const isPeak = (k === 2);
 
       let type = 'blue', mat = blueMat, pts = 100;
-      if (isPeak) { type = 'gold'; mat = goldMat; pts = 1000; }
+      if (isPeak) { type = 'red'; mat = redMat; pts = 300; }
 
       const mesh = new THREE.Mesh(diamondGeo, mat);
       const x = archStartX;
@@ -55,7 +56,7 @@ export const createDiamondArchSystem = (scene) => {
       if (!item.active) continue;
       item.mesh.rotation.y += dt * 3.5;
 
-      if (item.type === 'gold') {
+      if (item.type === 'red') {
         item.mesh.scale.setScalar(1.0 + Math.sin(time * 6.0 + item.x) * 0.18);
       }
 
@@ -71,11 +72,12 @@ export const createDiamondArchSystem = (scene) => {
         item.mesh.position.y += dy * dt * 28.0;
       }
 
-      // 획득 판정
+      // 획득 판정 (100% 빠짐없는 soundFx.playGold() 띵-! 울림 보장)
       if (distSq3D < 36.0) {
         item.active = false;
         item.mesh.visible = false;
-        if (onScoreAdd) onScoreAdd(item.pts); // 점수는 정상 반영, 토스트 텍스트만 제거!
+        soundFx.playGold(); // 💎 100% 또렷한 맑은 띵-! 사운드!
+        if (onScoreAdd) onScoreAdd(item.pts);
       }
     }
 

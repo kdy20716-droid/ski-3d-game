@@ -40,15 +40,18 @@ export const createDriftSystem = (scene, skierGroup) => {
   let wasDrifting = false;
   let lockedDriftDir = 0; // 한번 꺾인 드리프트 방향 고정 (Lock)
   let driftYawAngle = 0;   // 실제 스키 카빙 몸체 Y축 회전 각도
+  let driftCharge = 0.0;   // Shift 누른 채 좌우로 이동한 누적 게이지 (0.0 ~ 1.0)
 
   // 🏎️ 2. 드리프트 및 카트라이더 순간 부스터 업데이트
   const update = (G, keys, dt, ui) => {
     // 🚫 1) 공중에 떴을 때: 드리프트 락 해제 및 눈보라 파티클 0.2초간 민첩하게 Fade-Out!
     if (G.inAir) {
-      sprayMat.opacity = Math.max(0.0, sprayMat.opacity - dt * 5.0); // 0.2초 동안 민첩하게 소멸!
+      sprayMat.opacity = Math.max(0.0, sprayMat.opacity - dt * 5.0);
       driftYawAngle += (0 - driftYawAngle) * dt * 8.0;
       wasDrifting = false;
       lockedDriftDir = 0;
+      driftCharge = 0.0;
+      if (ui && ui.updateDriftChargeUI) ui.updateDriftChargeUI(0.0);
       return;
     }
 
@@ -57,29 +60,45 @@ export const createDriftSystem = (scene, skierGroup) => {
     const shift = keys.has('ShiftLeft') || keys.has('ShiftRight');
     const inputTurn = (right ? 1 : 0) - (left ? 1 : 0);
 
-    // Shift를 처음 누르는 순간의 방향을 락킹 (Shift 누른 상태로 방향 전환 불가능)
-    if (shift && !wasDrifting && inputTurn !== 0) {
-      lockedDriftDir = inputTurn;
+    // Shift 키와 방향키가 함께 눌려있는 경우 드리프트 시작!
+    if (shift && inputTurn !== 0) {
+      if (lockedDriftDir === 0) {
+        lockedDriftDir = inputTurn;
+      }
     }
 
     const isDrifting = shift && lockedDriftDir !== 0;
 
-    // ⚡ 2) Shift를 떼는 순간 발동하는 카트라이더 순간 부스터! (INSTANT BOOST!)
+    // ⚡ 2) Shift를 뗐을 때: 최소 35% 이상(driftCharge >= 0.35) 꽉 채워졌을 때만 부스터 발동!
     if (wasDrifting && !isDrifting) {
-      G.boosterTimer = 1.2; // 순간 부스터 속도감 이펙트 & Max Speed +50km/h 한계 돌파!
-      G.spd += 6.0;         // 순발 팝 가속!
-      if (ui) ui.showBonusToast('INSTANT BOOST! ⚡', true);
+      if (driftCharge >= 0.35) {
+        const boostDuration = 0.6 + driftCharge * 2.2; // 0.6s ~ 2.8s 절제된 비례 부스터!
+        G.boosterTimer = Math.max(G.boosterTimer, boostDuration);
+        G.spd += 4.0 + driftCharge * 4.0;
+        if (ui && ui.showBonusToast) {
+          ui.showBonusToast(`DRIFT BOOST! +${boostDuration.toFixed(1)}s ⚡`, true);
+        }
+      }
       lockedDriftDir = 0;
+      driftCharge = 0.0;
+      if (ui && ui.updateDriftChargeUI) ui.updateDriftChargeUI(0.0);
     }
 
-    // 🏎️ 3) Shift 홀드 시: 감속 드리프트 & 몸체 80도 회전 & 고정된 방향으로 슬라이딩
-    if (isDrifting) {
-      // 🛑 Shift 누르고 있는 동안 속도가 스으윽 감속됨!
-      G.spd = Math.max(10.0, G.spd - dt * 26.0);
+    wasDrifting = isDrifting;
 
-      // 고정된 드리프트 방향(lockedDriftDir)으로만 슬라이딩
-      G.vx += lockedDriftDir * 210.0 * dt;
+    // 🏎️ 3) Shift 홀드 시: 좌우 이동량 비례 게이지 차징 & HUD 갱신!
+    if (isDrifting) {
+      // 🛑 Shift 누르고 있는 동안 속도가 스으윽 감속하며 좌우로 미끄러짐
+      G.spd = Math.max(10.0, G.spd - dt * 24.0);
+
+      // 고정된 드리프트 방향(lockedDriftDir)으로만 슬라이딩 이동
+      const driftMoveAmount = lockedDriftDir * 210.0 * dt;
+      G.vx += driftMoveAmount;
       G.vx *= 0.948;
+
+      // ⚡ Shift 누른 채 좌우로 미끄러져 이동한 양만큼 게이지 차징! (최대 1.0)
+      driftCharge = Math.min(1.0, driftCharge + dt * 1.6);
+      if (ui && ui.updateDriftChargeUI) ui.updateDriftChargeUI(driftCharge);
 
       // 🔄 마리오 카트 스키 카빙: 몸 전체와 스키 판을 Y축으로 80도(1.40 rad) 정방향 획! 돌리기
       driftYawAngle += (-lockedDriftDir * 1.40 - driftYawAngle) * dt * 9.0;
@@ -107,6 +126,8 @@ export const createDriftSystem = (scene, skierGroup) => {
       }
       sprayMat.opacity = Math.max(0.0, sprayMat.opacity - dt * 5.0); // 0.2초간 깔끔하게 Fade-Out!
       lockedDriftDir = 0;
+      driftCharge = 0.0;
+      if (ui && ui.updateDriftChargeUI) ui.updateDriftChargeUI(0.0);
     }
 
     // 눈보라 파티클 위치 갱신

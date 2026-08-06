@@ -26,6 +26,44 @@ export const makeSkier = () => {
   bodyGroup.add(skiL, skiR, pants, jacket, helmet, gogg);
   rootGroup.add(bodyGroup, shadowBlob);
 
+  // 🎯 3D 캔버스 빌보드 ! 느낌표 뱃지 (캐릭터 머리 위 Y = 2.8m 에 100% 찰떡 결합!)
+  const createSurpriseBadgeSprite = () => {
+    const cvs = document.createElement('canvas');
+    cvs.width = 128; cvs.height = 128;
+    const ctx = cvs.getContext('2d');
+    
+    // 🔴 강렬한 비비드 딥 레드 뱃지 (#FF0033 + 네온 핑크 외곽선)
+    const grad = ctx.createRadialGradient(64, 64, 10, 64, 64, 56);
+    grad.addColorStop(0, '#FF1A4B');
+    grad.addColorStop(1, '#D6002A');
+
+    ctx.beginPath();
+    ctx.arc(64, 64, 56, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+
+    // 흰색 ! 느낌표
+    ctx.font = '900 72px Outfit, sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('!', 64, 66);
+
+    const tex = new THREE.CanvasTexture(cvs);
+    const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0, depthTest: false });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(1.6, 1.6, 1);
+    sprite.position.set(0, 2.9, 0); // 머리 바로 위 2.9m 위치!
+    sprite.visible = false;
+    return { sprite, spriteMat };
+  };
+
+  const badgeObj = createSurpriseBadgeSprite();
+  rootGroup.add(badgeObj.sprite);
+
   // ❄️ 드리프트 엣지 카빙 시 촤아악 뿜어지는 하얀 눈보라 파티클
   const sprayCount = 220;
   const sprayPos = new Float32Array(sprayCount * 3);
@@ -49,5 +87,34 @@ export const makeSkier = () => {
 
   rootGroup.scale.setScalar(2.0);
 
-  return { group: rootGroup, bodyGroup, shadowBlob, shadowMat, sprayPoints, sprayMat, sprayGeo, sprayPos, sprayVel, sprayLife };
+  // 5초 무적 반투명 깜빡임 연출 헬퍼
+  const updateInvincibleFlash = (invincibleTimer) => {
+    if (invincibleTimer > 0) {
+      const isVisible = Math.floor(invincibleTimer * 14) % 2 === 0;
+      bodyGroup.visible = isVisible;
+    } else {
+      bodyGroup.visible = true;
+    }
+  };
+
+  const updateSurpriseBadge3D = (state) => {
+    if (state === 'show') {
+      badgeObj.sprite.visible = true;
+      badgeObj.spriteMat.opacity = 1.0;
+      badgeObj.sprite.position.set(0, 2.9, 0);
+    } else if (state === 'fadeout') {
+      badgeObj.sprite.visible = true;
+      badgeObj.spriteMat.opacity = Math.max(0, badgeObj.spriteMat.opacity - 0.08);
+      badgeObj.sprite.position.y += 0.02; // 위로 살짝 스르륵 상승하며 페이드 아웃!
+    } else {
+      badgeObj.sprite.visible = false;
+      badgeObj.spriteMat.opacity = 0;
+    }
+  };
+
+  return {
+    group: rootGroup, bodyGroup, shadowMat,
+    sprayPoints, sprayPos, sprayVel, sprayLife, sprayMat,
+    updateInvincibleFlash, updateSurpriseBadge3D
+  };
 };

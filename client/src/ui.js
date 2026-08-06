@@ -1,9 +1,13 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+import { soundFx } from './soundSystem.js?v=2.3.2';
+
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
   const $speed = document.getElementById('hSpeed');
   const $stage = document.getElementById('hStage');
   const $fillSpd = document.getElementById('spdFill');
   const $fillJump = document.getElementById('jmpFill');
+  const $fillDrift = document.getElementById('driftFill');
   const scrStart = document.getElementById('scStart');
   const scrPause = document.getElementById('scPause');
   const scrOver  = document.getElementById('scOver');
@@ -20,9 +24,9 @@ export const setupUI = (handlers) => {
   const langSelectEl = document.getElementById('langSelect');
   const lblLogoSubEl = document.getElementById('lblLogoSub');
 
-  if (btnStartEl)  btnStartEl.onclick  = handlers.onStart;
-  if (btnResumeEl) btnResumeEl.onclick = handlers.onTogglePause;
-  if (btnRestartEl) btnRestartEl.onclick = handlers.onStart;
+  if (btnStartEl)  btnStartEl.onclick  = () => { soundFx.playClick(); handlers.onStart(); };
+  if (btnResumeEl) btnResumeEl.onclick = () => { soundFx.playClick(); handlers.onTogglePause(); };
+  if (btnRestartEl) btnRestartEl.onclick = () => { soundFx.playClick(); handlers.onStart(); };
 
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
@@ -162,5 +166,75 @@ export const setupUI = (handlers) => {
     }
   };
 
-  return { showToast, showBonusToast, setBoosterUI, setMangaSpeedLines, updateHUD, updateStageTitle, showScreen };
+  const surpriseBadgeEl = document.getElementById('surpriseBadge');
+  const victoryOverlayEl = document.getElementById('victoryOverlay');
+
+  const showSurpriseBadge = (state, skier, camera) => {
+    if (!surpriseBadgeEl) return;
+    if (state === 'show' && skier && camera) {
+      surpriseBadgeEl.classList.remove('off', 'fadeout');
+      // 3D 스키어 머리 위 (Y + 2.6m) 월드 좌표 ➔ 2D 화면 픽셀 좌표 100% 밀착 투영!
+      const headPos = skier.position.clone().add(new THREE.Vector3(0, 2.6, 0));
+      headPos.project(camera);
+      const x = (headPos.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-headPos.y * 0.5 + 0.5) * window.innerHeight;
+      surpriseBadgeEl.style.left = `${x}px`;
+      surpriseBadgeEl.style.top = `${y}px`;
+    } else if (state === 'fadeout') {
+      surpriseBadgeEl.classList.add('fadeout');
+    } else {
+      surpriseBadgeEl.classList.add('off');
+      surpriseBadgeEl.classList.remove('fadeout');
+    }
+  };
+
+  const showVictoryOverlay = (show) => {
+    if (!victoryOverlayEl) return;
+    if (show) victoryOverlayEl.classList.remove('off');
+    else victoryOverlayEl.classList.add('off');
+  };
+
+  const skipHintEl = document.getElementById('skipHint');
+  const dissolveEl = document.getElementById('respawnDissolve');
+  const dangerVignetteEl = document.getElementById('dangerVignette');
+
+  const setDangerVignette = (intensity) => {
+    if (!dangerVignetteEl) return;
+    // intensity: 0.0 ~ 1.0
+    dangerVignetteEl.style.opacity = Math.max(0, Math.min(1, intensity)).toFixed(2);
+  };
+
+  const showSkipHint = (show) => {
+    if (!skipHintEl) return;
+    if (show) skipHintEl.classList.remove('off');
+    else skipHintEl.classList.add('off');
+  };
+
+  const triggerDissolveRespawn = (onPeakCallback) => {
+    if (!dissolveEl) {
+      if (onPeakCallback) onPeakCallback();
+      return;
+    }
+    dissolveEl.classList.remove('off');
+    dissolveEl.style.opacity = '1';
+    setTimeout(() => {
+      if (onPeakCallback) onPeakCallback();
+      setTimeout(() => {
+        dissolveEl.style.opacity = '0';
+        setTimeout(() => dissolveEl.classList.add('off'), 250);
+      }, 120);
+    }, 180);
+  };
+
+  const updateDriftChargeUI = (chargeRatio) => {
+    if (!$fillDrift) return;
+    const pct = Math.max(0, Math.min(100, Math.floor(chargeRatio * 100)));
+    $fillDrift.style.width = `${pct}%`;
+  };
+
+  return {
+    showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
+    showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
+    updateDriftChargeUI, updateStageTitle
+  };
 };

@@ -9,8 +9,22 @@
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="vignette"></div>
-<canvas id="mangaSpeedLinesCanvas"></canvas>
+  <div class="vignette"></div>
+  <canvas id="mangaSpeedLinesCanvas"></canvas>
+  <div id="surpriseBadge" class="off">!</div>
+  <div id="skipHint" class="off">SKIP - SPACEBAR</div>
+
+  <!-- 🚨 산사태 접근 붉은 모서리 위험 경고 비넷 오버레이 -->
+  <div id="dangerVignette"></div>
+
+  <!-- 🌌 디졸브 어두워짐 리스폰 암전 오버레이 -->
+  <div id="respawnDissolve" class="off"></div>
+
+  <!-- Victory Survived Overlay -->
+  <div id="victoryOverlay" class="off">
+    <div class="survived-title">SURVIVED!</div>
+    <div class="survived-sub">산사태 탈출 성공 · 전설의 스키 챔피언</div>
+  </div>
 
 <div id="overlay">
   <div id="hud">
@@ -35,9 +49,11 @@
       <div class="bar-track"><div class="bar-fill" id="spdFill" style="width:0%"></div></div>
       <div class="bar-label">JUMP CHARGE (SPACE)</div>
       <div class="bar-track"><div class="bar-fill" id="jmpFill" style="width:0%"></div></div>
+      <div class="bar-label" style="margin-top:6px; color:#FF9900;">DRIFT CHARGE (SHIFT)</div>
+      <div class="bar-track"><div class="bar-fill" id="driftFill" style="width:0%; background: linear-gradient(90deg, #FF7700, #FFCC00);"></div></div>
     </div>
     <div class="controls-hint">
-      <b>Shift</b> + <b>← →</b> 광속 드리프트<br>
+      <b>Shift</b> + <b>← →</b> 드리프트 게이지 차징<br>
       <b>🔷100pt 🟥300pt 🌟500pt(반짝임)</b> 다이아몬드 수집<br>
       <b>SPACE</b> 홀드 점프 &nbsp;·&nbsp; <b>ESC</b> 일시정지
     </div>
@@ -82,7 +98,7 @@
   <button class="btn" id="btnRestart">TRY AGAIN</button>
 </div>
 
-<!-- Main Module Script (Client Architecture v2.1.8 - Ultra Mini Speed Lines & Charge Control) -->
-<script type="module" src="src/main.js?v=2.1.8"></script>
+<!-- Main Module Script (Client Architecture v2.5.7 - Connected Golden Diamond Sound FX in kickerRamp) -->
+<script type="module" src="src/main.js?v=2.6.1"></script>
 </body>
 </html>

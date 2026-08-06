@@ -155,8 +155,79 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   animation: pulseMangaLines 0.08s infinite alternate ease-in-out;
 }
 
-@keyframes pulseMangaLines {
-  0% { transform: scale(1.0) rotate(0deg); }
-  50% { transform: scale(1.02) rotate(0.3deg); }
-  100% { transform: scale(1.04) rotate(-0.3deg); }
+/* Surprise Badge & Victory Survived Overlay */
+#surpriseBadge {
+  position: fixed; transform: translate(-50%, -100%) scale(1.0);
+  font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; color: #FFF;
+  background: radial-gradient(circle, #FF0055 0%, #FF5500 100%);
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 18px rgba(255, 0, 85, 0.95), 0 0 6px #FFF;
+  border: 2.5px solid #FFF; pointer-events: none; z-index: 80;
+  transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+  opacity: 1.0;
 }
+#surpriseBadge.fadeout {
+  opacity: 0; transform: translate(-50%, -150%) scale(0.5);
+}
+#surpriseBadge.off { display: none; }
+
+#skipHint {
+  position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
+  font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: 4px; color: rgba(255, 255, 255, 0.85); text-transform: uppercase;
+  background: rgba(10, 15, 30, 0.65); padding: 8px 20px; border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(8px);
+  pointer-events: none; z-index: 82;
+  animation: pulseSkip 1.2s infinite alternate ease-in-out;
+}
+#skipHint.off { display: none; }
+
+@keyframes pulseSkip {
+  0% { opacity: 0.35; transform: translateX(-50%) scale(0.96); }
+  100% { opacity: 1.0; transform: translateX(-50%) scale(1.04); }
+}
+
+#respawnDissolve {
+  position: fixed; inset: 0; pointer-events: none; z-index: 90;
+  background: #03010C; opacity: 0; transition: opacity 0.18s ease-in-out;
+}
+#respawnDissolve.active { opacity: 0.95; }
+#respawnDissolve.off { display: none; }
+
+#victoryOverlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 85;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(0,0,0,0.65) 80%);
+  opacity: 1; transition: opacity 0.5s ease;
+}
+#victoryOverlay.off { display: none; }
+
+.survived-title {
+  font-size: clamp(64px, 12vw, 110px); font-weight: 900; letter-spacing: 6px;
+  background: linear-gradient(135deg, #FFF 0%, #FFD700 40%, #FF8030 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 45px rgba(255,215,0,0.9));
+  animation: pulseSurvived 0.8s infinite alternate ease-in-out;
+}
+
+.survived-sub {
+  font-size: 20px; font-weight: 600; letter-spacing: 4px; color: #FFF;
+  text-shadow: 0 0 20px rgba(255,215,0,0.8); margin-top: 10px;
+}
+
+@keyframes pulseSurvived {
+  0% { transform: scale(1.0); }
+  100% { transform: scale(1.05); }
+}
+
+/* 🚨 산사태 근접 화면 모서리 붉은 비넷 위험 경고 오버레이 */
+#dangerVignette {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 85;
+  background: radial-gradient(circle, transparent 55%, rgba(230, 0, 40, 0.75) 98%);
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+

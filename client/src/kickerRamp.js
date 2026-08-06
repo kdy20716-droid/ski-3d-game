@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { getTerrainY } from './terrain.js';
+import { soundFx } from './soundSystem.js';
 
 export const createKickerRampSystem = (scene) => {
   const rampList = [];
@@ -108,10 +109,10 @@ export const createKickerRampSystem = (scene) => {
     rampList.length = 0;
     rampGoldItems.length = 0;
 
-    let curZ = -160; // 첫 번째 점프대는 Z=-160m 정중앙
+    let curZ = -450; // 시작 직후 정면 450m 구간 점프대 완전 치우기! (탁 트인 평탄 도로 확보)
     for (let r = 0; r < 6; r++) {
       const rZ = curZ;
-      const rX = (r === 0) ? 0 : getAntiOverlapX(); // 동일 X 라인 겹침 완전 방지!
+      const rX = getAntiOverlapX(); // 도로 중앙 겹침 방지!
       const meshGroup = createKickerMesh(rX, rZ);
       const goldCluster = spawn3GoldCluster(rX, rZ);
 
@@ -136,6 +137,7 @@ export const createKickerRampSystem = (scene) => {
       if (G.px >= minX && G.px <= maxX && G.pz >= minZ && G.pz <= maxZ) {
         if (!G.wasRampJump) {
           G.inAir = true;
+          G.airTimeTimer = 0.0; // 체공시간 타이머 0.0s 초기화!
           G.vy = 53.0; // 황금 다이아몬드 정점 25m 완벽 고공 도약!
           G.wasRampJump = true;
           G.jumpCharge = 0;
@@ -192,7 +194,8 @@ export const createKickerRampSystem = (scene) => {
       if (distSq3D < 42.0) {
         gItem.active = false;
         gItem.mesh.visible = false;
-        if (onScoreAdd) onScoreAdd(gItem.pts); // 점수 500pt는 정상 반영, 토스트 텍스트만 팝업 안 뜨게 제거!
+        soundFx.playGoldenDiamond(); // 🌟 황금 다이아몬드 전용 챠링-! Sound FX 100% 호출!
+        if (onScoreAdd) onScoreAdd(gItem.pts);
       }
     }
 
@@ -207,10 +210,10 @@ export const createKickerRampSystem = (scene) => {
   };
 
   const reset = () => {
-    let curZ = -160;
+    let curZ = -450;
     for (let r = 0; r < rampList.length; r++) {
       const ramp = rampList[r];
-      const rX = (r === 0) ? 0 : (Math.random() - 0.5) * 120;
+      const rX = getAntiOverlapX();
       relocateRampAndGold(ramp, rX, curZ);
       curZ -= (380 + Math.random() * 160);
     }
