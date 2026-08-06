@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNOWFALL — 황혼의 설산</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="vignette"></div>
+
+<div id="overlay">
+  <div id="hud">
+    <div class="hud-box">
+      <div class="hud-label">점수</div>
+      <div class="hud-value" id="hScore">0<span>pts</span></div>
+      <div id="bonusToast" class="bonus-toast"></div>
+    </div>
+    <div class="hud-box hud-center">
+      <div class="hud-title">SNOWFALL</div>
+      <div class="hud-stage" id="hStage">STAGE 1 · 새벽의 여명</div>
+    </div>
+    <div class="hud-box hud-right">
+      <div class="hud-label">속도</div>
+      <div class="hud-value" id="hSpeed">0<span>km/h</span></div>
+    </div>
+  </div>
+
+  <div id="bars">
+    <div class="bar-group">
+      <div class="bar-label">Speed</div>
+      <div class="bar-track"><div class="bar-fill" id="spdFill" style="width:0%"></div></div>
+      <div class="bar-label">JUMP CHARGE (SPACE)</div>
+      <div class="bar-track"><div class="bar-fill" id="jmpFill" style="width:0%"></div></div>
+    </div>
+    <div class="controls-hint">
+      <b>Shift</b> + <b>← →</b> 광속 드리프트<br>
+      <b>🔷100pt 🟥300pt 🌟500pt(반짝임)</b> 다이아몬드 수집<br>
+      <b>SPACE</b> 홀드 점프 &nbsp;·&nbsp; <b>ESC</b> 일시정지
+    </div>
+  </div>
+
+  <div id="toast">
+    <div id="toast-sub">STAGE 1</div>
+    <div id="toast-main">새벽의 여명</div>
+  </div>
+</div>
+
+<!-- Start Screen -->
+<div class="screen" id="scStart">
+  <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
+  <div class="logo-text">SNOWFALL</div>
+  <div class="logo-sub">모듈화 아키텍처 (ES6 Modular Engine)</div>
+  <button class="btn" id="btnStart">START SKIING</button>
+  <div class="hint-text">Clean ES6 Structure · Double-Buffered Terrain · Perpetual Snowfall</div>
+</div>
+
+<!-- Pause Screen -->
+<div class="screen off" id="scPause">
+  <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
+  <div class="over-title" style="background: linear-gradient(135deg,#aaa,#fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">PAUSED</div>
+  <div class="over-stats">일시 정지 중입니다</div>
+  <button class="btn" id="btnResume">RESUME</button>
+</div>
+
+<!-- Game Over Screen -->
+<div class="screen off" id="scOver">
+  <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
+  <div class="over-title">WIPEOUT!</div>
+  <div class="over-stats" id="overStats"></div>
+  <button class="btn" id="btnRestart">TRY AGAIN</button>
+</div>
+
+<!-- Main Module Script (Client Architecture v2.0.3) -->
+<script type="module" src="src/main.js?v=2.0.3"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+
+export const STAGES = [
+  { name: '새벽의 여명', sub: 'EARLY DAWN', sunDir: new THREE.Vector3(-0.6, 0.35, -0.7).normalize(), skyCol: [0.85, 0.35, 0.45], lightCol: 0xFFA07A, ambientCol: 0x685075, hemiSky: 0xFFA07A, hemiGround: 0x402850, fogCol: 0x582E60, stageVal: 0, snowGlow: 0x2A1535 },
+  { name: '상쾌한 아침', sub: 'MORNING SUNRISE', sunDir: new THREE.Vector3(-0.55, 0.45, -0.65).normalize(), skyCol: [0.95, 0.55, 0.35], lightCol: 0xFFE0B0, ambientCol: 0x705585, hemiSky: 0xFFE0B0, hemiGround: 0x452855, fogCol: 0x683B65, stageVal: 1, snowGlow: 0x301840 },
+  { name: '화창한 오전', sub: 'BRIGHT MORNING', sunDir: new THREE.Vector3(-0.4, 0.65, -0.55).normalize(), skyCol: [0.55, 0.75, 0.98], lightCol: 0xFFF5E0, ambientCol: 0x657898, hemiSky: 0xD0E5FF, hemiGround: 0x354560, fogCol: 0x5070A5, stageVal: 2, snowGlow: 0x152540 },
+  { name: '정오의 햇살', sub: 'MIDDAY SUN', sunDir: new THREE.Vector3(-0.15, 0.85, -0.4).normalize(), skyCol: [0.30, 0.65, 0.98], lightCol: 0xFFFFFF, ambientCol: 0x7085A5, hemiSky: 0xE0F0FF, hemiGround: 0x384865, fogCol: 0x5075B0, stageVal: 3, snowGlow: 0x182845 },
+  { name: '황금빛 오후', sub: 'GOLDEN AFTERNOON', sunDir: new THREE.Vector3(-0.5, 0.52, -0.6).normalize(), skyCol: [0.95, 0.62, 0.22], lightCol: 0xFFD080, ambientCol: 0x705068, hemiSky: 0xFFD080, hemiGround: 0x452E48, fogCol: 0x653855, stageVal: 4, snowGlow: 0x351E30 },
+  { name: '황혼의 노을', sub: 'SUNSET DUSK', sunDir: new THREE.Vector3(-0.75, 0.30, -0.6).normalize(), skyCol: [0.98, 0.32, 0.08], lightCol: 0xFF6520, ambientCol: 0x653568, hemiSky: 0xFF6520, hemiGround: 0x482050, fogCol: 0x601A75, stageVal: 5, snowGlow: 0x401035 },
+  { name: '붉은 석양', sub: 'RED MAGIC HOUR', sunDir: new THREE.Vector3(-0.85, 0.22, -0.5).normalize(), skyCol: [0.90, 0.15, 0.25], lightCol: 0xFF4455, ambientCol: 0x582845, hemiSky: 0xFF4455, hemiGround: 0x401838, fogCol: 0x501550, stageVal: 6, snowGlow: 0x450825 },
+  { name: '초저녁 푸른 어둠', sub: 'TWILIGHT BLUE', sunDir: new THREE.Vector3(-0.3, 0.25, -0.7).normalize(), skyCol: [0.20, 0.18, 0.55], lightCol: 0x7799FF, ambientCol: 0x383058, hemiSky: 0x7799FF, hemiGround: 0x282245, fogCol: 0x221B40, stageVal: 7, snowGlow: 0x101538 },
+  { name: '별빛 쏟아지는 밤', sub: 'STARRY NIGHT', sunDir: new THREE.Vector3(0.3, 0.60, -0.6).normalize(), skyCol: [0.08, 0.12, 0.35], lightCol: 0x99CCFF, ambientCol: 0x303855, hemiSky: 0x99CCFF, hemiGround: 0x202540, fogCol: 0x181D35, stageVal: 8, snowGlow: 0x0A1228 },
+  { name: '달빛과 오로라 밤', sub: 'MOONLIT AURORA', sunDir: new THREE.Vector3(0.45, 0.70, -0.5).normalize(), skyCol: [0.05, 0.10, 0.32], lightCol: 0xA0E0FF, ambientCol: 0x283555, hemiSky: 0xA0E0FF, hemiGround: 0x202A45, fogCol: 0x172032, stageVal: 9, snowGlow: 0x081530 },
+  { name: '챔피언의 영광', sub: 'FINAL GLORY', sunDir: new THREE.Vector3(0.0, 0.75, -0.66).normalize(), skyCol: [0.85, 0.70, 0.40], lightCol: 0xFFD700, ambientCol: 0x3D2210, hemiSky: 0xFFD700, hemiGround: 0x2A150A, fogCol: 0x4A301A, stageVal: 10, snowGlow: 0xFFAA00, nextDist: 15000 }
+];
