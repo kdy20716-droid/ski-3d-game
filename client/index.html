@@ -52,12 +52,21 @@
 <div class="screen" id="scStart">
   <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
   <div class="logo-text">SNOWFALL</div>
-  <div class="logo-sub">모듈화 아키텍처 (ES6 Modular Engine)</div>
-  <button class="btn" id="btnStart">START SKIING</button>
-  <div class="hint-text">Clean ES6 Structure · Double-Buffered Terrain · Perpetual Snowfall</div>
+  <div class="logo-sub" id="lblLogoSub">ESCAPE THE AVALANCHE! HIGH-SPEED ALPINE DESCENT</div>
+  <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
+  <button class="btn" id="btnStart">PLAY GAME</button>
+  
+  <div style="margin-top: 18px; display: flex; gap: 10px; justify-content: center; align-items: center;">
+    <select id="langSelect" style="padding: 10px 16px; background: rgba(10, 20, 45, 0.85); color: #00F0FF; border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; backdrop-filter: blur(8px); outline: none;">
+      <option value="en">🇺🇸 English</option>
+      <option value="ko">🇰🇷 한국어</option>
+      <option value="ja">🇯🇵 日本語</option>
+      <option value="zh">🇨🇳 中文</option>
+      <option value="fr">🇫🇷 Français</option>
+    </select>
+  </div>
 </div>
 
-<!-- Pause Screen -->
 <div class="screen off" id="scPause">
   <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
   <div class="over-title" style="background: linear-gradient(135deg,#aaa,#fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">PAUSED</div>
@@ -65,15 +74,14 @@
   <button class="btn" id="btnResume">RESUME</button>
 </div>
 
-<!-- Game Over Screen -->
 <div class="screen off" id="scOver">
-  <div class="screen-deco"><div class="screen-line"></div><div class="screen-dot"></div><div class="screen-line"></div></div>
+  <div class="screen-sub">SESSION TERMINATED</div>
   <div class="over-title">WIPEOUT!</div>
   <div class="over-stats" id="overStats"></div>
   <button class="btn" id="btnRestart">TRY AGAIN</button>
 </div>
 
-<!-- Main Module Script (Client Architecture v2.0.3) -->
-<script type="module" src="src/main.js?v=2.0.3"></script>
+<!-- Main Module Script (Client Architecture v2.0.9) -->
+<script type="module" src="src/main.js?v=2.0.9"></script>
 </body>
 </html>

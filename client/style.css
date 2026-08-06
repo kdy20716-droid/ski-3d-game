@@ -110,7 +110,7 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
 }
 .screen.off { display: none; }
 
-.screen-deco { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.screen-deco { display: flex; align-items: center; gap: 14px; margin-top: 12px; margin-bottom: 24px; }
 .screen-line { width: 50px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,180,70,0.5), transparent); }
 .screen-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,180,70,0.6); }
 
@@ -120,7 +120,7 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 50px rgba(255,100,20,0.4)); margin-bottom: 12px;
 }
-.logo-sub { font-size: 13px; font-weight: 300; letter-spacing: 8px; text-transform: uppercase; color: rgba(255, 210, 120, 0.75); margin-bottom: 48px; }
+.logo-sub { font-size: 13px; font-weight: 300; letter-spacing: 6px; text-transform: uppercase; color: rgba(255, 210, 120, 0.85); margin-bottom: 14px; }
 
 .btn {
   pointer-events: all; cursor: pointer;
@@ -128,7 +128,7 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   letter-spacing: 5px; text-transform: uppercase; color: #08000a;
   background: linear-gradient(135deg, #FFD700 0%, #FF8030 100%);
   border: none; border-radius: 100px;
-  padding: 16px 50px;
+  padding: 16px 50px; margin-top: 12px;
   box-shadow: 0 0 40px rgba(255,130,20,0.55);
   transition: transform 0.2s, box-shadow 0.2s;
 }

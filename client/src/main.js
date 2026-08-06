@@ -1,15 +1,16 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=2.0.3';
-import { STAGES } from './stages.js?v=2.0.3';
-import { createSky } from './sky.js?v=2.0.3';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.0.3';
-import { makeSkier } from './skier.js?v=2.0.3';
-import { createEnvironment } from './environment.js?v=2.0.3';
-import { createDiamondArchSystem } from './diamondArch.js?v=2.0.3';
-import { createKickerRampSystem } from './kickerRamp.js?v=2.0.3';
-import { createSpawnManager } from './spawnManager.js?v=2.0.3';
-import { createDriftSystem } from './driftSystem.js?v=2.0.3';
-import { setupUI } from './ui.js?v=2.0.3';
+import { CFG } from './config.js?v=2.0.9';
+import { STAGES } from './stages.js?v=2.0.9';
+import { createSky } from './sky.js?v=2.0.9';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.0.9';
+import { makeSkier } from './skier.js?v=2.0.9';
+import { createEnvironment } from './environment.js?v=2.0.9';
+import { createDiamondArchSystem } from './diamondArch.js?v=2.0.9';
+import { createKickerRampSystem } from './kickerRamp.js?v=2.0.9';
+import { createSpawnManager } from './spawnManager.js?v=2.0.9';
+import { createDriftSystem } from './driftSystem.js?v=2.0.9';
+import { setupUI } from './ui.js?v=2.0.9';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.0.9';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP

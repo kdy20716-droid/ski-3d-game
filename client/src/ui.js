@@ -17,10 +17,29 @@ export const setupUI = (handlers) => {
   const btnStartEl  = document.getElementById('btnStart');
   const btnResumeEl = document.getElementById('btnResume');
   const btnRestartEl = document.getElementById('btnRestart');
+  const langSelectEl = document.getElementById('langSelect');
+  const lblLogoSubEl = document.getElementById('lblLogoSub');
 
   if (btnStartEl)  btnStartEl.onclick  = handlers.onStart;
   if (btnResumeEl) btnResumeEl.onclick = handlers.onTogglePause;
   if (btnRestartEl) btnRestartEl.onclick = handlers.onStart;
+
+  const updateLanguageUI = () => {
+    if (typeof window.i18n === 'undefined') return;
+    const { t } = window.i18n;
+    if (lblLogoSubEl) lblLogoSubEl.textContent = t('subTitle');
+    if (btnStartEl) btnStartEl.textContent = t('start');
+    if (btnRestartEl) btnRestartEl.textContent = t('retry');
+  };
+
+  if (langSelectEl) {
+    langSelectEl.onchange = (e) => {
+      if (window.i18n) {
+        window.i18n.setLang(e.target.value);
+        updateLanguageUI();
+      }
+    };
+  }
 
   const showToast = (sub, main) => {
     toastSub.textContent = sub; toastMain.textContent = main;

@@ -1,0 +1,37 @@
+{
+  "challengeLeaderboard": [
+    {
+      "id": 1,
+      "country": "KR",
+      "nickname": "알프스스키왕",
+      "clearTime": 412.5,
+      "score": 48500,
+      "date": "2026-08-06"
+    },
+    {
+      "id": 2,
+      "country": "US",
+      "nickname": "AlpineRider",
+      "clearTime": 435.0,
+      "score": 42100,
+      "date": "2026-08-06"
+    },
+    {
+      "id": 3,
+      "country": "JP",
+      "nickname": "YukiMaster",
+      "clearTime": 460.2,
+      "score": 39500,
+      "date": "2026-08-06"
+    },
+    {
+      "id": 4,
+      "country": "FR",
+      "nickname": "ChamonixPro",
+      "clearTime": 482.0,
+      "score": 36000,
+      "date": "2026-08-06"
+    }
+  ],
+  "users": {}
+}
