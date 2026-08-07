@@ -33,6 +33,12 @@
     <div class="hud-box hud-center">
       <div class="hud-title">SNOWFALL</div>
       <div class="hud-stage" id="hStage">STAGE 1 · 새벽의 여명</div>
+      <!-- 🥇 스테이지당 3개 메달 수집 불투명 검정 원 인디케이터 컨테이너 -->
+      <div id="medalHudContainer">
+        <div class="medal-slot" id="mSlot0"></div>
+        <div class="medal-slot" id="mSlot1"></div>
+        <div class="medal-slot" id="mSlot2"></div>
+      </div>
     </div>
     <div class="hud-box hud-right">
       <div class="hud-label">속도</div>
@@ -119,7 +125,7 @@
   <button class="btn" id="btnRestart">TRY AGAIN</button>
 </div>
 
-<!-- Main Module Script (Client Architecture v3.6.0 - Reduced Stun Lock Duration to 0.3s for Ultra-Fast Recovery) -->
-<script type="module" src="src/main.js?v=3.6.0"></script>
+<!-- Main Module Script (Client Architecture v4.2.0 - Golden Medals System & 3s Title Fadeout & Stage Clear Bonus) -->
+<script type="module" src="src/main.js?v=4.2.0"></script>
 </body>
 </html>

@@ -3,6 +3,10 @@ import { soundFx } from './soundSystem.js?v=2.3.2';
 
 // 🎬 오프닝 시네마틱 컷씬 (산사태 바짝 덮침 ➔ 놀란 스키어 ! 경고 팝업 ➔ 빠르게 전속력 하강!)
 export const updateOpeningCutscene = (G, dt, camera, skier, ui, getTerrainY, avalancheSystem, CFG, skierData) => {
+  // 🚨 [가시성 100% 보장]: 컷씬 동안 캐릭터가 100% 보이도록 리셋 보장
+  skier.visible = true;
+  if (skierData && skierData.bodyGroup) skierData.bodyGroup.visible = true;
+
   G.cutsceneTimer += dt;
   const t = G.cutsceneTimer;
 

@@ -110,10 +110,42 @@ export const createEnvironment = (scene) => {
     scene.add(m);
   });
 
-  // 🔷/🟥 일반 필드 바닥 다이아몬드 (70% 파랑, 30% 빨강)
-  const diamondGeo = new THREE.OctahedronGeometry(2.4);
-  const blueMat = new THREE.MeshStandardMaterial({ color: 0x00D0FF, emissive: 0x0088FF, emissiveIntensity: 0.8, metalness: 0.9, roughness: 0.1 });
-  const redMat  = new THREE.MeshStandardMaterial({ color: 0xFF2255, emissive: 0xFF0033, emissiveIntensity: 0.8, metalness: 0.9, roughness: 0.1 });
+  // 🔷/🟥 일반 필드 바닥 다이아몬드 (100% 뾰족한 각진 팔면체 다이아몬드 지오메트리 & 묵직하고 선명한 사파이어/루비 재질)
+  const diamondGeo = new THREE.OctahedronGeometry(2.4, 0);
+
+  // 💎 맑고 선명하며 밀도 높은 사파이어 파란 다이아몬드
+  const blueMat = new THREE.MeshPhysicalMaterial({
+    color: 0x0088FF,
+    emissive: 0x0033CC,
+    emissiveIntensity: 0.45,
+    roughness: 0.05,
+    metalness: 0.20,
+    transmission: 0.12,          // 살짝만 투명하여 비비드한 파란색이 묵직하고 선명함!
+    ior: 2.417,
+    thickness: 1.5,
+    reflectivity: 1.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    transparent: true,
+    opacity: 0.98,
+  });
+
+  // 💎 묵직하고 선명한 비비드 붉은 루비 다이아몬드
+  const redMat = new THREE.MeshPhysicalMaterial({
+    color: 0xFF0044,
+    emissive: 0xCC0022,
+    emissiveIntensity: 0.45,
+    roughness: 0.05,
+    metalness: 0.20,
+    transmission: 0.12,          // 살짝만 투명하여 붉은색이 묵직하고 선명함!
+    ior: 2.417,
+    thickness: 1.5,
+    reflectivity: 1.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    transparent: true,
+    opacity: 0.98,
+  });
 
   for (let i = 0; i < CFG.ITEMS; i++) {
     const rand = hash(i * 4.3);

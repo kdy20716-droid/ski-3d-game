@@ -173,9 +173,35 @@ export const createRockySnowballHazardSystem = (scene) => {
         b.vx += (dxToPlayer * 1.8 - b.vx) * dt * 2.2;
       }
 
+      // 🛹 점프대(Kicker Ramp) 상호작용: 점프대를 지나면 위로 살짝 붕-! 떠오름
+      if (G.kickerRampList) {
+        for (const ramp of G.kickerRampList) {
+          if (Math.abs(b.x - ramp.x) < 7.5 && Math.abs(b.z - ramp.z) < 11.0) {
+            if (!b.inAir) {
+              b.inAir = true;
+              b.vy = 14.0; // 점프대 끝에서 붕 떠오르는 Y 속도!
+            }
+          }
+        }
+      }
+
       b.x += b.vx * dt;
       b.z += b.vz * dt;
-      b.y = getTerrainY(b.x, b.z) + b.radius;
+
+      const groundY = getTerrainY(b.x, b.z) + b.radius;
+
+      if (b.inAir) {
+        b.vy = (b.vy || 0) - 35.0 * dt; // 중력
+        b.y += (b.vy || 0) * dt;
+
+        if (b.y <= groundY) {
+          b.y = groundY;
+          b.inAir = false;
+          b.vy = 0;
+        }
+      } else {
+        b.y = groundY;
+      }
 
       b.group.position.set(b.x, b.y, b.z);
 

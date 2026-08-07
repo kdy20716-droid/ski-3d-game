@@ -1,22 +1,22 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=3.6.0';
-import { STAGES } from './stages.js?v=3.6.0';
-import { createSky } from './sky.js?v=3.6.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=3.6.0';
-import { makeSkier } from './skier.js?v=3.6.0';
-import { createEnvironment } from './environment.js?v=3.6.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=3.6.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=3.6.0';
-import { createSpawnManager } from './spawnManager.js?v=3.6.0';
-import { createDriftSystem } from './driftSystem.js?v=3.6.0';
-import { setupUI } from './ui.js?v=3.6.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=3.6.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=3.6.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=3.6.0';
-import { soundFx } from './soundSystem.js?v=3.6.0';
-import { loadSelectedCharacter } from './characters.js?v=3.6.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=3.6.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=3.6.0';
+import { CFG } from './config.js?v=4.2.0';
+import { STAGES } from './stages.js?v=4.2.0';
+import { createSky } from './sky.js?v=4.2.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=4.2.0';
+import { makeSkier } from './skier.js?v=4.2.0';
+import { createEnvironment } from './environment.js?v=4.2.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=4.2.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=4.2.0';
+import { createSpawnManager } from './spawnManager.js?v=4.2.0';
+import { createDriftSystem } from './driftSystem.js?v=4.2.0';
+import { setupUI } from './ui.js?v=4.2.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=4.2.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=4.2.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=4.2.0';
+import { soundFx } from './soundSystem.js?v=4.2.0';
+import { loadSelectedCharacter } from './characters.js?v=4.2.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=4.2.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=4.2.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -93,7 +93,7 @@ scene.add(camera); // camera를 scene에 추가해야 camera child가 렌더링�
 const G = {
   play: false, paused: false, dead: false,
   spd: CFG.BASE_SPD, px: 0, pz: 0, py: 0, vy: 0, vx: 0,
-  lean: 0, dist: 0, score: 0, stage: 1,
+  lean: 0, dist: 0, score: 0, stage: 1, stageMedals: 0,
   nextFlagDist: 10000,
   jumpCharge: 0, isCharging: false, inAir: false,
   boosterTimer: 0, wasRampJump: false, wasFullJump: false, was5sBooster: false,
@@ -306,7 +306,7 @@ const startGame = () => {
   soundFx.playStart(); // 🎬 게임 시작 / 오프닝 컷씬 웅장한 soundFx
   Object.assign(G, {
     play: true, paused: false, dead: false, spd: CFG.BASE_SPD,
-    px: 0, pz: 0, py: getTerrainY(0, 0), vy: 0, vx: 0, lean: 0, dist: 0, score: 0, stage: 1,
+    px: 0, pz: 0, py: getTerrainY(0, 0), vy: 0, vx: 0, lean: 0, dist: 0, score: 0, stage: 1, stageMedals: 0,
     nextFlagDist: 10000, jumpCharge: 0, isCharging: false, inAir: false, airTimeTimer: 0.0,
     boosterTimer: 0, wasRampJump: false, wasFullJump: false, elapsed: 0, bonusTimer: 0,
     // 🎬 산사태 시네마틱 컷씬 & 3초 유예 시간 & 3초 무적 리스폰 & 완주 세레머니 상태 변수
@@ -314,9 +314,20 @@ const startGame = () => {
     invincibleTimer: 0.0, stunTimer: 0.0, avalancheZ: 220.0,
     isVictoryCeremony: false, victoryTimer: 0.0,
   });
+
+  if (ui && ui.updateMedalHUD) ui.updateMedalHUD(0);
   
   skier.position.set(0, G.py, 0);
   skier.rotation.set(0, 0, 0);
+
+  // 🚨 [가시성 100% 리셋 방어막]: 이전 충돌/사망 무적 깜빡임 중 트라이 어게인 시 캐릭터 안 보이는 버그 완전 방지!
+  skier.visible = true;
+  if (skierData && skierData.bodyGroup) {
+    skierData.bodyGroup.visible = true;
+  }
+  skier.traverse((child) => {
+    if (child.isMesh) child.visible = true;
+  });
 
   // 🎬 오프닝 시네마틱 카메라 구도 (하늘 정면에서 캐릭터를 내다보는 뷰)
   camera.position.set(0, G.py + 16, -14);
@@ -534,12 +545,19 @@ const update = (dt, time) => {
     });
   }
 
-  // 🛹 삼각 나무 키커 점프대 및 황금 5개 공중 모듈 업데이트 (kickerRamp.js)
+  // 🛹 삼각 나무 키커 점프대 및 황금 메달 3개 모듈 업데이트 (kickerRamp.js)
   if (kickerSystem) {
-    kickerSystem.update(G.pz, G.px, G.py, dt, time, (pts) => { G.score += pts; }, (txt, gold) => {
-      soundFx.playGold(); // 💎 점프대 공중 황금 사운드
-      if (ui) ui.showBonusToast(txt, gold);
-    });
+    G.kickerRampList = kickerSystem.rampList;
+    kickerSystem.update(
+      G.pz, G.px, G.py, dt, time,
+      (pts) => { G.score += pts; },
+      (txt, gold) => { if (ui) ui.showBonusToast(txt, gold); },
+      () => {
+        // 🥇 황금 메달 획득 콜백: 최대 3개 카운트 업 & HUD 인디케이터 업데이트
+        G.stageMedals = Math.min(3, G.stageMedals + 1);
+        if (ui && ui.updateMedalHUD) ui.updateMedalHUD(G.stageMedals);
+      }
+    );
   }
   
   if (snowballHazard) {
@@ -713,8 +731,31 @@ const update = (dt, time) => {
       G.isVictoryCeremony = true;
       G.victoryTimer = 0.0;
     } else {
-      // 일반 모드 또는 10스테이지 미만: 다음 스테이지 진입 (11, 12... 1스테이지 배경 순환 무한 루프)
+      // 🥇 [스테이지 클리어 메달 보너스 점수 산정]: 1개 +3,000 / 2개 +6,000 / 3개 퍼펙트 +10,000 pts!
+      let medalBonusPts = 0;
+      let bonusToastText = '';
+      if (G.stageMedals === 1) {
+        medalBonusPts = 3000;
+        bonusToastText = 'MEDAL CLEAR BONUS +3,000! 🥇';
+      } else if (G.stageMedals === 2) {
+        medalBonusPts = 6000;
+        bonusToastText = 'DOUBLE MEDAL BONUS +6,000! 🥇🥇';
+      } else if (G.stageMedals >= 3) {
+        medalBonusPts = 10000;
+        bonusToastText = 'PERFECT 3 MEDALS BONUS +10,000! 🥇🥇🥇';
+      }
+
+      if (medalBonusPts > 0) {
+        G.score += medalBonusPts;
+        soundFx.playGoldenDiamond();
+        if (ui) ui.showBonusToast(bonusToastText, true);
+      }
+
+      // 다음 스테이지 진입 (11, 12... 무한 순환) & 메달 수집 0개 리셋
       G.stage += 1;
+      G.stageMedals = 0;
+      if (ui && ui.updateMedalHUD) ui.updateMedalHUD(0);
+
       const stageIdx = (G.stage - 1) % STAGES.length;
       const sNext = STAGES[stageIdx];
       triggerStageTransition(stageIdx);

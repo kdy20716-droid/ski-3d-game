@@ -55,39 +55,62 @@ export const createKickerRampSystem = (scene) => {
     return group;
   };
 
-  // 🌟 황금 다이아몬드 지오메트리 & 자체 발광 재질 (PointLight 완전 제거로 랙 0%)
-  const diamondGeo = new THREE.OctahedronGeometry(2.4);
-  const goldMat = new THREE.MeshStandardMaterial({
-    color: 0xFFD700, emissive: 0xFF9900, emissiveIntensity: 1.8, metalness: 0.95, roughness: 0.05
+  // 🥇 3D 동그란 순금 코인 메달 지오메트리 & 리얼 럭셔리 골드 물리 재질
+  const medalDiscGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.45, 32);
+  const medalRimGeo  = new THREE.TorusGeometry(2.25, 0.18, 16, 32);
+
+  const medalGoldMat = new THREE.MeshPhysicalMaterial({
+    color: 0xFFD700,
+    emissive: 0xFF8800,
+    emissiveIntensity: 0.95,
+    metalness: 0.95,
+    roughness: 0.08,
+    reflectivity: 1.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.02,
   });
 
-  // 🌟 점프대 공중 아치 전용: 오직 황금 다이아몬드 (500pt) 3개 일렬 부유
-  const spawn3GoldCluster = (rampX, rampZ) => {
+  const create3DGoldMedalMesh = () => {
+    const group = new THREE.Group();
+    const disc = new THREE.Mesh(medalDiscGeo, medalGoldMat);
+    disc.rotation.x = Math.PI / 2; // 동그란 면이 전방/카메라를 향하도록 직립!
+    disc.castShadow = true;
+
+    const rim = new THREE.Mesh(medalRimGeo, medalGoldMat);
+    group.add(disc, rim);
+    return group;
+  };
+
+  // 🥇 점프대 공중 아치 정점 전용: 동그란 황금 메달 1개 + 멀리서도 돋보이는 3D 빛 아우라!
+  const spawnSingleGoldMedal = (rampX, rampZ) => {
     const cluster = [];
     const archLength = 135;
     const peakHeight = 25.0;
-    const count = 3; // 요청하신 3개 연속 부유로 조정
+    const t = 0.5; // 아치 최고 정점 위치 (50%)
 
-    for (let k = 0; k < count; k++) {
-      const t = 0.35 + (k / (count - 1)) * 0.30; // 아치 정점 구간에 3개 정밀 배치
+    const group = new THREE.Group();
+    const medalMesh = create3DGoldMedalMesh();
+    group.add(medalMesh);
 
-      const mesh = new THREE.Mesh(diamondGeo, goldMat);
-      const x = rampX; // 점프대 바로 정면 일직선 축!
-      const z = rampZ - t * archLength;
-      const archH = 4.0 * peakHeight * t * (1.0 - t);
-      const gy = getTerrainY(x, z) + 1.8 + archH;
+    // 🥇 "저건 꼭 먹어야 해!" 느낌의 멀리서도 눈부시게 퍼지는 3D 황금 빛 아우라 조명!
+    const auraLight = new THREE.PointLight(0xFFD700, 8.0, 24.0);
+    group.add(auraLight);
 
-      mesh.position.set(x, gy, z);
-      scene.add(mesh);
+    const x = rampX;
+    const z = rampZ - t * archLength;
+    const archH = 4.0 * peakHeight * t * (1.0 - t);
+    const gy = getTerrainY(x, z) + 1.8 + archH;
 
-      const item = {
-        mesh, x, z, baseY: gy, type: 'gold', pts: 500, active: true, // 500점으로 조율
-        archT: t, archLength, peakHeight
-      };
+    group.position.set(x, gy, z);
+    scene.add(group);
 
-      cluster.push(item);
-      rampGoldItems.push(item);
-    }
+    const item = {
+      group, mesh: medalMesh, auraLight, x, z, baseY: gy, type: 'medal', pts: 0, active: true,
+      archT: t, archLength, peakHeight
+    };
+
+    cluster.push(item);
+    rampGoldItems.push(item);
     return cluster;
   };
 
@@ -104,21 +127,24 @@ export const createKickerRampSystem = (scene) => {
     return nextX;
   };
 
-  // 점프대 6개 동적 무작위 설치 (동일 라인 & Z 중복 100% 방지)
+  // 점프대 6개 동적 무작위 설치 (스테이지당 지정된 3개 점프대에만 황금 메달 1개씩 총 3개 설치)
   const initRamps = () => {
     rampList.length = 0;
     rampGoldItems.length = 0;
 
-    let curZ = -450; // 시작 직후 정면 450m 구간 점프대 완전 치우기! (탁 트인 평탄 도로 확보)
+    let curZ = -450;
     for (let r = 0; r < 6; r++) {
       const rZ = curZ;
-      const rX = getAntiOverlapX(); // 도로 중앙 겹침 방지!
+      const rX = getAntiOverlapX();
       const meshGroup = createKickerMesh(rX, rZ);
-      const goldCluster = spawn3GoldCluster(rX, rZ);
+      
+      // 🥇 스테이지당 점프대 0, 2, 4번 (총 3개)에만 황금 메달 1개씩 스폰!
+      let goldCluster = [];
+      if (r % 2 === 0 && rampGoldItems.length < 3) {
+        goldCluster = spawnSingleGoldMedal(rX, rZ);
+      }
 
       rampList.push({ mesh: meshGroup, x: rX, z: rZ, goldCluster });
-
-      // 400m~560m 넉넉한 Z축 간격으로 점프대 끼리 겹침 0%
       curZ -= (400 + Math.random() * 160);
     }
   };
@@ -128,7 +154,6 @@ export const createKickerRampSystem = (scene) => {
   // AABB 콜라이더 및 순수 포물선 도약
   const checkCollisionAndLaunch = (G, showToast) => {
     for (const ramp of rampList) {
-      // 점프대 정밀 AABB 콜라이더 체크 (옆을 그냥 지날 때는 도약 안 하고 점프대 밟을 때만 정확 도약!)
       const minX = ramp.x - 8.5;
       const maxX = ramp.x + 8.5;
       const minZ = ramp.z - 18.0;
@@ -137,26 +162,27 @@ export const createKickerRampSystem = (scene) => {
       if (G.px >= minX && G.px <= maxX && G.pz >= minZ && G.pz <= maxZ) {
         if (!G.wasRampJump) {
           G.inAir = true;
-          G.airTimeTimer = 0.0; // 체공시간 타이머 0.0s 초기화!
-          G.vy = 53.0; // 황금 다이아몬드 정점 25m 완벽 고공 도약!
+          G.airTimeTimer = 0.0;
+          G.vy = 53.0; // 황금 메달 정점 25m 완벽 고공 도약!
           G.wasRampJump = true;
           G.jumpCharge = 0;
           G.isCharging = false;
-          if (showToast) showToast('KICKER HIGH LAUNCH!', true);
+
+          soundFx.playKickerLaunch();
+          if (showToast) showToast('KICKER HIGH LAUNCH! 🚀', true);
         }
         break;
       }
     }
   };
 
-  // 점프대와 황금 3개 위치 동기화 재배치 헬퍼
+  // 점프대와 황금 메달 1개 위치 동기화 재배치 헬퍼
   const relocateRampAndGold = (ramp, newX, newZ) => {
     ramp.x = newX;
     ramp.z = newZ;
     const gy = getTerrainY(newX, newZ);
     ramp.mesh.position.set(newX, gy + 1.8, newZ);
 
-    // 점프대 정면 일직선 축 상에 황금 3개 100% 동기화 재배치!
     const archLength = 135;
     const peakHeight = 25.0;
     for (const gItem of ramp.goldCluster) {
@@ -164,39 +190,33 @@ export const createKickerRampSystem = (scene) => {
       gItem.z = newZ - gItem.archT * archLength;
       const itemGy = getTerrainY(gItem.x, gItem.z) + 1.8 + 4.0 * peakHeight * gItem.archT * (1.0 - gItem.archT);
       gItem.baseY = itemGy;
-      gItem.mesh.position.set(gItem.x, itemGy, gItem.z);
-      gItem.mesh.scale.setScalar(1.0);
+      gItem.group.position.set(gItem.x, itemGy, gItem.z);
+      gItem.group.scale.setScalar(1.0);
       gItem.active = true;
-      gItem.mesh.visible = true;
+      gItem.group.visible = true;
     }
   };
 
-  const update = (playerZ, playerX, playerY, dt, time, onScoreAdd, showToast) => {
-    // 황금 다이아몬드 획득 및 3D 자석
+  const update = (playerZ, playerX, playerY, dt, time, onScoreAdd, showToast, onMedalCollect) => {
+    // 🥇 황금 메달 획득 연출 (부딪히는 순간 즉시 화면 100% 소멸!)
     for (const gItem of rampGoldItems) {
       if (!gItem.active) continue;
       gItem.mesh.rotation.y += dt * 4.0;
 
-      // 랙 없는 순수 Emissive 펄스
-      gItem.mesh.scale.setScalar(1.0 + Math.sin(time * 6.0 + gItem.x) * 0.18);
+      gItem.group.scale.setScalar(1.0 + Math.sin(time * 6.0 + gItem.x) * 0.18);
 
-      const dx = playerX - gItem.mesh.position.x;
-      const dy = (playerY + 1.2) - gItem.mesh.position.y;
-      const dz = playerZ - gItem.mesh.position.z;
+      const dx = playerX - gItem.group.position.x;
+      const dy = (playerY + 1.2) - gItem.group.position.y;
+      const dz = playerZ - gItem.group.position.z;
       const distSq3D = dx * dx + dy * dy + dz * dz;
 
-      if (distSq3D < 120.0 && distSq3D > 0.1) {
-        gItem.mesh.position.x += dx * dt * 32.0;
-        gItem.mesh.position.z += dz * dt * 32.0;
-        gItem.mesh.position.y += dy * dt * 32.0;
-      }
-
-      if (distSq3D < 42.0) {
+      // 🥇 메달 부딪히는 순간 즉시 화면 소멸 & 상단 HUD 메달 채움!
+      if (distSq3D < 85.0) {
         gItem.active = false;
-        gItem.mesh.visible = false;
-        soundFx.playGoldenDiamond(); // 🌟 황금 다이아몬드 전용 챠링-! Sound FX 100% 호출!
-        if (onScoreAdd) onScoreAdd(gItem.pts);
-      }
+        gItem.group.visible = false;
+        soundFx.playGoldenDiamond(); // 🥇 황금 메달 전용 챠링-! Sound FX
+        if (showToast) showToast('GOLDEN MEDAL GET! 🥇', true);
+        if (onMedalCollect) onMedalCollect();
     }
 
     // 🎲 점프대 무한 순환 (동일 X 라인 겹침 0% 재배치)
