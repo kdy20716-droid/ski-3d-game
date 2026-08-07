@@ -12,7 +12,7 @@ class SoundManager {
     this.lastGoldTime = 0;
   }
 
-  // 브라우저 사용자 상호작용 후 AudioContext 안전 초기화
+  // 브라우저 사용자 상호작용 후 AudioContext 및 노이즈 버퍼 사전 할당 (런타임 렉/GC 100% 방지)
   init() {
     if (this.initDone) return;
     try {
@@ -22,10 +22,35 @@ class SoundManager {
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(0.35, this.ctx.currentTime); // 적절한 마스터 볼륨
         this.masterGain.connect(this.ctx.destination);
+        this.initSharedNoiseBuffers();
         this.initDone = true;
       }
     } catch (e) {
       console.warn('AudioContext init failed:', e);
+    }
+  }
+
+  initSharedNoiseBuffers() {
+    if (!this.ctx || this.sharedNoise35) return;
+    try {
+      const sr = this.ctx.sampleRate;
+      
+      const b35 = this.ctx.createBuffer(1, Math.floor(sr * 0.35), sr);
+      const d35 = b35.getChannelData(0);
+      for (let i = 0; i < d35.length; i++) d35[i] = Math.random() * 2 - 1;
+      this.sharedNoise35 = b35;
+
+      const b18 = this.ctx.createBuffer(1, Math.floor(sr * 0.18), sr);
+      const d18 = b18.getChannelData(0);
+      for (let i = 0; i < d18.length; i++) d18[i] = Math.random() * 2 - 1;
+      this.sharedNoise18 = b18;
+
+      const b12 = this.ctx.createBuffer(1, Math.floor(sr * 0.12), sr);
+      const d12 = b12.getChannelData(0);
+      for (let i = 0; i < d12.length; i++) d12[i] = Math.random() * 2 - 1;
+      this.sharedNoise12 = b12;
+    } catch (e) {
+      console.warn('Pre-allocating noise buffers failed:', e);
     }
   }
 
@@ -161,14 +186,16 @@ class SoundManager {
     if (!this.ctx || this.isMuted) return;
 
     const t = this.ctx.currentTime;
-    const bufferSize = this.ctx.sampleRate * 0.35;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
     const noise = this.ctx.createBufferSource();
-    noise.buffer = buffer;
+    if (this.sharedNoise35) {
+      noise.buffer = this.sharedNoise35;
+    } else {
+      const bufferSize = this.ctx.sampleRate * 0.35;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+    }
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'bandpass';
@@ -194,16 +221,16 @@ class SoundManager {
     if (!this.ctx || this.isMuted) return;
 
     const t = this.ctx.currentTime;
-
-    const bufferSize = this.ctx.sampleRate * 0.12;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-
     const noise = this.ctx.createBufferSource();
-    noise.buffer = buffer;
+    if (this.sharedNoise12) {
+      noise.buffer = this.sharedNoise12;
+    } else {
+      const bufferSize = this.ctx.sampleRate * 0.12;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+    }
 
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
@@ -258,28 +285,28 @@ class SoundManager {
     });
   }
 
-  // 7. 🌟 황금 다이아몬드 (Golden Diamond) 전용 화려한 챠링-! 획득음 (100% 즉각 믹서 렌더링)
+  // 7. 🌟 황금 다이아몬드/메달 전용 경량화 챠링-! 획득음 (오디오 스레드 렉 100% 차단)
   playGoldenDiamond() {
     this.ensureContext();
     if (!this.ctx || this.isMuted) return;
 
     const t = this.ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5 - E5 - G5 - C6 - E6 아르페지오
+    const notes = [659.25, 1046.50, 1318.51]; // E5 - C6 - E6 3음 아르페지오 (경량 믹서 연산)
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, t + idx * 0.025);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t + idx * 0.03);
 
-      gain.gain.setValueAtTime(0.38, t + idx * 0.025);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.025 + 0.16);
+      gain.gain.setValueAtTime(0.3, t + idx * 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.03 + 0.14);
 
       osc.connect(gain);
       gain.connect(this.masterGain);
 
-      osc.start(t + idx * 0.025);
-      osc.stop(t + idx * 0.025 + 0.16);
+      osc.start(t + idx * 0.03);
+      osc.stop(t + idx * 0.03 + 0.14);
     });
   }
 

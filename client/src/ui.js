@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { soundFx } from './soundSystem.js?v=2.3.2';
-import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=7.0.0';
+import { soundFx } from './soundSystem.js?v=13.0.0';
+import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=13.0.0';
+import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=13.0.0';
 
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
@@ -19,15 +20,80 @@ export const setupUI = (handlers) => {
 
   let bonusTimeout = null;
 
-  const btnStartEl  = document.getElementById('btnStart');
-  const btnResumeEl = document.getElementById('btnResume');
+  const btnStartEl   = document.getElementById('btnStart');
+  const btnEndlessEl = document.getElementById('btnEndlessStart');
+  const btnResumeEl  = document.getElementById('btnResume');
   const btnRestartEl = document.getElementById('btnRestart');
   const langSelectEl = document.getElementById('langSelect');
   const lblLogoSubEl = document.getElementById('lblLogoSub');
 
-  if (btnStartEl)  btnStartEl.onclick  = () => { soundFx.playClick(); handlers.onStart(); };
-  if (btnResumeEl) btnResumeEl.onclick = () => { soundFx.playClick(); handlers.onTogglePause(); };
-  if (btnRestartEl) btnRestartEl.onclick = () => { soundFx.playClick(); handlers.onStart(); };
+  const btnLbScore   = document.getElementById('btnLbScore');
+  const btnLbTime    = document.getElementById('btnLbTime');
+  const lbListEl     = document.getElementById('lbList');
+  let currentLbSort  = 'score';
+
+  const renderLeaderboard = async (sortType = currentLbSort) => {
+    currentLbSort = sortType;
+    if (btnLbScore && btnLbTime) {
+      if (sortType === 'score') {
+        btnLbScore.classList.add('active');
+        btnLbTime.classList.remove('active');
+      } else {
+        btnLbTime.classList.add('active');
+        btnLbScore.classList.remove('active');
+      }
+    }
+
+    if (!lbListEl) return;
+    lbListEl.innerHTML = '<div style="color:rgba(255,255,255,0.5); font-size:11px; text-align:center; padding:24px;">Loading Rankings...</div>';
+
+    const data = await fetchLeaderboardData(sortType);
+    const list = data ? (data.leaderboard || []) : [];
+
+    lbListEl.innerHTML = '';
+    if (list.length === 0) {
+      lbListEl.innerHTML = '<div style="color:rgba(255,255,255,0.4); font-size:11px; text-align:center; padding:24px;">No rankings yet</div>';
+      return;
+    }
+
+    list.slice(0, 10).forEach((item, idx) => {
+      const rankBadge = idx === 0 ? '🥇 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : `${idx + 1}`;
+      const flagEmoji = window.i18n ? window.i18n.getFlagEmoji(item.country) : (item.country || '🇰🇷');
+      
+      let valText = '';
+      if (sortType === 'time') {
+        const sec = Number(item.clearTime) || 0;
+        const m = Math.floor(sec / 60);
+        const s = (sec % 60).toFixed(1);
+        valText = m > 0 ? `${m}m ${s}s` : `${s}s`;
+      } else {
+        valText = `${(item.score || 0).toLocaleString()} pts`;
+      }
+
+      const row = document.createElement('div');
+      row.className = 'lb-item';
+      row.innerHTML = `
+        <div class="lb-rank">${rankBadge}</div>
+        <div class="lb-user">
+          <span class="lb-flag">${flagEmoji}</span>
+          <span>${item.nickname}</span>
+        </div>
+        <div class="lb-val">${valText}</div>
+      `;
+      lbListEl.appendChild(row);
+    });
+  };
+
+  if (btnLbScore) btnLbScore.onclick = () => { soundFx.playClick(); renderLeaderboard('score'); };
+  if (btnLbTime)  btnLbTime.onclick  = () => { soundFx.playClick(); renderLeaderboard('time'); };
+
+  // 초기 메인 화면 진입 시 실시간 리더보드 순위 조회
+  renderLeaderboard('score');
+
+  if (btnStartEl)   btnStartEl.onclick   = () => { soundFx.playClick(); handlers.onStart('challenge'); };
+  if (btnEndlessEl) btnEndlessEl.onclick = () => { soundFx.playClick(); handlers.onStart('endless'); };
+  if (btnResumeEl)  btnResumeEl.onclick  = () => { soundFx.playClick(); handlers.onTogglePause(); };
+  if (btnRestartEl) btnRestartEl.onclick = () => { soundFx.playClick(); handlers.onStart('challenge'); };
 
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
@@ -35,6 +101,7 @@ export const setupUI = (handlers) => {
 
     if (lblLogoSubEl) lblLogoSubEl.textContent = t('subTitle');
     if (btnStartEl) btnStartEl.textContent = t('start');
+    if (btnEndlessEl) btnEndlessEl.textContent = t('endlessStart');
     if (btnRestartEl) btnRestartEl.textContent = t('retry');
 
     const btnEditCharEl = document.getElementById('btnEditChar');
@@ -163,40 +230,59 @@ export const setupUI = (handlers) => {
     }
   };
 
-  // 🏁 레이스 진행 바 초기화 (스테이지 깃발 동적 생성)
+  // 🏁 캐릭터 선택에 따른 레이스 바 아바타 및 네온 테두리 변경
+  const updateRacePlayerAvatar = (charId) => {
+    const avatarEl = document.getElementById('racePlayerAvatar');
+    const playerEl = document.getElementById('racePlayer');
+    if (!avatarEl || !playerEl) return;
+
+    const charIcons = {
+      blaze: '🏎️', cyber: '⚡', hunter: '🏔️', phantom: '❄️', champion: '🥇',
+      fiona: '👩', bear: '🐻', penguin: '🐧', yeti: '🦣', beta: '🏂'
+    };
+    const charColors = {
+      blaze: '#FF3333', cyber: '#00F0FF', hunter: '#33CC66', phantom: '#A060FF',
+      champion: '#FFD700', fiona: '#FF66CC', bear: '#CC8844', penguin: '#00AAFF',
+      yeti: '#FFFFFF', beta: '#FF8800'
+    };
+    avatarEl.textContent = charIcons[charId] || '🎿';
+    const col = charColors[charId] || '#00F0FF';
+    playerEl.style.borderColor = col;
+    playerEl.style.boxShadow = `0 0 14px ${col}`;
+  };
+
+  // 🏁 레이스 진행 바 초기화 (클래식 디자인 복원: 깃발 깃봉 + 배너 + 라벨)
   const initRaceBar = (stages) => {
     const flagsEl = document.getElementById('raceFlags');
     if (!flagsEl || !stages) return;
     flagsEl.innerHTML = '';
-    // 스테이지 1~9 사이에 깃발 배치 (스테이지 전환 게이트 위치)
-    // 총 10스테이지, 깃발은 각 스테이지 경계 1~9 (전체 진행도 0~1 기준)
     const total = stages.length; // 10
     for (let i = 1; i < total; i++) {
-      const pct = (i / total) * 100; // 10%, 20%, ..., 90%
+      const globalPct = i / total; // 0.1, 0.2, ..., 0.9
+      const pct = (0.02 + globalPct * 0.94) * 100; // 트랙 내 실제 깃발 위치
       const flagEl = document.createElement('div');
       flagEl.className = 'race-flag';
       flagEl.style.left = `${pct}%`;
-      // 깃발 구조: 폴 + 배너 (위에서 아래로 — 뒤집힌 깃발)
       flagEl.innerHTML = `
-        <div class="race-flag-banner" style="background:${stages[i]?.textColor || '#FFE040'}88; border-color:${stages[i]?.textColor || '#FFE040'};"></div>
+        <div class="race-flag-banner" style="background:${stages[i]?.textColor || '#FFE040'}99; border-color:${stages[i]?.textColor || '#FFE040'};"></div>
         <div class="race-flag-pole"></div>
         <div class="race-flag-label">S${i + 1}</div>
       `;
       flagsEl.appendChild(flagEl);
     }
+    const selectedCharId = loadSelectedCharacter();
+    updateRacePlayerAvatar(selectedCharId);
   };
 
-  // 🏁 레이스 진행 바 업데이트 — 매 프레임 호출
-  // stageNum: 현재 스테이지 (1~10), stagePct: 현 스테이지 내 진행도 (0.0~1.0)
-  const updateRaceBar = (stageNum, stagePct) => {
+  // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 밀리초 100% 동일 정밀 동기화!
+  const updateRaceBar = (currentDist, totalDist = 100000) => {
     const playerEl = document.getElementById('racePlayer');
     if (!playerEl) return;
-    // 전체 진행도 (0.0~1.0) 계산
-    // stageNum은 1~10, 각 스테이지 길이는 동일하다고 가정
-    const totalStages = 10;
-    const globalPct = ((stageNum - 1) + Math.min(1, Math.max(0, stagePct))) / totalStages;
-    // 트랙 좌측 패딩 6px, 우측 20px (체커보드 공간)
-    const pctInTrack = 0.02 + globalPct * 0.92; // 2%~94% 범위로 클램프
+
+    // 미세 보정 (-120m 오프셋 적용: 3D 캐릭터 중심 & 깃발 폴 중심 100% 동기화)
+    const calibDist = Math.max(0, currentDist - 120);
+    const rawPct = Math.min(1.0, Math.max(0.0, calibDist / totalDist));
+    const pctInTrack = 0.02 + rawPct * 0.94; // 2% ~ 96% 범위
     playerEl.style.left = `${pctInTrack * 100}%`;
   };
 
@@ -615,7 +701,7 @@ export const setupUI = (handlers) => {
     showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
     updateDriftChargeUI, updateStageTitle, updateCornerWarningUI, updateMedalHUD,
-    initRaceBar, updateRaceBar, updateScore,
+    initRaceBar, updateRaceBar, updateScore, updateRacePlayerAvatar, renderLeaderboard,
     initMainCharPreview, loadSelectedCharacter,
   };
 };

@@ -12,7 +12,8 @@ const TRANSLATIONS = {
   en: {
     title: '3D SKI AVALANCHE',
     subTitle: 'ESCAPE THE AVALANCHE! HIGH-SPEED ALPINE DESCENT',
-    start: 'PLAY GAME',
+    start: 'CHALLENGE MODE 🏆',
+    endlessStart: 'ENDLESS MODE ♾️',
     editChar: '✏ EDIT',
     charSelectTitle: 'CHARACTER SELECT',
     back: '← BACK',
@@ -29,7 +30,8 @@ const TRANSLATIONS = {
   ko: {
     title: '3D 스키 아발란체',
     subTitle: '산사태를 탈출하라! 목숨을 건 초고속 스키 탈출',
-    start: '게임 시작',
+    start: '도전 모드 시작 🏆',
+    endlessStart: '무한 모드 시작 ♾️',
     editChar: '✏ 캐릭터 변경',
     charSelectTitle: '캐릭터 선택',
     back: '← 뒤로가기',
@@ -46,7 +48,8 @@ const TRANSLATIONS = {
   ja: {
     title: '3D スキーアバランチ',
     subTitle: '雪崩から脱出せよ！命がけの超高速滑走',
-    start: 'ゲーム開始',
+    start: 'チャレンジモード 🏆',
+    endlessStart: 'エンドレスモード ♾️',
     editChar: '✏ キャラ変更',
     charSelectTitle: 'キャラクター選択',
     back: '← 戻る',
@@ -63,7 +66,8 @@ const TRANSLATIONS = {
   zh: {
     title: '3D 极限雪崩滑雪',
     subTitle: '逃离雪崩！生死一瞬的极速滑雪',
-    start: '开始游戏',
+    start: '挑战模式 🏆',
+    endlessStart: '无尽模式 ♾️',
     editChar: '✏ 更改角色',
     charSelectTitle: '角色选择',
     back: '← 返回',
@@ -80,7 +84,8 @@ const TRANSLATIONS = {
   fr: {
     title: '3D SKI AVALANCHE',
     subTitle: "ÉCHAPPEZ À L'AVALANCHE! DESCENTE DE SURVIE",
-    start: 'JOUER',
+    start: 'MODE DÉFI 🏆',
+    endlessStart: 'MODE INFINI ♾️',
     editChar: '✏ CHANGER',
     charSelectTitle: 'SÉLECTION DU PERSONNAGE',
     back: '← RETOUR',
