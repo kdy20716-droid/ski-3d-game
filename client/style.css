@@ -409,3 +409,69 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   transition: opacity 0.2s;
 }
 .char-card.selected .char-card-badge { opacity: 1; }
+
+/* ── ⚠️ 눈덩이 출현 3초 전 하단 붉은 네모 느낌표 경고 점등 스타일 ──────── */
+#snowballWarningBox {
+  position: fixed;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: none;
+  z-index: 84;
+  transition: opacity 0.15s ease-out;
+}
+#snowballWarningBox.off {
+  display: none;
+}
+
+.warn-square {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #FF0033 0%, #CC0022 100%);
+  border: 2px solid #FFFFFF;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(255, 0, 51, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.warn-excl {
+  font-family: 'Outfit', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1;
+  text-shadow: 0 0 6px #FF0033;
+}
+
+.warn-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #FF2244;
+  text-shadow: 0 0 12px rgba(255, 0, 51, 0.9), 0 0 2px #FFF;
+  text-transform: uppercase;
+}
+
+#snowballWarningBox.blink .warn-square {
+  animation: blinkRedSquare 0.25s infinite alternate ease-in-out;
+}
+
+@keyframes blinkRedSquare {
+  0% {
+    transform: scale(0.92);
+    box-shadow: 0 0 10px rgba(255, 0, 51, 0.5);
+    filter: brightness(0.9);
+  }
+  100% {
+    transform: scale(1.12);
+    box-shadow: 0 0 30px rgba(255, 0, 51, 1.0), 0 0 10px #FFF;
+    filter: brightness(1.4);
+  }
+}
+

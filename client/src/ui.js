@@ -233,6 +233,20 @@ export const setupUI = (handlers) => {
     $fillDrift.style.width = `${pct}%`;
   };
 
+  const snowballWarnEl = document.getElementById('snowballWarningBox');
+
+  const updateSnowballWarningUI = (info) => {
+    if (!snowballWarnEl) return;
+    if (info && info.show) {
+      snowballWarnEl.classList.remove('off');
+      if (info.blink) snowballWarnEl.classList.add('blink');
+      else snowballWarnEl.classList.remove('blink');
+    } else {
+      snowballWarnEl.classList.add('off');
+      snowballWarnEl.classList.remove('blink');
+    }
+  };
+
   // ═══════════════════════════════════════════════════════════════
   //  캐릭터 프리뷰 시스템 (Three.js 인 캔버스)
   // ═══════════════════════════════════════════════════════════════
@@ -421,7 +435,7 @@ export const setupUI = (handlers) => {
   return {
     showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
-    updateDriftChargeUI, updateStageTitle,
+    updateDriftChargeUI, updateStageTitle, updateSnowballWarningUI,
     initMainCharPreview, loadSelectedCharacter,
   };
 };
