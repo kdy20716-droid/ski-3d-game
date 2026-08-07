@@ -1,23 +1,23 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=4.4.0';
-import { STAGES } from './stages.js?v=4.4.0';
-import { createSky } from './sky.js?v=4.4.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=4.4.0';
-import { makeSkier } from './skier.js?v=4.4.0';
-import { createEnvironment } from './environment.js?v=4.4.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=4.4.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=4.4.0';
-import { createSpawnManager } from './spawnManager.js?v=4.4.0';
-import { createDriftSystem } from './driftSystem.js?v=4.4.0';
-import { setupUI } from './ui.js?v=4.4.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=4.4.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=4.4.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=4.4.0';
-import { soundFx } from './soundSystem.js?v=4.4.0';
-import { loadSelectedCharacter } from './characters.js?v=4.4.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=4.4.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=4.4.0';
-import { createMedalRampSystem } from './medalRamp.js?v=4.4.0';
+import { CFG } from './config.js?v=4.9.5';
+import { STAGES } from './stages.js?v=4.9.5';
+import { createSky } from './sky.js?v=4.9.5';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=4.9.5';
+import { makeSkier } from './skier.js?v=4.9.5';
+import { createEnvironment } from './environment.js?v=4.9.5';
+import { createDiamondArchSystem } from './diamondArch.js?v=4.9.5';
+import { createKickerRampSystem } from './kickerRamp.js?v=4.9.5';
+import { createSpawnManager } from './spawnManager.js?v=4.9.5';
+import { createDriftSystem } from './driftSystem.js?v=4.9.5';
+import { setupUI } from './ui.js?v=4.9.5';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=4.9.5';
+import { createAvalancheSystem } from './avalancheSystem.js?v=4.9.5';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=4.9.5';
+import { soundFx } from './soundSystem.js?v=4.9.5';
+import { loadSelectedCharacter } from './characters.js?v=4.9.5';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=4.9.5';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=4.9.5';
+import { createMedalRampSystem } from './medalRamp.js?v=4.9.5';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -366,7 +366,7 @@ const startGame = () => {
   skyMaterial.uniforms.uSun.value.copy(s0.sunDir);
   skyMaterial.uniforms.uSkyCol.value.set(...s0.skyCol);
   skyMaterial.uniforms.uStage.value = 0;
-  if (ui) ui.updateStageTitle(1, s0.name);
+  if (ui) ui.updateStageTitle(1, s0.name, s0.textColor);
 
   env.spawnFlagGate(G.nextFlagDist);
   if (ui) ui.showToast('AVALANCHE ESCAPE', '산사태를 탈출하라!');
@@ -757,7 +757,7 @@ const update = (dt, time) => {
       const stageIdx = (G.stage - 1) % STAGES.length;
       const sNext = STAGES[stageIdx];
       triggerStageTransition(stageIdx);
-      if (ui) ui.updateStageTitle(G.stage, sNext.name); // 3초간 시원하게 상단에 노출!
+      if (ui) ui.updateStageTitle(G.stage, sNext.name, sNext.textColor); // 3초간 시원하게 각 테마 네온 컬러로 상단에 노출!
 
       const isFinalGate = (G.stage === 10);
       const nextStepDist = isFinalGate ? 15000 : 10000;

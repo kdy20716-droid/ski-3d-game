@@ -31,42 +31,60 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
 }
 .hud-value span { font-size: 11px; font-weight: 300; color: rgba(255,220,170,0.6); margin-left: 3px; -webkit-text-fill-color: rgba(255,220,170,0.6); }
 .hud-center { text-align: center; padding: 10px 26px; min-width: 220px; }
-.hud-title {
-  font-size: 15px; font-weight: 900; letter-spacing: 6px; text-transform: uppercase;
-  background: linear-gradient(90deg, #FFD700, #FF7B2A, #FF3366);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.hud-stage {
-  font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #00F0FF;
-  text-transform: uppercase; text-shadow: 0 0 12px rgba(0,240,255,0.7);
-  margin-top: 2px;
-  transition: opacity 0.6s ease-out;
+/* 🎬 화면 상단 중앙 거대 스테이지 타이틀 배너 (글씨 부분 중심으로 진한 검은색이 묵직하게 감싸고 잘림 없이 자연스러운 소프트 안개 비넷!) */
+.hud-stage-banner {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Black Han Sans', 'Outfit', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  color: #00F0FF;
+  text-transform: uppercase;
+  text-shadow: 0 0 22px currentColor, 0 0 40px rgba(0, 0, 0, 1.0), 0 0 10px rgba(0,0,0,0.95);
+  /* 🌟 가운데 진한 검은색 범위를 45%까지 더 묵직하게 늘리고 좌우 잘림 없이 서서히 안개처럼 투명해지는 소프트 비넷 그라데이션! */
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.88) 45%, rgba(0, 0, 0, 0.35) 75%, transparent 100%);
+  border: none !important;
+  box-shadow: none !important;
+  padding: 14px 110px;        /* 좌우 여백을 넓혀 섀도우 잘림 현상 100% 해결! */
+  pointer-events: none;
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
   opacity: 1;
+  z-index: 100;
+  white-space: nowrap;
 }
-.hud-stage.fade-out {
+.hud-stage-banner.fade-out {
   opacity: 0 !important;
+  transform: translate(-50%, -15px) !important;
 }
 
-/* 🥇 상단 HUD 황금 메달 3개 수집 불투명 검은 원 인디케이터 (크기 확대!) */
+/* 🥇 화면 상단 독립 불투명 검은 원 3개 인디케이터 (박스 배경 ❌ ➔ 오직 3개 원만 ⭕) */
 #medalHudContainer {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 14px;
+  pointer-events: none;
+  z-index: 100;
 }
 
 .medal-slot {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.88);
-  border: 2.5px solid rgba(255, 255, 255, 0.40);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 0 8px rgba(0, 0, 0, 0.9);
+  border: 2.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.85), inset 0 0 8px rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   transition: all 0.25s ease-out;
   position: relative;
 }
@@ -77,12 +95,16 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   box-shadow: 0 0 20px rgba(255, 215, 0, 1.0), inset 0 0 8px #FFFFFF;
   transform: scale(1.12);
 }
+/* ⭐️ 기존 메달 이모티콘 🥇 제거 ➔ 선명한 황금 빛 3D 별 문양 ★ 로 교체! */
 .medal-slot.filled::before {
-  content: '🥇';
+  content: '★';
+  color: #FFFFFF;
+  font-size: 20px;
   line-height: 1;
+  text-shadow: 0 0 8px #FF8800, 0 0 2px #000;
 }
 
-/* 🥇 관문 통과 시 상단 메달이 뿅-! 빠져나와 점수판으로 날아가는 2D 파티클 애니메이션 */
+/* ⭐️ 관문 통과 시 상단 메달이 뿅-! 빠져나와 점수판으로 날아가는 2D 파티클 (별 ★ 문양 연출!) */
 .flying-medal-particle {
   position: fixed;
   width: 36px;
@@ -100,7 +122,10 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   transition: all 0.48s cubic-bezier(0.12, 0.8, 0.32, 1.2);
 }
 .flying-medal-particle::before {
-  content: '🥇';
+  content: '★';
+  color: #FFFFFF;
+  font-size: 20px;
+  text-shadow: 0 0 8px #FF8800, 0 0 2px #000;
 }
 
 /* Bottom Bars */
@@ -166,9 +191,9 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
 #toast-sub { font-size: 13px; letter-spacing: 8px; color: #FFD700; text-transform: uppercase; text-shadow: 0 0 12px rgba(255,215,0,0.8); }
 #toast-main { font-size: 54px; font-weight: 900; color: #fff; text-shadow: 0 0 35px rgba(255,100,50,0.9); }
 
-/* Screens */
+/* Screens (Pause, GameOver, CharSelect Screens) */
 .screen {
-  position: fixed; inset: 0; z-index: 20;
+  position: fixed; inset: 0; z-index: 20000;  /* 경고창(z-index: 900)보다 높게 지정하여 일시정지 시 제대로 방어! */
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: rgba(3, 1, 12, 0.82); backdrop-filter: blur(16px) saturate(1.2);
   color: #fff; text-align: center;
@@ -493,7 +518,7 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   justify-content: center;
   box-shadow: 0 0 35px rgba(255, 0, 51, 1.0), inset 0 0 10px rgba(255, 255, 255, 0.4);
   pointer-events: none;
-  z-index: 9999;
+  z-index: 900;                /* 모달 화면(z-index: 20000) 뒤에 위치하도록 수술! */
   transition: opacity 0.15s ease-out;
 }
 #cornerWarnLeft {

@@ -225,18 +225,24 @@ export const createSnowballHazardSystem = (scene) => {
       const hitRadius = b.radius + 1.35;
 
       if (distSq < hitRadius * hitRadius && !G.isCrashed) {
-        const isAboveSnowball = G.py > (b.y + b.radius * 0.15);
+        const groundY = getTerrainY(G.px, G.pz);
+        const isJumpingState = G.inAir || (G.py > groundY + 0.25) || (G.vy > 0);
+        const isAboveSnowball = G.py >= (b.y - b.radius * 0.4);
 
-        if (G.inAir && isAboveSnowball) {
-          // 🎉 점프해서 밟아 부수기 성공!
+        if (isJumpingState && isAboveSnowball) {
+          // 🎉 [살짝이라도 점프 상태면 100% 밟기 점프 발동!]: 눈덩이 퐁-! 파괴 소멸 & 상공 36m 고공 점프!
           b.active = false;
           scene.remove(b.mesh);
           triggerBreakExplosion(b.x, b.y, b.z, b.radius);
 
-          if (onScoreAdd) onScoreAdd(500);
-          if (showToast) showToast('SNOWBALL STAMP! +500', true);
+          if (onScoreAdd) onScoreAdd(300);
+          if (showToast) showToast('SNOWBALL STOMP JUMP! 💥', true);
 
-          G.vy = Math.max(G.vy, 15.0);
+          // 🚀 상공으로 붕- 솟구치는 밟기 점프!
+          G.inAir = true;
+          G.airTimeTimer = 0;
+          G.vy = 36.0;
+          soundFx.playKickerLaunch(); // 밟기 점프 도약음 사운드!
         } else if (G.invincibleTimer <= 0) {
           // 💥 눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
           G.spd = 0;

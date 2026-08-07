@@ -55,11 +55,13 @@ export const createKickerRampSystem = (scene) => {
     return group;
   };
 
-  // 💎 100% 각진 뾰족한 3D 팔면체 황금 다이아몬드 지오메트리 & 리얼 럭셔리 재질
+  // 💎 100% 각진 뾰족한 3D 팔면체 황금 다이아몬드 지오메트리 & 살짝 주황빛 스며든 럭셔리 엠버 골드 물리 재질
   const diamondGeo = new THREE.OctahedronGeometry(2.4, 0);
   const diamondGoldMat = new THREE.MeshPhysicalMaterial({
-    color: 0xFFD700, emissive: 0xFF8800, emissiveIntensity: 0.95,
-    metalness: 0.95, roughness: 0.05, transmission: 0.25, ior: 2.417, reflectivity: 1.0, clearcoat: 1.0
+    color: 0xFFB300,             // 🌟 살짝 주황빛이 도는 묵직한 황금빛 엠버 골드!
+    emissive: 0xFF6A00,
+    emissiveIntensity: 1.15,
+    metalness: 0.90, roughness: 0.05, transmission: 0.20, ior: 2.417, reflectivity: 1.0, clearcoat: 1.0
   });
 
   // 💎 일반 점프대 공중 아치 정점 전용: 황금 다이아몬드 (500pt) 1개 스폰

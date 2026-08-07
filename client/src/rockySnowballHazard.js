@@ -219,18 +219,23 @@ export const createRockySnowballHazardSystem = (scene) => {
       const hitRadius = b.radius + 1.25;
 
       if (distSq < hitRadius * hitRadius && !G.isCrashed) {
-        // 공중에서 밟으면 파괴 가능 (+800pt 고득점)
-        const isAbove = G.py > (b.y + b.radius * 0.2);
+        const groundY = getTerrainY(G.px, G.pz);
+        // 🎯 [거대 바위 밟기 조건]: 플레이어가 절반 점프 이상 높이 (b.y + radius * 0.40 이상)에 닿아야만 밟기 성공!
+        const isHalfJumpOrHigher = G.inAir && (G.py >= (b.y + b.radius * 0.40));
 
-        if (G.inAir && isAbove) {
+        if (isHalfJumpOrHigher) {
+          // 🎉 [절반 점프 이상 고공 밟기 성공!]: 묵직하게 쿵-! 파괴 소멸되며 상공 52m 초고공 솟구침!
           b.active = false;
           scene.remove(b.group);
           triggerRockExplosion(b.x, b.y, b.z, b.radius);
 
           if (onScoreAdd) onScoreAdd(800);
-          if (showToast) showToast('ROCKY BOULDER SMASH! +800', true);
+          if (showToast) showToast('MEGA ROCKY STOMP HIGH LAUNCH! 🚀💥 (+800pt)', true);
 
-          G.vy = Math.max(G.vy, 16.0); // 쿵 튀어오름
+          G.inAir = true;
+          G.airTimeTimer = 0;
+          G.vy = 52.0; // 거대 바위 반발력으로 하늘 높이 52m 메가 솟구침!
+          soundFx.playKickerLaunch();
         } else if (G.invincibleTimer <= 0) {
           // 💥 돌눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
           G.spd = 0;

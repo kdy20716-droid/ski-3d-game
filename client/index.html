@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SNOWFALL — 황혼의 설산</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -30,16 +30,15 @@
       <div class="hud-value" id="hScore">0<span>pts</span></div>
       <div id="bonusToast" class="bonus-toast"></div>
     </div>
-    <div class="hud-box hud-center">
-      <div class="hud-title">SNOWFALL</div>
-      <div class="hud-stage" id="hStage">STAGE 1 · 새벽의 여명</div>
-      <!-- 🥇 스테이지당 3개 메달 수집 불투명 검정 원 인디케이터 컨테이너 -->
-      <div id="medalHudContainer">
-        <div class="medal-slot" id="mSlot0"></div>
-        <div class="medal-slot" id="mSlot1"></div>
-        <div class="medal-slot" id="mSlot2"></div>
-      </div>
+    <!-- 🥇 화면 상단 독립 불투명 검은 원 3개 메달 인디케이터 (박스 배경 ❌ ➔ 오직 3개 원만 ⭕) -->
+    <div id="medalHudContainer">
+      <div class="medal-slot" id="mSlot0"></div>
+      <div class="medal-slot" id="mSlot1"></div>
+      <div class="medal-slot" id="mSlot2"></div>
     </div>
+    
+    <!-- 🎬 스테이지 첫 진입 3초 노출 후 스르륵 사라지는 타이틀 배너 -->
+    <div class="hud-stage-banner" id="hStage">STAGE 1 · 새벽의 여명</div>
     <div class="hud-box hud-right">
       <div class="hud-label">속도</div>
       <div class="hud-value" id="hSpeed">0<span>km/h</span></div>
@@ -125,7 +124,7 @@
   <button class="btn" id="btnRestart">TRY AGAIN</button>
 </div>
 
-<!-- Main Module Script (Client Architecture v4.4.0 - Standalone Medal Ramp Module medalRamp.js + Continuous Gold Diamond Kicker Ramps) -->
-<script type="module" src="src/main.js?v=4.4.0"></script>
+<!-- Main Module Script (Client Architecture v4.9.5 - Require Half-Jump Height or Higher for Giant Rocky Snowball Stomp) -->
+<script type="module" src="src/main.js?v=4.9.5"></script>
 </body>
 </html>

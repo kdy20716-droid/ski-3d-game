@@ -76,9 +76,11 @@ export const setupUI = (handlers) => {
   };
 
   let stageTitleTimer = null;
-  const updateStageTitle = (stageNum, stageName) => {
+  const updateStageTitle = (stageNum, stageName, textColor = '#00F0FF') => {
     if (!$stage) return;
     $stage.textContent = `STAGE ${stageNum} · ${stageName}`;
+    $stage.style.color = textColor; // 🎨 스테이지 테마별 대표 네온 컬러로 실시간 글씨 색상 적용!
+    $stage.style.textShadow = `0 0 18px ${textColor}, 0 0 35px rgba(0,0,0,0.9)`;
     $stage.classList.remove('fade-out');
 
     if (stageTitleTimer) clearTimeout(stageTitleTimer);
@@ -153,7 +155,7 @@ export const setupUI = (handlers) => {
 
           const stepPts = bonusSteps[i] || 3000;
           const label = i === 0 ? '+3,000' : (i === 1 ? '+6,000' : '+10,000');
-          showBonusToast(`MEDAL GET! ${label} 🥇`, true);
+          showBonusToast(`MEDAL BONUS ${label}`, true);
           if (onScoreStepCallback) onScoreStepCallback(stepPts);
         }, 500);
 
