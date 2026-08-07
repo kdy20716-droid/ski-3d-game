@@ -75,8 +75,90 @@ export const setupUI = (handlers) => {
     else $fillSpd.classList.remove('booster');
   };
 
+  let stageTitleTimer = null;
   const updateStageTitle = (stageNum, stageName) => {
+    if (!$stage) return;
     $stage.textContent = `STAGE ${stageNum} · ${stageName}`;
+    $stage.classList.remove('fade-out');
+
+    if (stageTitleTimer) clearTimeout(stageTitleTimer);
+
+    // 🎬 스테이지 첫 시작 시 3초간 선명하게 표출된 후 스르륵 페이드 아웃!
+    stageTitleTimer = setTimeout(() => {
+      $stage.classList.add('fade-out');
+    }, 3000);
+  };
+
+  // 🥇 상단 HUD 메달 수집 3개 불투명 원 인디케이터 렌더러 (0~3개)
+  const updateMedalHUD = (collectedCount = 0) => {
+    for (let i = 0; i < 3; i++) {
+      const slot = document.getElementById(`mSlot${i}`);
+      if (slot) {
+        if (i < collectedCount) slot.classList.add('filled');
+        else slot.classList.remove('filled');
+      }
+    }
+  };
+
+  // 🥇 관문 통과 시 상단 메달이 하나씩 '뿅-!' 빠져나와 좌측 점수판으로 쏙-! 흡수되는 애니메이션
+  const triggerMedalFlyToScoreAnimation = (medalCount, onScoreStepCallback) => {
+    if (medalCount <= 0) return;
+
+    const scoreBox = document.querySelector('.hud-box');
+    if (!scoreBox) return;
+
+    const scoreRect = scoreBox.getBoundingClientRect();
+    const targetX = scoreRect.left + scoreRect.width / 2;
+    const targetY = scoreRect.top + scoreRect.height / 2;
+
+    const bonusSteps = [3000, 6000, 10000];
+
+    for (let i = 0; i < medalCount; i++) {
+      const slot = document.getElementById(`mSlot${i}`);
+      if (!slot) continue;
+
+      const delay = i * 260; // 0.26초 간격으로 하나씩 뿅-!
+
+      setTimeout(() => {
+        const slotRect = slot.getBoundingClientRect();
+        const startX = slotRect.left + slotRect.width / 2 - 18;
+        const startY = slotRect.top + slotRect.height / 2 - 18;
+
+        // 1. 상단 원 슬롯 뿅-! 비움
+        slot.classList.remove('filled');
+
+        // 2. 2D 플라잉 메달 파티클 생성
+        const flyElem = document.createElement('div');
+        flyElem.className = 'flying-medal-particle';
+        flyElem.style.left = `${startX}px`;
+        flyElem.style.top = `${startY}px`;
+        document.body.appendChild(flyElem);
+
+        // 3. 챠링 사운드 & 0.05초 후 튀어오르기 ➔ 점수판 흡수 궤적
+        soundFx.playGoldenDiamond();
+
+        requestAnimationFrame(() => {
+          flyElem.style.transform = 'scale(1.4)';
+          setTimeout(() => {
+            flyElem.style.left = `${targetX - 18}px`;
+            flyElem.style.top = `${targetY - 18}px`;
+            flyElem.style.transform = 'scale(0.5)';
+            flyElem.style.opacity = '0.3';
+          }, 120);
+        });
+
+        // 4. 점수판 도달 순간 팝업 획득
+        setTimeout(() => {
+          if (flyElem.parentNode) flyElem.parentNode.removeChild(flyElem);
+
+          const stepPts = bonusSteps[i] || 3000;
+          const label = i === 0 ? '+3,000' : (i === 1 ? '+6,000' : '+10,000');
+          showBonusToast(`MEDAL GET! ${label} 🥇`, true);
+          if (onScoreStepCallback) onScoreStepCallback(stepPts);
+        }, 500);
+
+      }, delay);
+    }
   };
 
   const showScreen = (type, statsText = '') => {
@@ -434,7 +516,7 @@ export const setupUI = (handlers) => {
   return {
     showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
-    updateDriftChargeUI, updateStageTitle, updateCornerWarningUI,
+    updateDriftChargeUI, updateStageTitle, updateCornerWarningUI, updateMedalHUD, triggerMedalFlyToScoreAnimation,
     initMainCharPreview, loadSelectedCharacter,
   };
 };

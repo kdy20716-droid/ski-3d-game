@@ -1,22 +1,23 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=4.2.0';
-import { STAGES } from './stages.js?v=4.2.0';
-import { createSky } from './sky.js?v=4.2.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=4.2.0';
-import { makeSkier } from './skier.js?v=4.2.0';
-import { createEnvironment } from './environment.js?v=4.2.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=4.2.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=4.2.0';
-import { createSpawnManager } from './spawnManager.js?v=4.2.0';
-import { createDriftSystem } from './driftSystem.js?v=4.2.0';
-import { setupUI } from './ui.js?v=4.2.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=4.2.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=4.2.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=4.2.0';
-import { soundFx } from './soundSystem.js?v=4.2.0';
-import { loadSelectedCharacter } from './characters.js?v=4.2.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=4.2.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=4.2.0';
+import { CFG } from './config.js?v=4.4.0';
+import { STAGES } from './stages.js?v=4.4.0';
+import { createSky } from './sky.js?v=4.4.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=4.4.0';
+import { makeSkier } from './skier.js?v=4.4.0';
+import { createEnvironment } from './environment.js?v=4.4.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=4.4.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=4.4.0';
+import { createSpawnManager } from './spawnManager.js?v=4.4.0';
+import { createDriftSystem } from './driftSystem.js?v=4.4.0';
+import { setupUI } from './ui.js?v=4.4.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=4.4.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=4.4.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=4.4.0';
+import { soundFx } from './soundSystem.js?v=4.4.0';
+import { loadSelectedCharacter } from './characters.js?v=4.4.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=4.4.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=4.4.0';
+import { createMedalRampSystem } from './medalRamp.js?v=4.4.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -77,6 +78,7 @@ scene.add(skier);
 const env = createEnvironment(scene);
 const archSystem = createDiamondArchSystem(scene);
 const kickerSystem = createKickerRampSystem(scene);
+const medalRampSystem = createMedalRampSystem(scene);
 const driftSystem = createDriftSystem(scene, skier);
 const avalancheSystem = createAvalancheSystem(scene);
 const snowballHazard = createSnowballHazardSystem(scene);
@@ -340,6 +342,7 @@ const startGame = () => {
   if (env && env.resetEnvironment) env.resetEnvironment();
   if (archSystem && archSystem.reset) archSystem.reset();
   if (kickerSystem && kickerSystem.reset) kickerSystem.reset();
+  if (medalRampSystem && medalRampSystem.resetStageMedalRamps) medalRampSystem.resetStageMedalRamps(0);
   if (driftSystem && driftSystem.reset) driftSystem.reset();
   if (snowballHazard && snowballHazard.reset) snowballHazard.reset();
   if (rockySnowballHazard && rockySnowballHazard.reset) rockySnowballHazard.reset();
@@ -545,12 +548,17 @@ const update = (dt, time) => {
     });
   }
 
-  // 🛹 삼각 나무 키커 점프대 및 황금 메달 3개 모듈 업데이트 (kickerRamp.js)
+  // 🛹 1. 기본 삼각 나무 황금 다이아몬드 점프대 모듈 (kickerRamp.js - 무한 순환)
   if (kickerSystem) {
-    G.kickerRampList = kickerSystem.rampList;
-    kickerSystem.update(
+    kickerSystem.checkCollisionAndLaunch(G, (txt, gold) => { if (ui) ui.showBonusToast(txt, gold); });
+    kickerSystem.update(G.pz, G.px, G.py, dt, time, (pts) => { G.score += pts; }, (txt, gold) => { if (ui) ui.showBonusToast(txt, gold); });
+  }
+
+  // 🥇 2. 스테이지당 3개 독립 황금 메달 점프대 모듈 (medalRamp.js)
+  if (medalRampSystem) {
+    medalRampSystem.checkCollisionAndLaunch(G, (txt, gold) => { if (ui) ui.showBonusToast(txt, gold); });
+    medalRampSystem.update(
       G.pz, G.px, G.py, dt, time,
-      (pts) => { G.score += pts; },
       (txt, gold) => { if (ui) ui.showBonusToast(txt, gold); },
       () => {
         // 🥇 황금 메달 획득 콜백: 최대 3개 카운트 업 & HUD 인디케이터 업데이트
@@ -559,6 +567,12 @@ const update = (dt, time) => {
       }
     );
   }
+
+  // 🎿 눈덩이 상호작용용 전체 점프대 리스트 병합 등록
+  G.kickerRampList = [
+    ...(kickerSystem ? kickerSystem.rampList : []),
+    ...(medalRampSystem ? medalRampSystem.medalRampList : [])
+  ];
   
   if (snowballHazard) {
     snowballHazard.update(
@@ -731,46 +745,38 @@ const update = (dt, time) => {
       G.isVictoryCeremony = true;
       G.victoryTimer = 0.0;
     } else {
-      // 🥇 [스테이지 클리어 메달 보너스 점수 산정]: 1개 +3,000 / 2개 +6,000 / 3개 퍼펙트 +10,000 pts!
-      let medalBonusPts = 0;
-      let bonusToastText = '';
-      if (G.stageMedals === 1) {
-        medalBonusPts = 3000;
-        bonusToastText = 'MEDAL CLEAR BONUS +3,000! 🥇';
-      } else if (G.stageMedals === 2) {
-        medalBonusPts = 6000;
-        bonusToastText = 'DOUBLE MEDAL BONUS +6,000! 🥇🥇';
-      } else if (G.stageMedals >= 3) {
-        medalBonusPts = 10000;
-        bonusToastText = 'PERFECT 3 MEDALS BONUS +10,000! 🥇🥇🥇';
-      }
-
-      if (medalBonusPts > 0) {
-        G.score += medalBonusPts;
-        soundFx.playGoldenDiamond();
-        if (ui) ui.showBonusToast(bonusToastText, true);
-      }
-
-      // 다음 스테이지 진입 (11, 12... 무한 순환) & 메달 수집 0개 리셋
+      const prevMedalCount = G.stageMedals;
+      
+      // 1. 🎬 시작하자마자 다음 스테이지 UI 바로 상단 표출 & 다음 스테이지 메달 점프대 3개 새로 스폰!
       G.stage += 1;
       G.stageMedals = 0;
-      if (ui && ui.updateMedalHUD) ui.updateMedalHUD(0);
+      if (medalRampSystem && medalRampSystem.resetStageMedalRamps) {
+        medalRampSystem.resetStageMedalRamps(G.pz);
+      }
 
       const stageIdx = (G.stage - 1) % STAGES.length;
       const sNext = STAGES[stageIdx];
       triggerStageTransition(stageIdx);
-      if (ui) ui.updateStageTitle(G.stage, sNext.name);
+      if (ui) ui.updateStageTitle(G.stage, sNext.name); // 3초간 시원하게 상단에 노출!
 
       const isFinalGate = (G.stage === 10);
       const nextStepDist = isFinalGate ? 15000 : 10000;
       G.nextFlagDist += nextStepDist;
-      
       env.spawnFlagGate(G.nextFlagDist, isFinalGate);
+
+      soundFx.playStageClear();
 
       if (isFinalGate) {
         if (ui) ui.showToast('STAGE 10 FINAL', '15km 챔피언의 영광 피날레 코스!');
       } else {
         if (ui) ui.showToast(`STAGE ${G.stage}`, sNext.name);
+      }
+
+      // 2. 🥇 상단 수집된 메달들이 뿅-! 빠져나와 좌측 점수 UI 위치로 날아가며 +3000 -> +6000 -> +10000 팝업 흡수!
+      if (prevMedalCount > 0 && ui && ui.triggerMedalFlyToScoreAnimation) {
+        ui.triggerMedalFlyToScoreAnimation(prevMedalCount, (stepPts) => {
+          G.score += stepPts;
+        });
       }
     }
   }

@@ -55,46 +55,24 @@ export const createKickerRampSystem = (scene) => {
     return group;
   };
 
-  // 🥇 3D 동그란 순금 코인 메달 지오메트리 & 리얼 럭셔리 골드 물리 재질
-  const medalDiscGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.45, 32);
-  const medalRimGeo  = new THREE.TorusGeometry(2.25, 0.18, 16, 32);
-
-  const medalGoldMat = new THREE.MeshPhysicalMaterial({
-    color: 0xFFD700,
-    emissive: 0xFF8800,
-    emissiveIntensity: 0.95,
-    metalness: 0.95,
-    roughness: 0.08,
-    reflectivity: 1.0,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.02,
+  // 💎 100% 각진 뾰족한 3D 팔면체 황금 다이아몬드 지오메트리 & 리얼 럭셔리 재질
+  const diamondGeo = new THREE.OctahedronGeometry(2.4, 0);
+  const diamondGoldMat = new THREE.MeshPhysicalMaterial({
+    color: 0xFFD700, emissive: 0xFF8800, emissiveIntensity: 0.95,
+    metalness: 0.95, roughness: 0.05, transmission: 0.25, ior: 2.417, reflectivity: 1.0, clearcoat: 1.0
   });
 
-  const create3DGoldMedalMesh = () => {
-    const group = new THREE.Group();
-    const disc = new THREE.Mesh(medalDiscGeo, medalGoldMat);
-    disc.rotation.x = Math.PI / 2; // 동그란 면이 전방/카메라를 향하도록 직립!
-    disc.castShadow = true;
-
-    const rim = new THREE.Mesh(medalRimGeo, medalGoldMat);
-    group.add(disc, rim);
-    return group;
-  };
-
-  // 🥇 점프대 공중 아치 정점 전용: 동그란 황금 메달 1개 + 멀리서도 돋보이는 3D 빛 아우라!
-  const spawnSingleGoldMedal = (rampX, rampZ) => {
+  // 💎 일반 점프대 공중 아치 정점 전용: 황금 다이아몬드 (500pt) 1개 스폰
+  const spawnSingleGoldDiamond = (rampX, rampZ) => {
     const cluster = [];
     const archLength = 135;
     const peakHeight = 25.0;
-    const t = 0.5; // 아치 최고 정점 위치 (50%)
+    const t = 0.5;
 
     const group = new THREE.Group();
-    const medalMesh = create3DGoldMedalMesh();
-    group.add(medalMesh);
-
-    // 🥇 "저건 꼭 먹어야 해!" 느낌의 멀리서도 눈부시게 퍼지는 3D 황금 빛 아우라 조명!
-    const auraLight = new THREE.PointLight(0xFFD700, 8.0, 24.0);
-    group.add(auraLight);
+    const mesh = new THREE.Mesh(diamondGeo, diamondGoldMat);
+    mesh.castShadow = true;
+    group.add(mesh);
 
     const x = rampX;
     const z = rampZ - t * archLength;
@@ -105,7 +83,7 @@ export const createKickerRampSystem = (scene) => {
     scene.add(group);
 
     const item = {
-      group, mesh: medalMesh, auraLight, x, z, baseY: gy, type: 'medal', pts: 0, active: true,
+      group, mesh, x, z, baseY: gy, type: 'gold', pts: 500, active: true,
       archT: t, archLength, peakHeight
     };
 
@@ -127,7 +105,7 @@ export const createKickerRampSystem = (scene) => {
     return nextX;
   };
 
-  // 점프대 6개 동적 무작위 설치 (스테이지당 지정된 3개 점프대에만 황금 메달 1개씩 총 3개 설치)
+  // 기본 황금 다이아몬드 점프대 6개 동적 무작위 무한 순환 스폰
   const initRamps = () => {
     rampList.length = 0;
     rampGoldItems.length = 0;
@@ -137,15 +115,10 @@ export const createKickerRampSystem = (scene) => {
       const rZ = curZ;
       const rX = getAntiOverlapX();
       const meshGroup = createKickerMesh(rX, rZ);
-      
-      // 🥇 스테이지당 점프대 0, 2, 4번 (총 3개)에만 황금 메달 1개씩 스폰!
-      let goldCluster = [];
-      if (r % 2 === 0 && rampGoldItems.length < 3) {
-        goldCluster = spawnSingleGoldMedal(rX, rZ);
-      }
+      const goldCluster = spawnSingleGoldDiamond(rX, rZ);
 
       rampList.push({ mesh: meshGroup, x: rX, z: rZ, goldCluster });
-      curZ -= (400 + Math.random() * 160);
+      curZ -= (380 + Math.random() * 160);
     }
   };
 
@@ -198,7 +171,7 @@ export const createKickerRampSystem = (scene) => {
   };
 
   const update = (playerZ, playerX, playerY, dt, time, onScoreAdd, showToast, onMedalCollect) => {
-    // 🥇 황금 메달 획득 연출 (부딪히는 순간 즉시 화면 100% 소멸!)
+    // 🥇 황금 메달 & 황금 다이아몬드 획득 연출
     for (const gItem of rampGoldItems) {
       if (!gItem.active) continue;
       gItem.mesh.rotation.y += dt * 4.0;
@@ -210,13 +183,21 @@ export const createKickerRampSystem = (scene) => {
       const dz = playerZ - gItem.group.position.z;
       const distSq3D = dx * dx + dy * dy + dz * dz;
 
-      // 🥇 메달 부딪히는 순간 즉시 화면 소멸 & 상단 HUD 메달 채움!
       if (distSq3D < 85.0) {
         gItem.active = false;
         gItem.group.visible = false;
-        soundFx.playGoldenDiamond(); // 🥇 황금 메달 전용 챠링-! Sound FX
-        if (showToast) showToast('GOLDEN MEDAL GET! 🥇', true);
-        if (onMedalCollect) onMedalCollect();
+        soundFx.playGoldenDiamond();
+
+        if (gItem.type === 'medal') {
+          // 🥇 황금 메달 획득 처리!
+          if (showToast) showToast('GOLDEN MEDAL GET! 🥇', true);
+          if (onMedalCollect) onMedalCollect();
+        } else {
+          // 💎 황금 다이아몬드 획득 처리 (+500pt 점수)
+          if (showToast) showToast('GOLD DIAMOND! +500', true);
+          if (onScoreAdd) onScoreAdd(gItem.pts);
+        }
+      }
     }
 
     // 🎲 점프대 무한 순환 (동일 X 라인 겹침 0% 재배치)
