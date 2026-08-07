@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { makeCharacterModel } from './characters.js';
+import { makeCharacterModel } from './characters.js?v=7.0.0';
 
 export const makeSkier = (characterId = 'beta') => {
   const rootGroup = new THREE.Group();

@@ -1,24 +1,24 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=5.2.0';
-import { STAGES } from './stages.js?v=5.2.0';
-import { createSky } from './sky.js?v=5.2.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=5.2.0';
-import { makeSkier } from './skier.js?v=5.2.0';
-import { createEnvironment } from './environment.js?v=5.2.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=5.2.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=5.2.0';
-import { createSpawnManager } from './spawnManager.js?v=5.2.0';
-import { createDriftSystem } from './driftSystem.js?v=5.2.0';
-import { setupUI } from './ui.js?v=5.2.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=5.2.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=5.2.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=5.2.0';
-import { soundFx } from './soundSystem.js?v=5.2.0';
-import { loadSelectedCharacter } from './characters.js?v=5.2.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=5.2.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=5.2.0';
-import { createMedalRampSystem } from './medalRamp.js?v=5.2.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=5.2.0';
+import { CFG } from './config.js?v=7.0.0';
+import { STAGES } from './stages.js?v=7.0.0';
+import { createSky } from './sky.js?v=7.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=7.0.0';
+import { makeSkier } from './skier.js?v=7.0.0';
+import { createEnvironment } from './environment.js?v=7.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=7.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=7.0.0';
+import { createSpawnManager } from './spawnManager.js?v=7.0.0';
+import { createDriftSystem } from './driftSystem.js?v=7.0.0';
+import { setupUI } from './ui.js?v=7.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=7.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=7.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=7.0.0';
+import { soundFx } from './soundSystem.js?v=7.0.0';
+import { loadSelectedCharacter } from './characters.js?v=7.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=7.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=7.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=7.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=7.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -70,11 +70,29 @@ scene.add(skyMesh);
 
 const { snowMat, updateDoubleBufferedTerrain, resetTerrain } = createTerrainSystem(scene);
 
-const skierData = makeSkier(loadSelectedCharacter());
+let skierData = makeSkier(loadSelectedCharacter());
 const skier = skierData.group;
-const skierBodyGroup = skierData.bodyGroup;
-const skierShadowMat = skierData.shadowMat;
+let skierBodyGroup = skierData.bodyGroup;
+let skierShadowMat = skierData.shadowMat;
 scene.add(skier);
+
+const updateSkierCharacterModel = (charId) => {
+  const targetId = charId || loadSelectedCharacter();
+  const newSkierData = makeSkier(targetId);
+
+  // skier 그룹 내부 자식 오브젝트(캐릭터 메쉬 등) 교체
+  while (skier.children.length > 0) {
+    skier.remove(skier.children[0]);
+  }
+  
+  for (const child of newSkierData.group.children) {
+    skier.add(child);
+  }
+
+  skierData = newSkierData;
+  skierBodyGroup = newSkierData.bodyGroup;
+  skierShadowMat = newSkierData.shadowMat;
+};
 
 const env = createEnvironment(scene);
 const archSystem = createDiamondArchSystem(scene);
@@ -307,6 +325,7 @@ const togglePause = () => {
 
 const startGame = () => {
   soundFx.playStart(); // 🎬 게임 시작 / 오프닝 컷씬 웅장한 soundFx
+  updateSkierCharacterModel(loadSelectedCharacter());
   Object.assign(G, {
     play: true, paused: false, dead: false, spd: CFG.BASE_SPD,
     px: 0, pz: 0, py: getTerrainY(0, 0), vy: 0, vx: 0, lean: 0, dist: 0, score: 0, stage: 1, stageMedals: 0,
@@ -380,7 +399,13 @@ const endGame = () => {
   if (ui) ui.showScreen('over', `획득 점수: <strong>${Math.floor(G.score)} pts</strong><br>달성 스테이지: STAGE ${G.stage}`);
 };
 
-ui = setupUI({ onStart: startGame, onTogglePause: togglePause });
+ui = setupUI({
+  onStart: startGame,
+  onTogglePause: togglePause,
+  onCharacterSelect: (charId) => {
+    updateSkierCharacterModel(charId);
+  }
+});
 if (ui && ui.triggerDissolveRespawn) {
   G.triggerDissolveRespawn = ui.triggerDissolveRespawn;
 }

@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { soundFx } from './soundSystem.js?v=2.3.2';
-import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js';
+import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=7.0.0';
 
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
@@ -31,10 +31,59 @@ export const setupUI = (handlers) => {
 
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
-    const { t } = window.i18n;
+    const { t, getCharTranslation } = window.i18n;
+
     if (lblLogoSubEl) lblLogoSubEl.textContent = t('subTitle');
     if (btnStartEl) btnStartEl.textContent = t('start');
     if (btnRestartEl) btnRestartEl.textContent = t('retry');
+
+    const btnEditCharEl = document.getElementById('btnEditChar');
+    if (btnEditCharEl) btnEditCharEl.textContent = t('editChar');
+
+    // 캐릭터 선택 헤더 & 뒤로가기 버튼
+    const titleEl = document.querySelector('#scCharSelect .charsel-title');
+    if (titleEl) titleEl.textContent = t('charSelectTitle');
+
+    const btnCharBackEl = document.getElementById('btnCharBack');
+    if (btnCharBackEl) btnCharBackEl.textContent = t('back');
+
+    // 속도 레이블 (HUD)
+    const spdLabelEl = document.querySelector('#hSpeedBox .hud-label');
+    if (spdLabelEl) spdLabelEl.textContent = t('speedLabel');
+
+    // 일시정지 / 게임오버 타이틀
+    const pauseTitleEl = document.querySelector('#scPause .over-title');
+    if (pauseTitleEl) pauseTitleEl.textContent = t('paused');
+    const pauseHintEl = document.querySelector('#scPause .hint-text');
+    if (pauseHintEl) pauseHintEl.textContent = t('pauseHint');
+
+    const gameOverTitleEl = document.querySelector('#scGameOver .over-title');
+    if (gameOverTitleEl) gameOverTitleEl.textContent = t('gameOver');
+
+    // 메인화면 3D 프리뷰 이름 갱신
+    const mainCharId = loadSelectedCharacter();
+    const mainNameEl = document.getElementById('charPreviewName');
+    if (mainNameEl) {
+      const trans = getCharTranslation(mainCharId);
+      mainNameEl.textContent = trans.name;
+    }
+
+    // 캐릭터 선택창 카드가 생성되어 있다면 카드 텍스트 갱신
+    const grid = document.getElementById('charSelGrid');
+    if (grid && grid.children.length > 0) {
+      grid.querySelectorAll('.char-card').forEach(card => {
+        const charId = card.dataset.id;
+        if (charId) {
+          const trans = getCharTranslation(charId);
+          const nameNode = card.querySelector('.char-card-name');
+          const descNode = card.querySelector('.char-card-desc');
+          const badgeNode = card.querySelector('.char-card-badge');
+          if (nameNode) nameNode.textContent = trans.name;
+          if (descNode) descNode.textContent = trans.desc;
+          if (badgeNode) badgeNode.textContent = t('selected');
+        }
+      });
+    }
   };
 
   if (langSelectEl) {
@@ -45,6 +94,9 @@ export const setupUI = (handlers) => {
       }
     };
   }
+
+  // 초기 언어 UI 연동
+  updateLanguageUI();
 
   const showToast = (sub, main) => {
     toastSub.textContent = sub; toastMain.textContent = main;
@@ -340,51 +392,98 @@ export const setupUI = (handlers) => {
     const canvas = document.getElementById('charPreviewCanvas');
     if (!canvas) return;
 
-    // 이전 렌더러 정리
-    if (mainPreviewRenderer) { mainPreviewRenderer.dispose(); mainPreviewRenderer = null; }
-    if (mainPreviewRAF) { cancelAnimationFrame(mainPreviewRAF); mainPreviewRAF = null; }
-
     const W = 320, H = 400;
     canvas.width  = W;
     canvas.height = H;
 
-    mainPreviewRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    mainPreviewRenderer.setSize(W, H);
-    mainPreviewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mainPreviewRenderer.setClearColor(0x000000, 0);
+    if (!mainPreviewRenderer) {
+      try {
+        mainPreviewRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        mainPreviewRenderer.setSize(W, H);
+        mainPreviewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        mainPreviewRenderer.setClearColor(0x000000, 0);
 
-    mainPreviewScene  = makePreviewScene();
-    mainPreviewCamera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-    mainPreviewCamera.position.set(0, 4.5, 9);
-    mainPreviewCamera.lookAt(0, 2.2, 0);
+        mainPreviewScene  = makePreviewScene();
+        mainPreviewCamera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
+        mainPreviewCamera.position.set(0, 4.5, 9);
+        mainPreviewCamera.lookAt(0, 2.2, 0);
 
-    const { bodyGroup } = makeCharacterModel(charId);
-    bodyGroup.scale.setScalar(1.6);
-    bodyGroup.position.y = -0.5;
-    mainPreviewModel = bodyGroup;
-    mainPreviewScene.add(bodyGroup);
+        let rot = 0;
+        const loop = () => {
+          mainPreviewRAF = requestAnimationFrame(loop);
+          if (mainPreviewModel) {
+            rot += 0.004; // 매우 천천히 360도 자동 회전
+            mainPreviewModel.rotation.y = rot;
+          }
+          if (mainPreviewRenderer && mainPreviewScene && mainPreviewCamera) {
+            mainPreviewRenderer.render(mainPreviewScene, mainPreviewCamera);
+          }
+        };
+        loop();
+      } catch (err) {
+        console.warn('Main preview WebGL init error:', err);
+      }
+    }
 
-    // 캐릭터 이름 업데이트
+    // 모델만 교체 (WebGLRenderer 재생성 금지 -> precision error 방지)
+    if (mainPreviewModel && mainPreviewScene) {
+      mainPreviewScene.remove(mainPreviewModel);
+      mainPreviewModel = null;
+    }
+
+    if (mainPreviewScene) {
+      const { bodyGroup } = makeCharacterModel(charId);
+      bodyGroup.scale.setScalar(1.6);
+      bodyGroup.position.y = -0.5;
+      mainPreviewModel = bodyGroup;
+      mainPreviewScene.add(bodyGroup);
+    }
+
+    // 캐릭터 이름 업데이트 (다국어 지원)
     const nameEl = document.getElementById('charPreviewName');
-    const info   = CHARACTER_LIST.find(c => c.id === charId);
-    if (nameEl && info) nameEl.textContent = `${info.emoji} ${info.name}`;
-
-    let rot = 0;
-    const loop = () => {
-      mainPreviewRAF = requestAnimationFrame(loop);
-      rot += 0.004; // 매우 천천히 360도 자동 회전
-      bodyGroup.rotation.y = rot;
-      mainPreviewRenderer.render(mainPreviewScene, mainPreviewCamera);
-    };
-    loop();
+    if (nameEl && window.i18n) {
+      const trans = window.i18n.getCharTranslation(charId);
+      nameEl.textContent = trans.name;
+    }
   };
 
   // ── 캐릭터 선택 화면 ────────────────────────────────────────────
-  const cardRenderers = []; // 개별 카드 렌더러 목록 (dispose용)
+  let cardOffscreenCvs = null;
+  let cardSharedRenderer = null;
+  let cardSelectRAF = null;
+  const cardObjects = [];
 
   const disposeCardRenderers = () => {
-    cardRenderers.forEach(r => r.dispose());
-    cardRenderers.length = 0;
+    if (cardSelectRAF) {
+      cancelAnimationFrame(cardSelectRAF);
+      cardSelectRAF = null;
+    }
+    cardObjects.length = 0;
+  };
+
+  const closeCharSelect = () => {
+    disposeCardRenderers();
+    document.getElementById('scCharSelect').classList.add('off');
+    document.getElementById('scStart').classList.remove('off');
+  };
+
+  const getCardSharedRenderer = () => {
+    if (!cardOffscreenCvs) {
+      cardOffscreenCvs = document.createElement('canvas');
+      cardOffscreenCvs.width = 216;
+      cardOffscreenCvs.height = 272;
+    }
+    if (!cardSharedRenderer) {
+      try {
+        cardSharedRenderer = new THREE.WebGLRenderer({ canvas: cardOffscreenCvs, antialias: true, alpha: true });
+        cardSharedRenderer.setSize(216, 272);
+        cardSharedRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        cardSharedRenderer.setClearColor(0x000000, 0);
+      } catch (err) {
+        console.warn('Card shared WebGL init error:', err);
+      }
+    }
+    return cardSharedRenderer;
   };
 
   const buildCharSelectScreen = () => {
@@ -393,6 +492,7 @@ export const setupUI = (handlers) => {
     grid.innerHTML = '';
     disposeCardRenderers();
 
+    const renderer3D = getCardSharedRenderer();
     const currentId = loadSelectedCharacter();
 
     CHARACTER_LIST.forEach(charInfo => {
@@ -400,21 +500,11 @@ export const setupUI = (handlers) => {
       card.className = 'char-card' + (charInfo.id === currentId ? ' selected' : '');
       card.dataset.id = charInfo.id;
 
-      // 이모지
-      const emojiEl = document.createElement('div');
-      emojiEl.className = 'char-card-emoji';
-      emojiEl.textContent = charInfo.emoji;
-
-      // 3D 캔버스
+      // 2D 캔버스 (이모티콘 제거, 3D 캐릭터가 메인표출)
       const cvs = document.createElement('canvas');
       cvs.width  = 216;
       cvs.height = 272;
-
-      const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
-      renderer.setSize(216, 272);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x000000, 0);
-      cardRenderers.push(renderer);
+      const ctx2d = cvs.getContext('2d');
 
       const scene  = makePreviewScene();
       const camera = new THREE.PerspectiveCamera(44, 216 / 272, 0.1, 100);
@@ -426,37 +516,24 @@ export const setupUI = (handlers) => {
       bodyGroup.position.y = -0.5;
       scene.add(bodyGroup);
 
-      // 애니메이션 상태
-      let targetRot  = 0;
-      let currentRot = 0;
-      let isHovered  = false;
-      let rafId      = null;
-
-      const tick = () => {
-        rafId = requestAnimationFrame(tick);
-        if (isHovered) {
-          targetRot += 0.032; // hover 시 빙글빙글
-        } else {
-          // 정면(0rad)으로 스무스하게 복귀
-          targetRot = targetRot % (Math.PI * 2);
-          if (targetRot > Math.PI)  targetRot -= Math.PI * 2;
-          targetRot += (0 - targetRot) * 0.07;
-        }
-        currentRot += (targetRot - currentRot) * 0.18;
-        bodyGroup.rotation.y = currentRot;
-        renderer.render(scene, camera);
+      const cardObj = {
+        scene, camera, bodyGroup, ctx2d,
+        targetRot: 0, currentRot: 0, isHovered: false
       };
-      tick();
+      cardObjects.push(cardObj);
 
-      card.addEventListener('mouseenter', () => { isHovered = true; });
-      card.addEventListener('mouseleave', () => { isHovered = false; });
+      card.addEventListener('mouseenter', () => { cardObj.isHovered = true; });
+      card.addEventListener('mouseleave', () => { cardObj.isHovered = false; });
 
-      // 이름 / 설명 / 선택 배지
-      const nameEl  = document.createElement('div'); nameEl.className  = 'char-card-name';  nameEl.textContent = charInfo.name;
-      const descEl  = document.createElement('div'); descEl.className  = 'char-card-desc';  descEl.textContent = charInfo.desc;
-      const badge   = document.createElement('div'); badge.className   = 'char-card-badge'; badge.textContent  = 'SELECTED';
+      // 다국어 번역된 이름 / 설명 / 선택 배지
+      const trans = window.i18n ? window.i18n.getCharTranslation(charInfo.id) : { name: charInfo.name, desc: charInfo.desc };
+      const selectedText = window.i18n ? window.i18n.t('selected') : 'SELECTED';
 
-      card.append(emojiEl, cvs, nameEl, descEl, badge);
+      const nameEl  = document.createElement('div'); nameEl.className  = 'char-card-name';  nameEl.textContent = trans.name;
+      const descEl  = document.createElement('div'); descEl.className  = 'char-card-desc';  descEl.textContent = trans.desc;
+      const badge   = document.createElement('div'); badge.className   = 'char-card-badge'; badge.textContent  = selectedText;
+
+      card.append(cvs, nameEl, descEl, badge);
       grid.appendChild(card);
 
       // 클릭: 캐릭터 선택 + 메인화면으로 복귀
@@ -468,13 +545,37 @@ export const setupUI = (handlers) => {
         card.classList.add('selected');
         // 메인 프리뷰 갱신
         initMainCharPreview(charInfo.id);
+        if (handlers && handlers.onCharacterSelect) {
+          handlers.onCharacterSelect(charInfo.id);
+        }
         // 0.35초 후 선택 화면 닫고 메인으로
         setTimeout(() => {
-          document.getElementById('scCharSelect').classList.add('off');
-          document.getElementById('scStart').classList.remove('off');
+          closeCharSelect();
         }, 350);
       });
     });
+
+    const loopCards = () => {
+      cardSelectRAF = requestAnimationFrame(loopCards);
+      cardObjects.forEach(obj => {
+        if (obj.isHovered) {
+          obj.targetRot += 0.010; // 마우스 호버 시 우아하고 천천히 360도 회전!
+        } else {
+          obj.targetRot = obj.targetRot % (Math.PI * 2);
+          if (obj.targetRot > Math.PI) obj.targetRot -= Math.PI * 2;
+          obj.targetRot += (0 - obj.targetRot) * 0.07;
+        }
+        obj.currentRot += (obj.targetRot - obj.currentRot) * 0.18;
+        obj.bodyGroup.rotation.y = obj.currentRot;
+
+        if (renderer3D) {
+          renderer3D.render(obj.scene, obj.camera);
+          obj.ctx2d.clearRect(0, 0, 216, 272);
+          obj.ctx2d.drawImage(cardOffscreenCvs, 0, 0);
+        }
+      });
+    };
+    loopCards();
   };
 
   // ── EDIT 버튼 / 캐릭터 프리뷰 클릭 → 선택 화면 열기 ──────────────
@@ -491,10 +592,20 @@ export const setupUI = (handlers) => {
 
   if (btnEditChar)  btnEditChar.addEventListener('click',  (e) => { e.stopPropagation(); openCharSelect(); });
   if (charPrevWrap) charPrevWrap.addEventListener('click', () => openCharSelect());
-  if (btnCharBack)  btnCharBack.addEventListener('click', () => {
+  if (btnCharBack)  btnCharBack.addEventListener('click', (e) => {
+    e.stopPropagation();
     soundFx.playClick();
-    document.getElementById('scCharSelect').classList.add('off');
-    document.getElementById('scStart').classList.remove('off');
+    closeCharSelect();
+  });
+
+  // ESC 키 눌렀을 때 캐릭터 선택창 닫기 지원
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      const scCharSel = document.getElementById('scCharSelect');
+      if (scCharSel && !scCharSel.classList.contains('off')) {
+        closeCharSelect();
+      }
+    }
   });
 
   // 메인화면 진입 시 현재 캐릭터 프리뷰 초기화

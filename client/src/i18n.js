@@ -13,24 +13,13 @@ const TRANSLATIONS = {
     title: '3D SKI AVALANCHE',
     subTitle: 'ESCAPE THE AVALANCHE! HIGH-SPEED ALPINE DESCENT',
     start: 'PLAY GAME',
-    leaderboard: 'LEADERBOARD',
-    characters: 'CHARACTERS',
-    profile: 'PROFILE / LANG',
-    challengeMode: 'CHALLENGE MODE',
-    customMode: 'CUSTOM MODE',
-    challengeDesc: 'Default spec fixed. Score registered to Global Leaderboard!',
-    customDesc: 'Ride with your upgraded character. Personal record only.',
-    fastestTime: 'Fastest Time ⏱️',
-    highScore: 'High Score ⭐',
-    rank: 'Rank',
-    flag: 'Flag',
-    nickname: 'Player',
-    time: 'Clear Time',
-    score: 'Score',
-    date: 'Date',
-    boostText: 'INSTANT BOOST! ⚡',
-    rampBoost: 'RAMP BOOST! +5s 🚀',
-    driftBoost: 'DRIFT BOOST! ⚡',
+    editChar: '✏ EDIT',
+    charSelectTitle: 'CHARACTER SELECT',
+    back: '← BACK',
+    selected: 'SELECTED',
+    speedLabel: 'SPEED',
+    paused: 'PAUSED',
+    pauseHint: 'PRESS ESC TO RESUME',
     gameOver: 'AVALANCHE OVERTOOK YOU!',
     retry: 'TRY AGAIN',
     stage: 'STAGE',
@@ -41,24 +30,13 @@ const TRANSLATIONS = {
     title: '3D 스키 아발란체',
     subTitle: '산사태를 탈출하라! 목숨을 건 초고속 스키 탈출',
     start: '게임 시작',
-    leaderboard: '글로벌 랭킹',
-    characters: '캐릭터 & 스펙',
-    profile: '프로필 / 언어',
-    challengeMode: '🏆 도전 모드 (공정 실력)',
-    customMode: '⭐ 자신만의 모드 (스펙 업)',
-    challengeDesc: '기본 스펙 고정 주행. 완주 기록이 글로벌 랭킹 서버에 정식 등록됩니다!',
-    customDesc: '해금/업그레이드한 내 캐릭터로 자유 주행. 본인 개인 기록에 저장됩니다.',
-    fastestTime: '완주 시간 순 ⏱️',
-    highScore: '최고 점수 순 ⭐',
-    rank: '순위',
-    flag: '국적',
-    nickname: '선수명',
-    time: '완주 시간',
-    score: '점수',
-    date: '달성일',
-    boostText: '순간 부스터! ⚡',
-    rampBoost: '점프대 5초 부스터! 🚀',
-    driftBoost: '드리프트 부스트! ⚡',
+    editChar: '✏ 캐릭터 변경',
+    charSelectTitle: '캐릭터 선택',
+    back: '← 뒤로가기',
+    selected: '선택됨',
+    speedLabel: '속도',
+    paused: '일시정지',
+    pauseHint: 'ESC를 눌러 계속하기',
     gameOver: '산사태에 삼켜졌습니다!',
     retry: '다시 도전',
     stage: '스테이지',
@@ -69,24 +47,13 @@ const TRANSLATIONS = {
     title: '3D スキーアバランチ',
     subTitle: '雪崩から脱出せよ！命がけの超高速滑走',
     start: 'ゲーム開始',
-    leaderboard: 'ランキング',
-    characters: 'キャラ＆スペック',
-    profile: 'プロフィール/言語',
-    challengeMode: '🏆 チャレンジモード',
-    customMode: '⭐ カスタムモード',
-    challengeDesc: '基本スペック固定。公式世界ランキングに記録が登録されます！',
-    customDesc: 'アップグレードしたキャラで自由に滑走。個人記録に保存されます。',
-    fastestTime: 'タイム順 ⏱️',
-    highScore: 'スコア順 ⭐',
-    rank: '順位',
-    flag: '国籍',
-    nickname: 'プレイヤー',
-    time: 'タイム',
-    score: 'スコア',
-    date: '日付',
-    boostText: '瞬間ブースター！ ⚡',
-    rampBoost: 'ジャンプ5秒ブースト！ 🚀',
-    driftBoost: 'ドリフトブースト！ ⚡',
+    editChar: '✏ キャラ変更',
+    charSelectTitle: 'キャラクター選択',
+    back: '← 戻る',
+    selected: '選択中',
+    speedLabel: '速度',
+    paused: '一時停止',
+    pauseHint: 'ESCキーで再開',
     gameOver: '雪崩に飲み込まれた！',
     retry: '再挑戦',
     stage: 'ステージ',
@@ -97,24 +64,13 @@ const TRANSLATIONS = {
     title: '3D 极限雪崩滑雪',
     subTitle: '逃离雪崩！生死一瞬的极速滑雪',
     start: '开始游戏',
-    leaderboard: '全球排行榜',
-    characters: '角色与属性',
-    profile: '个人资料/语言',
-    challengeMode: '🏆 挑战模式',
-    customMode: '⭐ 自定义模式',
-    challengeDesc: '基础属性固定，成绩上传至全球排行榜！',
-    customDesc: '使用已升级的角色自由滑雪，保存至个人最佳纪录。',
-    fastestTime: '用时排序 ⏱️',
-    highScore: '积分排序 ⭐',
-    rank: '排名',
-    flag: '国籍',
-    nickname: '选手',
-    time: '用时',
-    score: '积分',
-    date: '日期',
-    boostText: '瞬间加速！ ⚡',
-    rampBoost: '跳台5秒加速！ 🚀',
-    driftBoost: '漂移加速！ ⚡',
+    editChar: '✏ 更改角色',
+    charSelectTitle: '角色选择',
+    back: '← 返回',
+    selected: '已选择',
+    speedLabel: '速度',
+    paused: '暂停',
+    pauseHint: '按 ESC 继续',
     gameOver: '已被雪崩吞没！',
     retry: '重新开始',
     stage: '关卡',
@@ -125,24 +81,13 @@ const TRANSLATIONS = {
     title: '3D SKI AVALANCHE',
     subTitle: "ÉCHAPPEZ À L'AVALANCHE! DESCENTE DE SURVIE",
     start: 'JOUER',
-    leaderboard: 'CLASSEMENT',
-    characters: 'PERSONNAGES',
-    profile: 'PROFIL / LANGUE',
-    challengeMode: '🏆 MODE DÉFI',
-    customMode: '⭐ MODE PERSONNALISÉ',
-    challengeDesc: 'Stats de base fixées. Score enregistré au classement mondial!',
-    customDesc: 'Skiez avec votre personnage amélioré. Record personnel uniquement.',
-    fastestTime: 'Meilleur Temps ⏱️',
-    highScore: 'Meilleur Score ⭐',
-    rank: 'Rang',
-    flag: 'Drapeau',
-    nickname: 'Joueur',
-    time: 'Temps',
-    score: 'Score',
-    date: 'Date',
-    boostText: 'BOOST INSTANTANÉ! ⚡',
-    rampBoost: 'BOOST TREMPLIN! +5s 🚀',
-    driftBoost: 'BOOST DERIVE! ⚡',
+    editChar: '✏ CHANGER',
+    charSelectTitle: 'SÉLECTION DU PERSONNAGE',
+    back: '← RETOUR',
+    selected: 'SÉLECTIONNÉ',
+    speedLabel: 'VITESSE',
+    paused: 'PAUSE',
+    pauseHint: 'APPUYEZ SUR ECHAP POUR REPRENDRE',
     gameOver: "L'AVALANCHE VOUS A RATTRAPÉ!",
     retry: 'RÉESSAYER',
     stage: 'STAGE',
@@ -151,7 +96,20 @@ const TRANSLATIONS = {
   }
 };
 
-let currentLang = 'en';
+export const CHARACTER_TRANSLATIONS = {
+  blaze:    { ko: { name: '블레이즈', desc: '불꽃 스피더' },       en: { name: 'Blaze', desc: 'Flame Speed Racer' },       ja: { name: 'ブレイズ', desc: '炎のスピードレーサー' },   zh: { name: '烈焰赛手', desc: '烈焰赛车手' },         fr: { name: 'Blaze', desc: 'Skieur de Feu' } },
+  cyber:    { ko: { name: '프로스트바이트', desc: '사이버 수트' }, en: { name: 'Frostbite', desc: 'Cyber Suit' },          ja: { name: 'フロストバイト', desc: 'サイバースーツ' },   zh: { name: '霜冻战士', desc: '赛博雪装' },           fr: { name: 'Frostbite', desc: 'Combinaison Cyber' } },
+  hunter:   { ko: { name: '알파인 레인저', desc: '산악 레인저' },  en: { name: 'Alpine Ranger', desc: 'Mountain Ranger' }, ja: { name: 'アルパインレンジャー', desc: '山岳レンジャー' }, zh: { name: '高山巡逻员', desc: '高山护林员' },     fr: { name: 'Chasseur des Alpes', desc: 'Garde-Forestier' } },
+  phantom:  { ko: { name: '팬텀', desc: '스텔스 수트' },           en: { name: 'Phantom', desc: 'Stealth Suit' },          ja: { name: 'ファントム', desc: 'ステルススーツ' },     zh: { name: '幽灵潜行者', desc: '隐形战服' },         fr: { name: 'Fantôme', desc: 'Combinaison Furtive' } },
+  champion: { ko: { name: '챔피언', desc: '골드 메달리스트' },     en: { name: 'Champion', desc: 'Gold Medalist' },        ja: { name: 'チャンピオン', desc: '金メダリスト' },     zh: { name: '金牌冠军', desc: '金牌得主' },           fr: { name: 'Champion', desc: 'Médaillé d\'Or' } },
+  fiona:    { ko: { name: '피오나', desc: '눈의 여왕' },           en: { name: 'Fiona', desc: 'Snow Queen' },              ja: { name: 'フィオナ', desc: '雪の女王' },             zh: { name: '菲奥娜', desc: '冰雪女王' },             fr: { name: 'Fiona', desc: 'Reine des Neiges' } },
+  bear:     { ko: { name: '곰돌이', desc: '설산 마스코트' },       en: { name: 'Mountain Bear', desc: 'Alpine Bear' },     ja: { name: 'クマさん', desc: '雪山のマスコット' },       zh: { name: '雪山熊', desc: '雪山吉祥物' },           fr: { name: 'Ours', desc: 'Mascotte des Alpes' } },
+  penguin:  { ko: { name: '펭귄', desc: '빙하 미끄럼꾼' },         en: { name: 'Ice Penguin', desc: 'Glacier Glider' },    ja: { name: 'ペンギン', desc: '氷河のグライダー' },       zh: { name: '冰川企鹅', desc: '冰川滑翔者' },         fr: { name: 'Pingouin', desc: 'Glisseur des Glaces' } },
+  yeti:     { ko: { name: '예티', desc: '설산의 전설' },           en: { name: 'Snow Yeti', desc: 'Legend of Alps' },      ja: { name: 'イエティ', desc: '雪山の伝説' },           zh: { name: '雪人伊提', desc: '雪山传说' },           fr: { name: 'Yéti', desc: 'Légende des Alpes' } },
+  beta:     { ko: { name: '베타테스터', desc: '원조 테스트 스키어' },en: { name: 'Beta Tester', desc: 'Original Skier' },    ja: { name: 'ベータテスター', desc: '元祖テスター' },     zh: { name: '测试员', desc: '元老测试员' },           fr: { name: 'Bêta Testeur', desc: 'Testeur d\'Origine' } }
+};
+
+let currentLang = 'ko'; // Default to Korean
 
 export const getLang = () => currentLang;
 
@@ -165,8 +123,13 @@ export const setLang = (langCode) => {
 };
 
 export const t = (key) => {
-  const langObj = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
-  return langObj[key] || TRANSLATIONS.en[key] || key;
+  const langObj = TRANSLATIONS[currentLang] || TRANSLATIONS.ko;
+  return langObj[key] || TRANSLATIONS.ko[key] || key;
+};
+
+export const getCharTranslation = (charId, langCode = currentLang) => {
+  const charObj = CHARACTER_TRANSLATIONS[charId] || CHARACTER_TRANSLATIONS.blaze;
+  return charObj[langCode] || charObj.ko || charObj.en;
 };
 
 export const getFlagEmoji = (countryCode) => {
@@ -174,7 +137,7 @@ export const getFlagEmoji = (countryCode) => {
   return FLAGS[code] ? FLAGS[code].flag : '🚩';
 };
 
-export const i18n = { getLang, setLang, t, getFlagEmoji, FLAGS };
+export const i18n = { getLang, setLang, t, getCharTranslation, getFlagEmoji, FLAGS };
 
 // 브라우저 글로벌 디버그용 노출
 if (typeof window !== 'undefined') {
