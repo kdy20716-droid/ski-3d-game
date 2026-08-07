@@ -1,25 +1,25 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=17.0.0';
-import { STAGES } from './stages.js?v=17.0.0';
-import { createSky } from './sky.js?v=17.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=17.0.0';
-import { makeSkier } from './skier.js?v=17.0.0';
-import { createEnvironment } from './environment.js?v=17.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=17.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=17.0.0';
-import { createSpawnManager } from './spawnManager.js?v=17.0.0';
-import { createDriftSystem } from './driftSystem.js?v=17.0.0';
-import { setupUI } from './ui.js?v=17.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=17.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=17.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=17.0.0';
-import { soundFx } from './soundSystem.js?v=17.0.0';
-import { loadSelectedCharacter } from './characters.js?v=17.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=17.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=17.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=17.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=17.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=17.0.0';
+import { CFG } from './config.js?v=18.0.0';
+import { STAGES } from './stages.js?v=18.0.0';
+import { createSky } from './sky.js?v=18.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=18.0.0';
+import { makeSkier } from './skier.js?v=18.0.0';
+import { createEnvironment } from './environment.js?v=18.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=18.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=18.0.0';
+import { createSpawnManager } from './spawnManager.js?v=18.0.0';
+import { createDriftSystem } from './driftSystem.js?v=18.0.0';
+import { setupUI } from './ui.js?v=18.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=18.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=18.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=18.0.0';
+import { soundFx } from './soundSystem.js?v=18.0.0';
+import { loadSelectedCharacter } from './characters.js?v=18.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=18.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=18.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=18.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=18.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=18.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -886,7 +886,7 @@ const update = (dt, time) => {
 
   // 🏁 레이스 진행 바 업데이트 (3D 인게임 실제 위치와 100% 동일한 밀리초 동기화!)
   if (ui && ui.updateRaceBar) {
-    ui.updateRaceBar(G.dist, 100000, G.mode);
+    ui.updateRaceBar(G.dist, 100000, G.isOpeningCutscene);
   }
 };
 

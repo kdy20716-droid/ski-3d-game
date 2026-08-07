@@ -274,13 +274,17 @@ export const setupUI = (handlers) => {
     updateRacePlayerAvatar(selectedCharId);
   };
 
-  // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 밀리초 100% 동일 정밀 동기화!
-  const updateRaceBar = (currentDist, totalDist = 100000) => {
+  // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 시각적 100% 동일 동기화!
+  const updateRaceBar = (currentDist, totalDist = 100000, isCutscene = false) => {
     const playerEl = document.getElementById('racePlayer');
     if (!playerEl) return;
 
-    // 미세 보정 (-120m 오프셋 적용: 3D 캐릭터 중심 & 깃발 폴 중심 100% 동기화)
-    const calibDist = Math.max(0, currentDist - 120);
+    // 1. 오프닝 컷씬 진행 중일 때에는 상단 진행 아바타를 0m 시작점에 고정!
+    const effectiveDist = isCutscene ? 0 : Math.max(0, currentDist);
+
+    // 2. 2D 아바타 원형 반지름 시각적 앞서감 보정 (-280m 오프셋 적용)
+    // 3D 스키어가 관문 깃발을 통과하는 바로 그 밀리초 순간 상단 아바타 전면도 깃발을 정확히 통과!
+    const calibDist = Math.max(0, effectiveDist - 280);
     const rawPct = Math.min(1.0, Math.max(0.0, calibDist / totalDist));
     const pctInTrack = 0.02 + rawPct * 0.94; // 2% ~ 96% 범위
     playerEl.style.left = `${pctInTrack * 100}%`;
