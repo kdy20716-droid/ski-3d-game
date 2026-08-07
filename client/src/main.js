@@ -1,22 +1,22 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=2.8.0';
-import { STAGES } from './stages.js?v=2.8.0';
-import { createSky } from './sky.js?v=2.8.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.8.0';
-import { makeSkier } from './skier.js?v=2.8.0';
-import { createEnvironment } from './environment.js?v=2.8.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=2.8.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=2.8.0';
-import { createSpawnManager } from './spawnManager.js?v=2.8.0';
-import { createDriftSystem } from './driftSystem.js?v=2.8.0';
-import { setupUI } from './ui.js?v=2.8.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.8.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=2.8.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=2.8.0';
-import { soundFx } from './soundSystem.js?v=2.8.0';
-import { loadSelectedCharacter } from './characters.js?v=2.8.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=2.8.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=2.8.0';
+import { CFG } from './config.js?v=2.8.6';
+import { STAGES } from './stages.js?v=2.8.6';
+import { createSky } from './sky.js?v=2.8.6';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.8.6';
+import { makeSkier } from './skier.js?v=2.8.6';
+import { createEnvironment } from './environment.js?v=2.8.6';
+import { createDiamondArchSystem } from './diamondArch.js?v=2.8.6';
+import { createKickerRampSystem } from './kickerRamp.js?v=2.8.6';
+import { createSpawnManager } from './spawnManager.js?v=2.8.6';
+import { createDriftSystem } from './driftSystem.js?v=2.8.6';
+import { setupUI } from './ui.js?v=2.8.6';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.8.6';
+import { createAvalancheSystem } from './avalancheSystem.js?v=2.8.6';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=2.8.6';
+import { soundFx } from './soundSystem.js?v=2.8.6';
+import { loadSelectedCharacter } from './characters.js?v=2.8.6';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=2.8.6';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=2.8.6';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -155,6 +155,107 @@ const updateStageTransition = (dt) => {
 };
 
 // ─────────────────────────────────────────
+//  🤫 개발자 전용 비밀 스테이지 워프 연습 모드 (Alt + Shift + 숫자 3초 홀드)
+// ─────────────────────────────────────────
+let cheatWarpKey = null;
+let cheatWarpStartTime = 0;
+let cheatWarpTargetStage = 0;
+
+const warpToStage = (stageNum) => {
+  const targetIdx = Math.max(1, Math.min(10, stageNum));
+  soundFx.playVictory(); // 🎺 스테이지 워프 완료 사운드
+
+  G.play = true;
+  G.paused = false;
+  G.dead = false;
+  G.isCrashed = false;
+  G.spd = CFG.BASE_SPD;
+  G.px = 0;
+  G.pz = 0;
+  G.py = getTerrainY(0, 0);
+  G.vy = 0; G.vx = 0; G.lean = 0;
+  G.dist = 0; G.score = 0;
+  G.stage = targetIdx;
+  G.nextFlagDist = 10000;
+  G.jumpCharge = 0; G.isCharging = false; G.inAir = false; G.airTimeTimer = 0.0;
+  G.boosterTimer = 0; G.wasRampJump = false; G.wasFullJump = false;
+  G.elapsed = 0; G.bonusTimer = 0;
+  
+  // 시네마틱 스킵 상태
+  G.isOpeningCutscene = false;
+  G.cutsceneTimer = 0.0;
+  G.avalancheGraceTimer = 3.0;
+  G.invincibleTimer = 3.0; // 워프 직후 3초 무적
+  G.stunTimer = 0.0;
+  G.avalancheZ = 95.0;
+  G.isVictoryCeremony = false;
+
+  skier.position.set(0, G.py, 0);
+  skier.rotation.set(0, 0, 0);
+
+  // 스테이지 환경 변환
+  const sIdx = targetIdx - 1;
+  const targetStageObj = STAGES[sIdx];
+  transitionState.currentStageIdx = sIdx;
+  transitionState.targetStageIdx = sIdx;
+  transitionState.progress = 1.0;
+
+  scene.fog.color.setHex(targetStageObj.fogCol);
+  sunLight.color.setHex(targetStageObj.lightCol);
+  sunLight.position.copy(targetStageObj.sunDir).multiplyScalar(200);
+  ambientLight.color.setHex(targetStageObj.ambientCol);
+  hemiLight.color.setHex(targetStageObj.hemiSky);
+  hemiLight.groundColor.setHex(targetStageObj.hemiGround);
+  snowMat.emissive.setHex(targetStageObj.snowGlow);
+
+  skyMaterial.uniforms.uSun.value.copy(targetStageObj.sunDir);
+  skyMaterial.uniforms.uSkyCol.value.set(...targetStageObj.skyCol);
+  skyMaterial.uniforms.uStage.value = targetStageObj.stageVal;
+
+  resetTerrain();
+  if (env && env.resetEnvironment) env.resetEnvironment();
+  if (archSystem && archSystem.reset) archSystem.reset();
+  if (kickerSystem && kickerSystem.reset) kickerSystem.reset();
+  if (driftSystem && driftSystem.reset) driftSystem.reset();
+  if (snowballHazard && snowballHazard.reset) snowballHazard.reset();
+  if (rockySnowballHazard && rockySnowballHazard.reset) rockySnowballHazard.reset();
+
+  if (ui) {
+    ui.showScreen('game');
+    ui.updateStageTitle(targetIdx, targetStageObj.name);
+    ui.showBonusToast(`WARP: STAGE ${targetIdx} · ${targetStageObj.name}`, true);
+    if (ui.showVictoryOverlay) ui.showVictoryOverlay(false);
+    if (ui.showSurpriseBadge) ui.showSurpriseBadge(false);
+  }
+};
+
+const checkSecretCheatWarp = (dt) => {
+  if (!cheatWarpKey) return;
+  const elapsed = performance.now() - cheatWarpStartTime;
+  if (elapsed >= 3000.0) { // 3.0초 꾹 누르기 완료!
+    const targetStage = cheatWarpTargetStage;
+    cheatWarpKey = null;
+    cheatWarpStartTime = 0;
+    cheatWarpTargetStage = 0;
+    warpToStage(targetStage);
+  }
+};
+
+const parseDigitKey = (code) => {
+  if (code === 'Digit1' || code === 'Numpad1') return 1;
+  if (code === 'Digit2' || code === 'Numpad2') return 2;
+  if (code === 'Digit3' || code === 'Numpad3') return 3;
+  if (code === 'Digit4' || code === 'Numpad4') return 4;
+  if (code === 'Digit5' || code === 'Numpad5') return 5;
+  if (code === 'Digit6' || code === 'Numpad6') return 6;
+  if (code === 'Digit7' || code === 'Numpad7') return 7;
+  if (code === 'Digit8' || code === 'Numpad8') return 8;
+  if (code === 'Digit9' || code === 'Numpad9') return 9;
+  if (code === 'Digit0' || code === 'Numpad0') return 10;
+  return 0;
+};
+
+// ─────────────────────────────────────────
 //  CONTROLS & UI HANDLERS
 // ─────────────────────────────────────────
 let ui = null;
@@ -171,9 +272,30 @@ window.addEventListener('keydown', e => {
     if (skierData && skierData.updateSurpriseBadge3D) skierData.updateSurpriseBadge3D('off');
     if (ui && ui.showSkipHint) ui.showSkipHint(false);
   }
+
+  // 🤫 개발자 전용 3초 홀드 워프 타이머 시작 (Ctrl + 숫자 1~0 3초간 꾹 누르기)
+  if (e.ctrlKey || e.metaKey) {
+    const stageNum = parseDigitKey(e.code);
+    if (stageNum > 0) {
+      if (cheatWarpKey !== e.code) {
+        cheatWarpKey = e.code;
+        cheatWarpStartTime = performance.now();
+        cheatWarpTargetStage = stageNum;
+      }
+    }
+  }
+
   keys.add(e.code);
 });
-window.addEventListener('keyup', e => keys.delete(e.code));
+
+window.addEventListener('keyup', e => {
+  keys.delete(e.code);
+  if (cheatWarpKey === e.code || (!e.ctrlKey && !e.metaKey)) {
+    cheatWarpKey = null;
+    cheatWarpStartTime = 0;
+    cheatWarpTargetStage = 0;
+  }
+});
 
 const togglePause = () => {
   G.paused = !G.paused;
@@ -247,6 +369,9 @@ ui = setupUI({ onStart: startGame, onTogglePause: togglePause });
 //  MAIN UPDATE LOOP
 // ─────────────────────────────────────────
 const update = (dt, time) => {
+  // 🤫 개발자 전용 3초 홀드 워프 타이머 체킹 (메인메뉴/인게임 어디서나 동작!)
+  checkSecretCheatWarp(dt);
+
   if (G.paused) return;
   G.elapsed += dt;
 
@@ -663,6 +788,9 @@ const animate = (ts) => {
   prev = t;
 
   skyMaterial.uniforms.uTime.value = t;
+
+  // 🤫 개발자 비밀 스테이지 3초 홀드 워프 타이머 체킹 (메인메뉴/인게임 무관 항상 동작!)
+  checkSecretCheatWarp(dt);
 
   if (G.play) {
     update(dt, t);
