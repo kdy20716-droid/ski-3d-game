@@ -1,20 +1,21 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=2.6.5';
-import { STAGES } from './stages.js?v=2.6.5';
-import { createSky } from './sky.js?v=2.6.5';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.6.5';
-import { makeSkier } from './skier.js?v=2.6.5';
-import { createEnvironment } from './environment.js?v=2.6.5';
-import { createDiamondArchSystem } from './diamondArch.js?v=2.6.5';
-import { createKickerRampSystem } from './kickerRamp.js?v=2.6.5';
-import { createSpawnManager } from './spawnManager.js?v=2.6.5';
-import { createDriftSystem } from './driftSystem.js?v=2.6.5';
-import { setupUI } from './ui.js?v=2.6.5';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.6.5';
-import { createAvalancheSystem } from './avalancheSystem.js?v=2.6.5';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=2.6.5';
-import { soundFx } from './soundSystem.js?v=2.6.5';
-import { loadSelectedCharacter } from './characters.js?v=2.6.5';
+import { CFG } from './config.js?v=2.7.0';
+import { STAGES } from './stages.js?v=2.7.0';
+import { createSky } from './sky.js?v=2.7.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.7.0';
+import { makeSkier } from './skier.js?v=2.7.0';
+import { createEnvironment } from './environment.js?v=2.7.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=2.7.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=2.7.0';
+import { createSpawnManager } from './spawnManager.js?v=2.7.0';
+import { createDriftSystem } from './driftSystem.js?v=2.7.0';
+import { setupUI } from './ui.js?v=2.7.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.7.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=2.7.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=2.7.0';
+import { soundFx } from './soundSystem.js?v=2.7.0';
+import { loadSelectedCharacter } from './characters.js?v=2.7.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=2.7.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -77,6 +78,7 @@ const archSystem = createDiamondArchSystem(scene);
 const kickerSystem = createKickerRampSystem(scene);
 const driftSystem = createDriftSystem(scene, skier);
 const avalancheSystem = createAvalancheSystem(scene);
+const snowballHazard = createSnowballHazardSystem(scene);
 
 // 눈 파티클을 camera 자식으로 등록 → 카메라 로컬 좌표 유지
 // 플레이어가 아무리 멀리 내려가도 항상 카메라 주변에 눈이 존재
@@ -204,6 +206,7 @@ const startGame = () => {
   if (archSystem && archSystem.reset) archSystem.reset();
   if (kickerSystem && kickerSystem.reset) kickerSystem.reset();
   if (driftSystem && driftSystem.reset) driftSystem.reset();
+  if (snowballHazard && snowballHazard.reset) snowballHazard.reset();
 
   if (ui) ui.showScreen('game');
   if (ui && ui.showVictoryOverlay) ui.showVictoryOverlay(false);
@@ -408,6 +411,10 @@ const update = (dt, time) => {
     });
   }
   
+  if (snowballHazard) {
+    snowballHazard.update(G, dt);
+  }
+
   updateDoubleBufferedTerrain(G.pz);
 
   skier.position.set(G.px, G.py, G.pz);
