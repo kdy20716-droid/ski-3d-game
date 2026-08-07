@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { getTerrainY } from './terrain.js';
-import { soundFx } from './soundSystem.js';
+import { soundFx } from './soundSystem.js?v=9.0.0';
 
 // ─────────────────────────────────────────────────────────────────
 //  ❄️ 눈덩이 장애물: 거대 크기 + 진로 유지(-Z 직진) + 경고 UI 100% 연동

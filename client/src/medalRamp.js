@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { getTerrainY } from './terrain.js';
-import { soundFx } from './soundSystem.js';
+import { soundFx } from './soundSystem.js?v=9.0.0';
 
 // 🥇 스테이지당 딱 3개만 존재하는 황금 메달 전용 점프대 시스템 모듈
 export const createMedalRampSystem = (scene) => {
@@ -175,7 +175,11 @@ export const createMedalRampSystem = (scene) => {
           G.jumpCharge = 0;
           G.isCharging = false;
 
-          soundFx.playKickerLaunch();
+          if (soundFx && typeof soundFx.playKickerLaunch === 'function') {
+            soundFx.playKickerLaunch();
+          } else if (soundFx && soundFx.playJump) {
+            soundFx.playJump();
+          }
           if (showToast) showToast('GOLD MEDAL KICKER LAUNCH! 🚀🥇', true);
         }
         break;

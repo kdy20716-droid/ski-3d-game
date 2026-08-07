@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { soundFx } from './soundSystem.js?v=2.3.2';
+import { soundFx } from './soundSystem.js?v=9.0.0';
 
 // 🎬 오프닝 시네마틱 컷씬 (산사태 바짝 덮침 ➔ 놀란 스키어 ! 경고 팝업 ➔ 빠르게 전속력 하강!)
 export const updateOpeningCutscene = (G, dt, camera, skier, ui, getTerrainY, avalancheSystem, CFG, skierData) => {

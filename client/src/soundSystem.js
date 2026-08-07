@@ -331,6 +331,31 @@ class SoundManager {
     osc.stop(t + 0.85);
   }
 
+  // 8-1. 🚩 스테이지 관문 통과 승리 팡파르음 (도-미-솔 C5-E5-G5-C6 아르페지오)
+  playStageClear() {
+    this.ensureContext();
+    if (!this.ctx || this.isMuted) return;
+
+    const t = this.ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 - E5 - G5 - C6
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t + idx * 0.06);
+
+      gain.gain.setValueAtTime(0.4, t + idx * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.06 + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(t + idx * 0.06);
+      osc.stop(t + idx * 0.06 + 0.22);
+    });
+  }
+
   // 9. 🏆 Stage 10 완주 공중제비 승리 팡파르음!
   playVictory() {
     this.ensureContext();

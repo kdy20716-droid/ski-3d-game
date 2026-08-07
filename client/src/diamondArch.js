@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { getTerrainY } from './terrain.js';
-import { soundFx } from './soundSystem.js';
+import { soundFx } from './soundSystem.js?v=9.0.0';
 
 export const createDiamondArchSystem = (scene) => {
   const archItems = [];

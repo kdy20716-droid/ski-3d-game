@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { getTerrainY } from './terrain.js';
-import { soundFx } from './soundSystem.js';
+import { soundFx } from './soundSystem.js?v=9.0.0';
 
 export const createKickerRampSystem = (scene) => {
   const rampList = [];
@@ -143,7 +143,11 @@ export const createKickerRampSystem = (scene) => {
           G.jumpCharge = 0;
           G.isCharging = false;
 
-          soundFx.playKickerLaunch();
+          if (soundFx && typeof soundFx.playKickerLaunch === 'function') {
+            soundFx.playKickerLaunch();
+          } else if (soundFx && soundFx.playJump) {
+            soundFx.playJump();
+          }
           if (showToast) showToast('KICKER HIGH LAUNCH! 🚀', true);
         }
         break;
