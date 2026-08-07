@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 import { soundFx } from './soundSystem.js?v=13.0.0';
 import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=13.0.0';
-import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=13.0.0';
+import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=15.0.0';
 
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
@@ -30,17 +30,17 @@ export const setupUI = (handlers) => {
   const btnLbScore   = document.getElementById('btnLbScore');
   const btnLbTime    = document.getElementById('btnLbTime');
   const lbListEl     = document.getElementById('lbList');
-  let currentLbSort  = 'score';
+  let currentLbSort  = 'time';
 
   const renderLeaderboard = async (sortType = currentLbSort) => {
     currentLbSort = sortType;
     if (btnLbScore && btnLbTime) {
-      if (sortType === 'score') {
-        btnLbScore.classList.add('active');
-        btnLbTime.classList.remove('active');
-      } else {
+      if (sortType === 'time') {
         btnLbTime.classList.add('active');
         btnLbScore.classList.remove('active');
+      } else {
+        btnLbScore.classList.add('active');
+        btnLbTime.classList.remove('active');
       }
     }
 
@@ -87,8 +87,8 @@ export const setupUI = (handlers) => {
   if (btnLbScore) btnLbScore.onclick = () => { soundFx.playClick(); renderLeaderboard('score'); };
   if (btnLbTime)  btnLbTime.onclick  = () => { soundFx.playClick(); renderLeaderboard('time'); };
 
-  // 초기 메인 화면 진입 시 실시간 리더보드 순위 조회
-  renderLeaderboard('score');
+  // 초기 메인 화면 진입 및 새로고침 시 기록 순위(time) 기본 노출!
+  renderLeaderboard('time');
 
   if (btnStartEl)   btnStartEl.onclick   = () => { soundFx.playClick(); handlers.onStart('challenge'); };
   if (btnEndlessEl) btnEndlessEl.onclick = () => { soundFx.playClick(); handlers.onStart('endless'); };

@@ -1,5 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { soundFx } from './soundSystem.js?v=9.0.0';
+import { soundFx } from './soundSystem.js?v=13.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=15.0.0';
+import { loadSelectedCharacter } from './characters.js?v=13.0.0';
+import { getLang } from './i18n.js?v=13.0.0';
 
 // 🎬 오프닝 시네마틱 컷씬 (산사태 바짝 덮침 ➔ 놀란 스키어 ! 경고 팝업 ➔ 빠르게 전속력 하강!)
 export const updateOpeningCutscene = (G, dt, camera, skier, ui, getTerrainY, avalancheSystem, CFG, skierData) => {
@@ -119,6 +122,17 @@ export const updateVictoryCeremony = (G, dt, camera, skier, ui, getTerrainY) => 
 
   if (vt >= 2.8) {
     G.play = false;
+
+    // 🏆 리더보드 점수 및 완주/생존 기록 등록 & 메인메뉴 랭킹 갱신!
+    submitLeaderboardScoreData({
+      country: getLang ? getLang().toUpperCase() : 'KR',
+      nickname: loadSelectedCharacter() || 'SkiRider',
+      clearTime: G.elapsed || 0,
+      score: G.score || 0
+    }).then(() => {
+      if (ui && ui.renderLeaderboard) ui.renderLeaderboard();
+    });
+
     if (ui) ui.showScreen('over', `🏆 <strong>SURVIVED! CHAMPION VICTORY!</strong><br>최종 점수: <strong>${Math.floor(G.score)} pts</strong><br>산사태 탈출 성공 및 리더보드 등록 완료!`);
   }
 };

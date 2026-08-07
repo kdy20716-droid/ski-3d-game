@@ -146,7 +146,7 @@
         </div>
         <!-- 2열: 게임 시작 (도전 모드 / 무한 모드) + 언어 선택 -->
         <div class="start-right-col">
-          <button class="btn" id="btnStart">도전 모드 시작 🏆</button>
+          <button class="btn" id="btnStart">도전 모드 시작</button>
           <button
             class="btn"
             id="btnEndlessStart"
@@ -157,7 +157,7 @@
               box-shadow: 0 0 25px rgba(0, 200, 255, 0.45);
             "
           >
-            무한 모드 시작 ♾️
+            무한 모드 시작
           </button>
           <div style="margin-top: 16px">
             <select
@@ -183,13 +183,13 @@
             </select>
           </div>
         </div>
-        <!-- 3열: 메인메뉴 오른쪽 실시간 기록/점수 순위 리더보드 카드 -->
+        <!-- 3열: 메인메뉴 오른쪽 실시간 기록/점수 순위 리더보드 카드 (기록 순위 기본 선택) -->
         <div class="leaderboard-card" id="mainLeaderboardCard">
           <div class="lb-header">
             <div class="lb-title">GLOBAL RANKINGS</div>
             <div class="lb-tabs">
-              <button class="lb-tab active" id="btnLbScore">🏆 점수 순위</button>
-              <button class="lb-tab" id="btnLbTime">⏱️ 기록 순위</button>
+              <button class="lb-tab active" id="btnLbTime">⏱️ 기록 순위</button>
+              <button class="lb-tab" id="btnLbScore">🏆 점수 순위</button>
             </div>
           </div>
           <div class="lb-list" id="lbList">
@@ -237,7 +237,7 @@
       <button class="btn" id="btnRestart">TRY AGAIN</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v13.0.0 - Cheat Warp RaceBar Sync & Stage 10 Victory Ceremony Verification) -->
-    <script type="module" src="client/src/main.js?v=13.0.0"></script>
+    <!-- Main Module Script (Client Architecture v17.0.0 - Time Rank Default View on Refresh) -->
+    <script type="module" src="client/src/main.js?v=17.0.0"></script>
   </body>
 </html>
