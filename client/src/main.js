@@ -1,22 +1,22 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=2.8.6';
-import { STAGES } from './stages.js?v=2.8.6';
-import { createSky } from './sky.js?v=2.8.6';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=2.8.6';
-import { makeSkier } from './skier.js?v=2.8.6';
-import { createEnvironment } from './environment.js?v=2.8.6';
-import { createDiamondArchSystem } from './diamondArch.js?v=2.8.6';
-import { createKickerRampSystem } from './kickerRamp.js?v=2.8.6';
-import { createSpawnManager } from './spawnManager.js?v=2.8.6';
-import { createDriftSystem } from './driftSystem.js?v=2.8.6';
-import { setupUI } from './ui.js?v=2.8.6';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=2.8.6';
-import { createAvalancheSystem } from './avalancheSystem.js?v=2.8.6';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=2.8.6';
-import { soundFx } from './soundSystem.js?v=2.8.6';
-import { loadSelectedCharacter } from './characters.js?v=2.8.6';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=2.8.6';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=2.8.6';
+import { CFG } from './config.js?v=3.3.1';
+import { STAGES } from './stages.js?v=3.3.1';
+import { createSky } from './sky.js?v=3.3.1';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=3.3.1';
+import { makeSkier } from './skier.js?v=3.3.1';
+import { createEnvironment } from './environment.js?v=3.3.1';
+import { createDiamondArchSystem } from './diamondArch.js?v=3.3.1';
+import { createKickerRampSystem } from './kickerRamp.js?v=3.3.1';
+import { createSpawnManager } from './spawnManager.js?v=3.3.1';
+import { createDriftSystem } from './driftSystem.js?v=3.3.1';
+import { setupUI } from './ui.js?v=3.3.1';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=3.3.1';
+import { createAvalancheSystem } from './avalancheSystem.js?v=3.3.1';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=3.3.1';
+import { soundFx } from './soundSystem.js?v=3.3.1';
+import { loadSelectedCharacter } from './characters.js?v=3.3.1';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=3.3.1';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=3.3.1';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -542,7 +542,11 @@ const update = (dt, time) => {
   if (snowballHazard) {
     snowballHazard.update(
       G, dt,
-      (warnInfo) => { if (ui && ui.updateSnowballWarningUI) ui.updateSnowballWarningUI(warnInfo); },
+      (warnInfo) => {
+        if (ui && ui.updateCornerWarningUI) {
+          ui.updateCornerWarningUI(warnInfo.showLeft, warnInfo.showRight);
+        }
+      },
       (pts) => { G.score += pts; },
       (txt, gold) => { if (ui) ui.showBonusToast(txt, gold); }
     );
@@ -677,10 +681,11 @@ const update = (dt, time) => {
   G.avalancheZ -= currentAvSpd * dt;
   if (avalancheSystem) avalancheSystem.updateAvalanche(G.avalancheZ);
 
-  // 🚨 4) 산사태 접근 붉은 모서리 위험 경고 비넷 펄스 (28m 이내 근접 시 모서리가 빨갛게 경고!)
+  // 🚨 4) 산사태 및 눈덩이 접근 붉은 모서리 위험 경고 비넷 펄스 (65m 전부터 멀리서 미리 감지 & 서서히 진해짐!)
   if (ui && ui.setDangerVignette) {
-    if (currentGap < 28.0 && G.play && !G.dead) {
-      const intensity = (28.0 - currentGap) / 24.5;
+    if (currentGap < 65.0 && G.play && !G.dead) {
+      // 65m -> 15m 거리 감축에 비례하여 0.0 ~ 0.65까지 서서히 부드럽게 진해짐!
+      const intensity = Math.min(0.65, (65.0 - currentGap) / 50.0);
       ui.setDangerVignette(intensity);
     } else {
       ui.setDangerVignette(0);

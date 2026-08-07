@@ -197,13 +197,7 @@ export const setupUI = (handlers) => {
 
   const skipHintEl = document.getElementById('skipHint');
   const dissolveEl = document.getElementById('respawnDissolve');
-  const dangerVignetteEl = document.getElementById('dangerVignette');
 
-  const setDangerVignette = (intensity) => {
-    if (!dangerVignetteEl) return;
-    // intensity: 0.0 ~ 1.0
-    dangerVignetteEl.style.opacity = Math.max(0, Math.min(1, intensity)).toFixed(2);
-  };
 
   const showSkipHint = (show) => {
     if (!skipHintEl) return;
@@ -233,18 +227,27 @@ export const setupUI = (handlers) => {
     $fillDrift.style.width = `${pct}%`;
   };
 
-  const snowballWarnEl = document.getElementById('snowballWarningBox');
+  const cornerWarnLeft  = document.getElementById('cornerWarnLeft');
+  const cornerWarnRight = document.getElementById('cornerWarnRight');
+  const dangerVignette  = document.getElementById('dangerVignette');
 
-  const updateSnowballWarningUI = (info) => {
-    if (!snowballWarnEl) return;
-    if (info && info.show) {
-      snowballWarnEl.classList.remove('off');
-      if (info.blink) snowballWarnEl.classList.add('blink');
-      else snowballWarnEl.classList.remove('blink');
-    } else {
-      snowballWarnEl.classList.add('off');
-      snowballWarnEl.classList.remove('blink');
+  // ⚠️ 눈덩이 출현 시 화면 좌/우 모서리에 붉은 느낌표 고정 아이콘 점등
+  const updateCornerWarningUI = (showLeft, showRight) => {
+    if (cornerWarnLeft) {
+      if (showLeft) cornerWarnLeft.classList.remove('off');
+      else cornerWarnLeft.classList.add('off');
     }
+    if (cornerWarnRight) {
+      if (showRight) cornerWarnRight.classList.remove('off');
+      else cornerWarnRight.classList.add('off');
+    }
+  };
+
+  // 🚨 산사태 및 눈덩이 근접 시 화면 모서리 붉은 위험 비넷 opacity 서서히 조율 (Max 0.65)
+  const setDangerVignette = (intensity) => {
+    if (!dangerVignette) return;
+    const clamped = Math.max(0, Math.min(0.65, intensity));
+    dangerVignette.style.opacity = clamped.toFixed(2);
   };
 
   // ═══════════════════════════════════════════════════════════════
@@ -435,7 +438,7 @@ export const setupUI = (handlers) => {
   return {
     showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
-    updateDriftChargeUI, updateStageTitle, updateSnowballWarningUI,
+    updateDriftChargeUI, updateStageTitle, updateCornerWarningUI,
     initMainCharPreview, loadSelectedCharacter,
   };
 };

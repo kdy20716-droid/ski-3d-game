@@ -14,24 +14,15 @@
   <div id="surpriseBadge" class="off">!</div>
   <div id="skipHint" class="off">SKIP - SPACEBAR</div>
 
-  <!-- 🚨 산사태 접근 붉은 모서리 위험 경고 비넷 오버레이 -->
+  <!-- 🚨 산사태 및 눈덩이 접근 붉은 모서리 위험 경고 비넷 오버레이 -->
   <div id="dangerVignette"></div>
+
+  <!-- ⚠️ 눈덩이 출현 시 화면 좌/우 모서리 붉은 느낌표 아이콘 -->
+  <div id="cornerWarnLeft" class="corner-warn off"><span class="corner-excl">!</span></div>
+  <div id="cornerWarnRight" class="corner-warn off"><span class="corner-excl">!</span></div>
 
   <!-- 🌌 디졸브 어두워짐 리스폰 암전 오버레이 -->
   <div id="respawnDissolve" class="off"></div>
-
-  <!-- ⚠️ 눈덩이 출현 3초 전 하단 붉은 네모 느낌표 경고 점등 인디케이터 -->
-  <div id="snowballWarningBox" class="off">
-    <div class="warn-square"><span class="warn-excl">!</span></div>
-    <div class="warn-text">SNOWBALL AHEAD</div>
-    <div class="warn-square"><span class="warn-excl">!</span></div>
-  </div>
-
-  <!-- Victory Survived Overlay -->
-  <div id="victoryOverlay" class="off">
-    <div class="survived-title">SURVIVED!</div>
-    <div class="survived-sub">산사태 탈출 성공 · 전설의 스키 챔피언</div>
-  </div>
 
 <div id="overlay">
   <div id="hud">
@@ -129,7 +120,7 @@
   <button class="btn" id="btnRestart">TRY AGAIN</button>
 </div>
 
-<!-- Main Module Script (Client Architecture v2.8.6 - Secret Developer Stage Warp: Ctrl + Number 3s Hold) -->
-<script type="module" src="src/main.js?v=2.8.6"></script>
+<!-- Main Module Script (Client Architecture v3.3.1 - Fixed Duplicate setDangerVignette SyntaxError) -->
+<script type="module" src="src/main.js?v=3.3.1"></script>
 </body>
 </html>
