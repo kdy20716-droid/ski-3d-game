@@ -30,7 +30,7 @@
       <div class="hud-value" id="hScore">0<span>pts</span></div>
       <div id="bonusToast" class="bonus-toast"></div>
     </div>
-    <!-- 🥇 화면 상단 독립 불투명 검은 원 3개 메달 인디케이터 (박스 배경 ❌ ➔ 오직 3개 원만 ⭕) -->
+    <!-- 🥇 화면 상단 독립 불투명 검은 원 3개 메달 인디케이터 -->
     <div id="medalHudContainer">
       <div class="medal-slot" id="mSlot0"></div>
       <div class="medal-slot" id="mSlot1"></div>
@@ -39,27 +39,41 @@
     
     <!-- 🎬 스테이지 첫 진입 3초 노출 후 스르륵 사라지는 타이틀 배너 -->
     <div class="hud-stage-banner" id="hStage">STAGE 1 · 새벽의 여명</div>
-    <div class="hud-box hud-right">
-      <div class="hud-label">속도</div>
-      <div class="hud-value" id="hSpeed">0<span>km/h</span></div>
+    <!-- 빈 placeholder: hud-right 스피드는 아래로 이동됨 -->
+    <div style="min-width:160px;"></div>
+  </div>
+
+  <!-- 🏁 레이스 진행 현황 바 (화면 상단) -->
+  <div id="raceBar">
+    <div id="raceTrack">
+      <!-- 스테이지 깃발 1~9 (JS로 동적 생성됨) -->
+      <div id="raceFlags"></div>
+      <!-- 도착 체커보드 -->
+      <div id="raceFinish">
+        <div class="checker-col"><div class="checker-cell dark"></div><div class="checker-cell light"></div><div class="checker-cell dark"></div><div class="checker-cell light"></div></div>
+        <div class="checker-col"><div class="checker-cell light"></div><div class="checker-cell dark"></div><div class="checker-cell light"></div><div class="checker-cell dark"></div></div>
+        <div class="checker-col"><div class="checker-cell dark"></div><div class="checker-cell light"></div><div class="checker-cell dark"></div><div class="checker-cell light"></div></div>
+      </div>
+      <!-- 플레이어 캐릭터 아이콘 -->
+      <div id="racePlayer">🎿</div>
     </div>
   </div>
 
   <div id="bars">
     <div class="bar-group">
-      <div class="bar-label">Speed</div>
-      <div class="bar-track"><div class="bar-fill" id="spdFill" style="width:0%"></div></div>
-      <div class="bar-label">JUMP CHARGE (SPACE)</div>
+      <div class="bar-label bar-label-shadow">JUMP CHARGE (SPACE)</div>
       <div class="bar-track"><div class="bar-fill" id="jmpFill" style="width:0%"></div></div>
-      <div class="bar-label" style="margin-top:6px; color:#FF9900;">DRIFT CHARGE (SHIFT)</div>
+      <div class="bar-label bar-label-shadow" style="margin-top:6px; color:#FF9900;">DRIFT CHARGE (SHIFT)</div>
       <div class="bar-track"><div class="bar-fill" id="driftFill" style="width:0%; background: linear-gradient(90deg, #FF7700, #FFCC00);"></div></div>
     </div>
-    <div class="controls-hint">
-      <b>Shift</b> + <b>← →</b> 드리프트 게이지 차징<br>
-      <b>🔷100pt 🟥300pt 🌟500pt(반짝임)</b> 다이아몬드 수집<br>
-      <b>SPACE</b> 홀드 점프 &nbsp;·&nbsp; <b>ESC</b> 일시정지
+    <!-- 오른쪽 하단 스피드 박스 -->
+    <div class="hud-box hud-right" id="hSpeedBox">
+      <div class="hud-label">속도</div>
+      <div class="hud-value" id="hSpeed">0<span>km/h</span></div>
     </div>
   </div>
+  <!-- 스피드 fill bar (숨김, 내부 로직용 유지) -->
+  <div style="display:none"><div id="spdFill"></div></div>
 
   <div id="toast">
     <div id="toast-sub">STAGE 1</div>
@@ -124,7 +138,7 @@
   <button class="btn" id="btnRestart">TRY AGAIN</button>
 </div>
 
-<!-- Main Module Script (Client Architecture v4.9.5 - Require Half-Jump Height or Higher for Giant Rocky Snowball Stomp) -->
-<script type="module" src="src/main.js?v=4.9.5"></script>
+<!-- Main Module Script (Client Architecture v5.2.0 - Medal Fly-to-Score Animation & Removed Controls Hint UI) -->
+<script type="module" src="src/main.js?v=5.2.0"></script>
 </body>
 </html>

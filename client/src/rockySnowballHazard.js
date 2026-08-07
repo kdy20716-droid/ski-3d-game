@@ -211,17 +211,16 @@ export const createRockySnowballHazardSystem = (scene) => {
       b.group.rotation.x -= rollAmount;
       b.group.rotation.y += b.vx * dt * 0.08;
 
-      // ── 충돌 & 밟기 판정 ───────────────────────────────────────
+      // ── 충돌 & 밟기 판정 (X/Z 수평 거리와 Y 높이 독립 분리로 100% 밟기 보장!) ───────────────────────────────────────
       const dx = G.px - b.x;
-      const dy = (G.py + 0.8) - b.y;
       const dz = G.pz - b.z;
-      const distSq = dx * dx + dy * dy + dz * dz;
-      const hitRadius = b.radius + 1.25;
+      const distXZSq = dx * dx + dz * dz;
+      const hitRadiusXZ = b.radius + 1.85;
 
-      if (distSq < hitRadius * hitRadius && !G.isCrashed) {
+      if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
         const groundY = getTerrainY(G.px, G.pz);
-        // 🎯 [거대 바위 밟기 조건]: 플레이어가 절반 점프 이상 높이 (b.y + radius * 0.40 이상)에 닿아야만 밟기 성공!
-        const isHalfJumpOrHigher = G.inAir && (G.py >= (b.y + b.radius * 0.40));
+        // 🎯 [거대 바위 밟기 조건]: 플레이어가 절반 점프 이상 높이 (b.y - radius * 0.15 이상)에 닿아야만 밟기 성공!
+        const isHalfJumpOrHigher = G.inAir && (G.py >= (b.y - b.radius * 0.15));
 
         if (isHalfJumpOrHigher) {
           // 🎉 [절반 점프 이상 고공 밟기 성공!]: 묵직하게 쿵-! 파괴 소멸되며 상공 52m 초고공 솟구침!
@@ -236,7 +235,7 @@ export const createRockySnowballHazardSystem = (scene) => {
           G.airTimeTimer = 0;
           G.vy = 52.0; // 거대 바위 반발력으로 하늘 높이 52m 메가 솟구침!
           soundFx.playKickerLaunch();
-        } else if (G.invincibleTimer <= 0) {
+        } else if (G.invincibleTimer <= 0 && Math.abs(G.py - b.y) < b.radius + 0.8) {
           // 💥 돌눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
           G.spd = 0;
           G.stunTimer = 0.3;       // 0.3초 빠른 스턴 회복!

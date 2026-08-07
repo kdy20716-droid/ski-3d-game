@@ -32,29 +32,9 @@ export const createMedalRampSystem = (scene) => {
   const medalRimGeo  = new THREE.TorusGeometry(4.25, 0.30, 16, 32);
   const starGeo      = create3DStarGeometry(1.95, 0.75, 0.35);
 
-  // 🌟 멀리서도 저건 꼭 먹어야 해! 느낌을 주는 하늘로 치솟는 3D 황금빛 수직 비콘 기둥 (높이 60m)
-  const beaconBeamGeo = new THREE.CylinderGeometry(1.6, 3.8, 65.0, 16, 1, true);
-  const beaconBeamMat = new THREE.MeshBasicMaterial({
-    color: 0xFFE885,
-    transparent: true,
-    opacity: 0.32,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
-  });
-
   const medalSoftGoldMat = new THREE.MeshPhysicalMaterial({
-    color: 0xFFF2A3,             // 🌟 더 밝고 연한 노란색 맑은 실크 골드 빛깔!
-    emissive: 0xFFD043,
-    emissiveIntensity: 1.6,       // 화사한 자체 발광
-    metalness: 0.75,
-    roughness: 0.05,
-    transmission: 0.25,          // 맑고 투명한 빛 투과
-    ior: 2.417,
-    reflectivity: 1.0,
-    clearcoat: 1.0,
-    transparent: true,
-    opacity: 0.95,
+    color: 0xFFF2A3, emissive: 0xFFD043, emissiveIntensity: 1.6,
+    metalness: 0.75, roughness: 0.05, transmission: 0.25, ior: 2.417, reflectivity: 1.0, clearcoat: 1.0, transparent: true, opacity: 0.95
   });
 
   const starGoldMat = new THREE.MeshPhysicalMaterial({
@@ -76,11 +56,7 @@ export const createMedalRampSystem = (scene) => {
     starBack.position.z = -0.32;
     starBack.rotation.y = Math.PI;
 
-    // 🌟 하늘로 길게 치솟는 눈부신 3D 수직 빛 비콘 기둥 (Beam)
-    const beaconBeam = new THREE.Mesh(beaconBeamGeo, beaconBeamMat);
-    beaconBeam.position.y = 30.0;
-
-    group.add(disc, rim, starFront, starBack, beaconBeam);
+    group.add(disc, rim, starFront, starBack);
     return group;
   };
 
@@ -218,11 +194,11 @@ export const createMedalRampSystem = (scene) => {
       const dz = playerZ - mItem.group.position.z;
       const distSq3D = dx * dx + dy * dy + dz * dz;
 
-      // 🥇 황금 메달 획득 처리!
-      if (distSq3D < 85.0) {
+      // 🥇 황금 메달 획득 처리! (부하 0 Lightweight 처리)
+      if (distSq3D < 90.0) {
         mItem.active = false;
         mItem.group.visible = false;
-        soundFx.playGoldenDiamond();
+        if (soundFx && soundFx.playGoldenDiamond) soundFx.playGoldenDiamond();
         if (showToast) showToast('GOLDEN MEDAL GET! 🥇', true);
         if (onMedalCollect) onMedalCollect();
       }

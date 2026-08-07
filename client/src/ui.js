@@ -55,19 +55,28 @@ export const setupUI = (handlers) => {
   const showBonusToast = (text, isGold = false) => {
     if (!bonusToastEl) return;
     bonusToastEl.textContent = text;
-    bonusToastEl.className = 'bonus-toast show' + (isGold ? ' gold' : '');
+    if (isGold) bonusToastEl.classList.add('gold');
+    else bonusToastEl.classList.remove('gold');
+    
+    if (!bonusToastEl.classList.contains('show')) {
+      bonusToastEl.classList.add('show');
+    }
     
     if (bonusTimeout) clearTimeout(bonusTimeout);
     bonusTimeout = setTimeout(() => {
       bonusToastEl.classList.remove('show');
-    }, 1000);
+    }, 900);
   };
 
   const updateHUD = (score, spd, maxSpd, jumpCharge) => {
     $score.textContent = Math.floor(score);
     $speed.textContent = Math.floor(spd * 3.6);
-    $fillSpd.style.width = `${(spd / maxSpd) * 100}%`;
+    if ($fillSpd) $fillSpd.style.width = `${(spd / maxSpd) * 100}%`;
     $fillJump.style.width = `${jumpCharge * 100}%`;
+  };
+
+  const updateScore = (score) => {
+    if ($score) $score.textContent = Math.floor(score);
   };
 
   const setBoosterUI = (active) => {
@@ -102,65 +111,41 @@ export const setupUI = (handlers) => {
     }
   };
 
-  // 🥇 관문 통과 시 상단 메달이 하나씩 '뿅-!' 빠져나와 좌측 점수판으로 쏙-! 흡수되는 애니메이션
-  const triggerMedalFlyToScoreAnimation = (medalCount, onScoreStepCallback) => {
-    if (medalCount <= 0) return;
-
-    const scoreBox = document.querySelector('.hud-box');
-    if (!scoreBox) return;
-
-    const scoreRect = scoreBox.getBoundingClientRect();
-    const targetX = scoreRect.left + scoreRect.width / 2;
-    const targetY = scoreRect.top + scoreRect.height / 2;
-
-    const bonusSteps = [3000, 6000, 10000];
-
-    for (let i = 0; i < medalCount; i++) {
-      const slot = document.getElementById(`mSlot${i}`);
-      if (!slot) continue;
-
-      const delay = i * 260; // 0.26초 간격으로 하나씩 뿅-!
-
-      setTimeout(() => {
-        const slotRect = slot.getBoundingClientRect();
-        const startX = slotRect.left + slotRect.width / 2 - 18;
-        const startY = slotRect.top + slotRect.height / 2 - 18;
-
-        // 1. 상단 원 슬롯 뿅-! 비움
-        slot.classList.remove('filled');
-
-        // 2. 2D 플라잉 메달 파티클 생성
-        const flyElem = document.createElement('div');
-        flyElem.className = 'flying-medal-particle';
-        flyElem.style.left = `${startX}px`;
-        flyElem.style.top = `${startY}px`;
-        document.body.appendChild(flyElem);
-
-        // 3. 챠링 사운드 & 0.05초 후 튀어오르기 ➔ 점수판 흡수 궤적
-        soundFx.playGoldenDiamond();
-
-        requestAnimationFrame(() => {
-          flyElem.style.transform = 'scale(1.4)';
-          setTimeout(() => {
-            flyElem.style.left = `${targetX - 18}px`;
-            flyElem.style.top = `${targetY - 18}px`;
-            flyElem.style.transform = 'scale(0.5)';
-            flyElem.style.opacity = '0.3';
-          }, 120);
-        });
-
-        // 4. 점수판 도달 순간 팝업 획득
-        setTimeout(() => {
-          if (flyElem.parentNode) flyElem.parentNode.removeChild(flyElem);
-
-          const stepPts = bonusSteps[i] || 3000;
-          const label = i === 0 ? '+3,000' : (i === 1 ? '+6,000' : '+10,000');
-          showBonusToast(`MEDAL BONUS ${label}`, true);
-          if (onScoreStepCallback) onScoreStepCallback(stepPts);
-        }, 500);
-
-      }, delay);
+  // 🏁 레이스 진행 바 초기화 (스테이지 깃발 동적 생성)
+  const initRaceBar = (stages) => {
+    const flagsEl = document.getElementById('raceFlags');
+    if (!flagsEl || !stages) return;
+    flagsEl.innerHTML = '';
+    // 스테이지 1~9 사이에 깃발 배치 (스테이지 전환 게이트 위치)
+    // 총 10스테이지, 깃발은 각 스테이지 경계 1~9 (전체 진행도 0~1 기준)
+    const total = stages.length; // 10
+    for (let i = 1; i < total; i++) {
+      const pct = (i / total) * 100; // 10%, 20%, ..., 90%
+      const flagEl = document.createElement('div');
+      flagEl.className = 'race-flag';
+      flagEl.style.left = `${pct}%`;
+      // 깃발 구조: 폴 + 배너 (위에서 아래로 — 뒤집힌 깃발)
+      flagEl.innerHTML = `
+        <div class="race-flag-banner" style="background:${stages[i]?.textColor || '#FFE040'}88; border-color:${stages[i]?.textColor || '#FFE040'};"></div>
+        <div class="race-flag-pole"></div>
+        <div class="race-flag-label">S${i + 1}</div>
+      `;
+      flagsEl.appendChild(flagEl);
     }
+  };
+
+  // 🏁 레이스 진행 바 업데이트 — 매 프레임 호출
+  // stageNum: 현재 스테이지 (1~10), stagePct: 현 스테이지 내 진행도 (0.0~1.0)
+  const updateRaceBar = (stageNum, stagePct) => {
+    const playerEl = document.getElementById('racePlayer');
+    if (!playerEl) return;
+    // 전체 진행도 (0.0~1.0) 계산
+    // stageNum은 1~10, 각 스테이지 길이는 동일하다고 가정
+    const totalStages = 10;
+    const globalPct = ((stageNum - 1) + Math.min(1, Math.max(0, stagePct))) / totalStages;
+    // 트랙 좌측 패딩 6px, 우측 20px (체커보드 공간)
+    const pctInTrack = 0.02 + globalPct * 0.92; // 2%~94% 범위로 클램프
+    playerEl.style.left = `${pctInTrack * 100}%`;
   };
 
   const showScreen = (type, statsText = '') => {
@@ -518,7 +503,8 @@ export const setupUI = (handlers) => {
   return {
     showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
-    updateDriftChargeUI, updateStageTitle, updateCornerWarningUI, updateMedalHUD, triggerMedalFlyToScoreAnimation,
+    updateDriftChargeUI, updateStageTitle, updateCornerWarningUI, updateMedalHUD,
+    initRaceBar, updateRaceBar, updateScore,
     initMainCharPreview, loadSelectedCharacter,
   };
 };

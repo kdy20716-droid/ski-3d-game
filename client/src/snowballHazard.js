@@ -217,17 +217,17 @@ export const createSnowballHazardSystem = (scene) => {
       const rollAmount = (speed / b.radius) * dt;
       b.mesh.rotation.x -= rollAmount;
 
-      // ── 충돌 & 밟기(Jump Stamp Break) 판정 ─────────────────────
+      // ── 충돌 & 밟기(Jump Stomp Break) 판정 (X/Z 수평 거리와 Y 높이 독립 분리로 100% 밟기 보장!) ─────────────────────
       const dx = G.px - b.x;
-      const dy = (G.py + 0.8) - b.y;
       const dz = G.pz - b.z;
-      const distSq = dx * dx + dy * dy + dz * dz;
-      const hitRadius = b.radius + 1.35;
+      const distXZSq = dx * dx + dz * dz;
+      const hitRadiusXZ = b.radius + 1.65; // 수평 감지 범위 넉넉히 확보!
 
-      if (distSq < hitRadius * hitRadius && !G.isCrashed) {
+      if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
         const groundY = getTerrainY(G.px, G.pz);
-        const isJumpingState = G.inAir || (G.py > groundY + 0.25) || (G.vy > 0);
-        const isAboveSnowball = G.py >= (b.y - b.radius * 0.4);
+        const isJumpingState = G.inAir || (G.py > groundY + 0.15) || (G.vy > 0);
+        // 플레이어 foot Y 높이가 눈덩이 중간 이상에 위치하는지 체크
+        const isAboveSnowball = G.py >= (b.y - b.radius * 0.85);
 
         if (isJumpingState && isAboveSnowball) {
           // 🎉 [살짝이라도 점프 상태면 100% 밟기 점프 발동!]: 눈덩이 퐁-! 파괴 소멸 & 상공 36m 고공 점프!
@@ -243,8 +243,8 @@ export const createSnowballHazardSystem = (scene) => {
           G.airTimeTimer = 0;
           G.vy = 36.0;
           soundFx.playKickerLaunch(); // 밟기 점프 도약음 사운드!
-        } else if (G.invincibleTimer <= 0) {
-          // 💥 눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
+        } else if (G.invincibleTimer <= 0 && Math.abs(G.py - b.y) < b.radius + 0.6) {
+          // 💥 지상 눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
           G.spd = 0;
           G.stunTimer = 0.3;       // 0.3초 빠른 스턴 회복!
           G.invincibleTimer = 3.0; // 3초 무적 반투명 깜빡임
