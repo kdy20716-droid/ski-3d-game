@@ -188,11 +188,14 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   100% { opacity: 1.0; transform: translateX(-50%) scale(1.04); }
 }
 
+/* 🚨 충돌 시 화면 모서리만 붉어지는 충격 비넷 피격 오버레이 (화면 중앙 검은색 100% 제거!) */
 #respawnDissolve {
-  position: fixed; inset: 0; pointer-events: none; z-index: 90;
-  background: #03010C; opacity: 0; transition: opacity 0.18s ease-in-out;
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 92;
+  background: radial-gradient(circle at center, transparent 38%, rgba(255, 0, 40, 0.50) 75%, rgba(200, 0, 30, 0.90) 100%);
+  opacity: 0;
+  transition: opacity 0.12s ease-out;
 }
-#respawnDissolve.active { opacity: 0.95; }
 #respawnDissolve.off { display: none; }
 
 #victoryOverlay {

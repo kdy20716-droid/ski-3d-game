@@ -206,10 +206,24 @@ export const createRockySnowballHazardSystem = (scene) => {
 
           G.vy = Math.max(G.vy, 16.0); // 쿵 튀어오름
         } else if (G.invincibleTimer <= 0) {
-          // 그냥 부딪히면 💥 Crash!
-          G.isCrashed = true;
-          G.crashTimer = 0;
+          // 💥 돌눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
+          G.spd = 0;
+          G.stunTimer = 0.3;       // 0.3초 빠른 스턴 회복!
+          G.invincibleTimer = 3.0; // 3초 무적 반투명 깜빡임
           soundFx.playCrash();
+
+          if (showToast) showToast('CRASH! 3초 무적 ⚡', false);
+          b.active = false;
+          scene.remove(b.group);
+          triggerRockExplosion(b.x, b.y, b.z, b.radius);
+
+          if (G.triggerDissolveRespawn) {
+            G.triggerDissolveRespawn(() => {
+              G.px = b.x * 0.15;
+            });
+          } else {
+            G.px = b.x * 0.15;
+          }
         }
       }
     }

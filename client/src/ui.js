@@ -205,20 +205,16 @@ export const setupUI = (handlers) => {
     else skipHintEl.classList.add('off');
   };
 
+  // 🚨 충돌 시 화면 중앙 검은색 100% 제거! 오직 모서리 붉은 위험 비넷만 순간 펄스 플래시!
   const triggerDissolveRespawn = (onPeakCallback) => {
-    if (!dissolveEl) {
-      if (onPeakCallback) onPeakCallback();
-      return;
-    }
-    dissolveEl.classList.remove('off');
-    dissolveEl.style.opacity = '1';
-    setTimeout(() => {
-      if (onPeakCallback) onPeakCallback();
+    if (onPeakCallback) onPeakCallback();
+
+    if (dangerVignette) {
+      dangerVignette.style.opacity = '0.65';
       setTimeout(() => {
-        dissolveEl.style.opacity = '0';
-        setTimeout(() => dissolveEl.classList.add('off'), 250);
-      }, 120);
-    }, 180);
+        dangerVignette.style.opacity = '0';
+      }, 220);
+    }
   };
 
   const updateDriftChargeUI = (chargeRatio) => {

@@ -150,12 +150,13 @@ export const createSnowballHazardSystem = (scene) => {
 
     spawnTimer += dt;
 
-    // ⚠️ [화면 좌/우 모서리 느낌표 경고]: 스폰 3초 전 ~ 스폰 직후까지 좌/우 모서리 아이콘 켜기
+    // ⚠️ [스폰 전 좌/우 모서리 붉은 느낌표 전조 경고]: 
+    // 눈덩이를 쏘기 전 3.0초~0.1초 전까지만 좌/우 모서리 느낌표가 빠르게 깜빡이고, 쏘는 순간 OFF!
     const timeUntilSpawn = stageCfg.cooldown - spawnTimer;
-    const isWarningActive = (timeUntilSpawn <= 3.0 && timeUntilSpawn > 0.05 && !G.isCrashed);
+    const isPreSpawnWarning = (timeUntilSpawn <= 3.0 && timeUntilSpawn > 0.10 && !G.isCrashed);
 
     if (onWarningUpdate) {
-      if (isWarningActive) {
+      if (isPreSpawnWarning) {
         onWarningUpdate({
           showLeft: true,
           showRight: true,
@@ -212,9 +213,25 @@ export const createSnowballHazardSystem = (scene) => {
 
           G.vy = Math.max(G.vy, 15.0);
         } else if (G.invincibleTimer <= 0) {
-          G.isCrashed = true;
-          G.crashTimer = 0;
+          // 💥 눈덩이 충돌: 0.3초 빠른 스턴 회복 + 붉은 충격 비넷 + 3초 무적!
+          G.spd = 0;
+          G.stunTimer = 0.3;       // 0.3초 빠른 스턴 회복!
+          G.invincibleTimer = 3.0; // 3초 무적 반투명 깜빡임
           soundFx.playCrash();
+
+          if (showToast) showToast('CRASH! 3초 무적 ⚡', false);
+          b.active = false;
+          scene.remove(b.mesh);
+          triggerBreakExplosion(b.x, b.y, b.z, b.radius);
+
+          // 🌌 붉은 충격 비넷 리스폰 연출
+          if (G.triggerDissolveRespawn) {
+            G.triggerDissolveRespawn(() => {
+              G.px = b.x * 0.15; // 안전 지대로 리스폰
+            });
+          } else {
+            G.px = b.x * 0.15;
+          }
         }
       }
     }

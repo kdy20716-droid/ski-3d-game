@@ -1,22 +1,22 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=3.3.1';
-import { STAGES } from './stages.js?v=3.3.1';
-import { createSky } from './sky.js?v=3.3.1';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=3.3.1';
-import { makeSkier } from './skier.js?v=3.3.1';
-import { createEnvironment } from './environment.js?v=3.3.1';
-import { createDiamondArchSystem } from './diamondArch.js?v=3.3.1';
-import { createKickerRampSystem } from './kickerRamp.js?v=3.3.1';
-import { createSpawnManager } from './spawnManager.js?v=3.3.1';
-import { createDriftSystem } from './driftSystem.js?v=3.3.1';
-import { setupUI } from './ui.js?v=3.3.1';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=3.3.1';
-import { createAvalancheSystem } from './avalancheSystem.js?v=3.3.1';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=3.3.1';
-import { soundFx } from './soundSystem.js?v=3.3.1';
-import { loadSelectedCharacter } from './characters.js?v=3.3.1';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=3.3.1';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=3.3.1';
+import { CFG } from './config.js?v=3.6.0';
+import { STAGES } from './stages.js?v=3.6.0';
+import { createSky } from './sky.js?v=3.6.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=3.6.0';
+import { makeSkier } from './skier.js?v=3.6.0';
+import { createEnvironment } from './environment.js?v=3.6.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=3.6.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=3.6.0';
+import { createSpawnManager } from './spawnManager.js?v=3.6.0';
+import { createDriftSystem } from './driftSystem.js?v=3.6.0';
+import { setupUI } from './ui.js?v=3.6.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=3.6.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=3.6.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=3.6.0';
+import { soundFx } from './soundSystem.js?v=3.6.0';
+import { loadSelectedCharacter } from './characters.js?v=3.6.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=3.6.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=3.6.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -364,6 +364,9 @@ const endGame = () => {
 };
 
 ui = setupUI({ onStart: startGame, onTogglePause: togglePause });
+if (ui && ui.triggerDissolveRespawn) {
+  G.triggerDissolveRespawn = ui.triggerDissolveRespawn;
+}
 
 // ─────────────────────────────────────────
 //  MAIN UPDATE LOOP
@@ -738,7 +741,7 @@ const update = (dt, time) => {
     if (dx*dx + dz*dz < tree.r2 * hitRadiusMult && !G.inAir) {
       if (G.invincibleTimer <= 0) {
         G.spd = 0;
-        G.stunTimer = 1.0; // 1초 스턴
+        G.stunTimer = 0.3; // 0.3초 빠른 스턴 회복!
         G.invincibleTimer = 3.0; // 3초 무적 반투명 깜빡임
         soundFx.playCrash(); // 💥 나무 충돌 타격음 FX
         
