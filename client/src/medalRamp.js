@@ -100,7 +100,7 @@ export const createMedalRampSystem = (scene) => {
     return group;
   };
 
-  // 🥇 메달 점프대 공중 정점 거대 3D 메달 1개 + 3D 강렬한 빛 아우라 조명 스폰
+  // 🥇 메달 점프대 공중 정점 거대 3D 메달 1개 스폰 (Shader 재컴파일 렉 원인인 PointLight 제거 ➔ emissive 자체 발광 사용)
   const spawnMedalOnRamp = (rampX, rampZ) => {
     const archLength = 135;
     const peakHeight = 25.0;
@@ -109,10 +109,6 @@ export const createMedalRampSystem = (scene) => {
     const group = new THREE.Group();
     const medalMesh = create3DGoldMedalMesh();
     group.add(medalMesh);
-
-    // 🥇 "저건 꼭 먹어야 해!" 멀리서도 돋보이는 3D 연한 노란 빛 강렬 아우라 조명 (강도 12.0)
-    const auraLight = new THREE.PointLight(0xFFE885, 12.0, 36.0);
-    group.add(auraLight);
 
     const x = rampX;
     const z = rampZ - t * archLength;
@@ -123,7 +119,7 @@ export const createMedalRampSystem = (scene) => {
     scene.add(group);
 
     const item = {
-      group, mesh: medalMesh, auraLight, x, z, baseY: gy, type: 'medal', pts: 0, active: true,
+      group, mesh: medalMesh, auraLight: null, x, z, baseY: gy, type: 'medal', pts: 0, active: true,
       archT: t, archLength, peakHeight
     };
 
@@ -198,10 +194,10 @@ export const createMedalRampSystem = (scene) => {
       const dz = playerZ - mItem.group.position.z;
       const distSq3D = dx * dx + dy * dy + dz * dz;
 
-      // 🥇 황금 메달 획득 처리! (부하 0 Lightweight 처리)
+      // 🥇 황금 메달 획득 처리! (Three.js 셰이더 재컴파일 방지를 위해 좌표만 -9999 이동)
       if (distSq3D < 90.0) {
         mItem.active = false;
-        mItem.group.visible = false;
+        mItem.group.position.set(0, -9999, 0);
         if (soundFx && soundFx.playGoldenDiamond) soundFx.playGoldenDiamond();
         if (showToast) showToast('GOLDEN MEDAL GET! 🥇', true);
         if (onMedalCollect) onMedalCollect();
