@@ -94,7 +94,7 @@ export const createDriftSystem = (scene, skierGroup) => {
       // 고정된 드리프트 방향(lockedDriftDir)으로만 슬라이딩 이동
       const driftMoveAmount = lockedDriftDir * 210.0 * dt;
       G.vx += driftMoveAmount;
-      G.vx *= 0.948;
+      G.vx *= Math.pow(0.948, dt * 60);
 
       // ⚡ Shift 누른 채 좌우로 미끄러져 이동한 양만큼 게이지 차징! (최대 1.0)
       driftCharge = Math.min(1.0, driftCharge + dt * 1.6);
@@ -122,7 +122,7 @@ export const createDriftSystem = (scene, skierGroup) => {
       // Shift 뗀 후 관성 정돈 및 복귀
       driftYawAngle += (0 - driftYawAngle) * dt * 6.0;
       if (Math.abs(G.vx) > 0.5) {
-        G.vx *= 0.94;
+        G.vx *= Math.pow(0.94, dt * 60);
       }
       sprayMat.opacity = Math.max(0.0, sprayMat.opacity - dt * 5.0); // 0.2초간 깔끔하게 Fade-Out!
       lockedDriftDir = 0;

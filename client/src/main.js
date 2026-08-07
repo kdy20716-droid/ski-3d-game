@@ -477,7 +477,7 @@ const update = (dt, time) => {
   else G.spd += (targetSpd - G.spd) * dt * (G.boosterTimer > 0 ? 2.5 : 0.6);
 
   G.vx += turn * turnForce * dt;
-  G.vx *= CFG.TURN_FRIC;
+  G.vx *= Math.pow(CFG.TURN_FRIC, dt * 60);
 
   G.px += G.vx * dt;
   G.pz -= G.spd * dt;
@@ -611,7 +611,7 @@ const update = (dt, time) => {
   }
   
   const maxLeanAngle = G.wasDrifting ? CFG.DRIFT_LEAN_MAX : 0.38;
-  G.lean += (turn * maxLeanAngle - G.vx * 0.015 - G.lean) * 0.22;
+  G.lean += (turn * maxLeanAngle - G.vx * 0.015 - G.lean) * (1 - Math.pow(1 - 0.22, dt * 60));
   skier.rotation.z = -G.lean;
 
   if (G.inAir) {
