@@ -49,7 +49,9 @@ export const createSnowballHazardSystem = (scene) => {
         const rndCount = 3 + Math.floor(Math.random() * 3);
         return { count: rndCount, radiusMin: 4.2, radiusMax: 6.5, spdMult: 1.15, cooldown: 2.8 };
       default:
-        return { count: 10, radiusMin: 4.0, radiusMax: 6.8, spdMult: 1.25, cooldown: 2.4 };
+        // 10스테이지: 미니, 미디엄, 초대형 자이언트 눈덩이가 100% 무작위 올-랜덤 난입!
+        const rndCount10 = 4 + Math.floor(Math.random() * 4);
+        return { count: rndCount10, radiusMin: 2.0, radiusMax: 7.5, spdMult: 1.25, cooldown: 2.0 };
     }
   };
 

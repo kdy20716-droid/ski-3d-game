@@ -144,11 +144,16 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
     if (soundFx && soundFx.playSurprise) soundFx.playSurprise();
   };
 
-  // 💣 메인 업데이트 (돌눈덩이 물리 + 다가오기 + 충돌/밟기 불발 + 4초 폭발)
-  const update = (G, dt, soundFx, ui, onExplodeKnockback) => {
-    // 7스테이지 이상 전용
+  // 💣 메인 업데이트 (돌눈덩이 물리 + 다가오기 + 밟기 불발 + 3.8초 미해제 시 폭발 넉백)
+  const update = (G, dt, soundFx, ui) => {
+    // 7스테이지 이상 전용 (10스테이지 올-랜덤 난입)
     if (G.stage < 7 || G.isOpeningCutscene || G.isVictoryCeremony) {
       return;
+    }
+
+    // 🎯 콤보 초기화 규칙: 플레이어가 땅(설산 지면)을 밟으면 연속 밟기 콤보 리셋!
+    if (!G.inAir) {
+      stompCombo = 0;
     }
 
     // 눈가루 파티클 시뮬레이션
@@ -182,9 +187,10 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
       }
     }
 
-    // 스폰 쿨다운 (3.5초 마다 1개)
+    // 스폰 쿨다운 (Stage 7~9: 3.5초, Stage 10: 2.4초 올-랜덤 난입)
     spawnTimer += dt;
-    if (spawnTimer >= 3.5) {
+    const cooldown = G.stage === 10 ? 2.4 : 3.5;
+    if (spawnTimer >= cooldown) {
       spawnTimer = 0;
       if (G.play && !G.dead) {
         spawnExplodingSnowball(G.px, G.pz, G.spd);
@@ -198,18 +204,18 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
 
       b.stateTimer += dt;
 
-      // 🚨 [돌눈덩이와 동일 연출]: 스폰 0.7초 후 급감속(브레이크)하면서 플레이어 캐릭터 쪽으로 다가옴!
-      if (b.stateTimer > 0.7 && !b.braking) {
+      // 🚨 [필수 해제 폭발 눈덩이 AI]: 돌눈덩이보다 천천히 내려가면서 유도 추격!
+      if (b.stateTimer > 0.6 && !b.braking) {
         b.braking = true;
       }
 
       if (b.braking) {
-        const targetVz = -(G.spd * 0.35); // 플레이어보다 천천히 내려가서 다가옴!
+        const targetVz = -(G.spd * 0.40); // 돌눈덩이보다 천천히 내려가 플레이어가 쉽게 접근 가능!
         b.vz += (targetVz - b.vz) * dt * 3.5;
 
-        // 플레이어 X축 추적하며 다가옴!
+        // 플레이어 캐릭터 쪽으로 끈질기게 유도 다가옴!
         const dxToPlayer = G.px - b.x;
-        b.vx += (dxToPlayer * 1.8 - b.vx) * dt * 2.2;
+        b.vx += (dxToPlayer * 2.2 - b.vx) * dt * 2.5;
       }
 
       b.x += b.vx * dt;
@@ -217,13 +223,13 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
       b.y = getTerrainY(b.x, b.z) + b.radius;
       b.group.position.set(b.x, b.y, b.z);
 
-      // 구르는 회전 애니메이션 (돌눈덩이 동일)
+      // 구르는 회전 애니메이션
       const speed = Math.sqrt(b.vx * b.vx + b.vz * b.vz);
       const rollAmount = (speed / b.radius) * dt;
       b.group.rotation.x -= rollAmount;
 
-      // 🔴 빨간색 초강력 발광 점멸 연출 (다가올수록 빠르게!)
-      const blinkFreq = 5.0 + Math.min(1.0, b.stateTimer / 3.5) * 22.0;
+      // 🔴 빨간색 초강력 발광 점멸 연출 (해제 시간이 임박할수록 35Hz로 폭주 발광!)
+      const blinkFreq = 6.0 + Math.min(1.0, b.stateTimer / 3.8) * 28.0;
       const isRed = Math.sin(performance.now() * 0.001 * blinkFreq) > 0;
 
       if (isRed) {
@@ -238,7 +244,7 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
         b.spikes.forEach(s => { s.emissiveIntensity = 3.5; });
       }
 
-      // ── 충돌 & 밟기 판정 (돌눈덩이와 100% 동일한 판정 알고리즘!) ─────────────────────
+      // ── 충돌 & 밟기 판정 ───────────────────────────────────
       const dx = G.px - b.x;
       const dz = G.pz - b.z;
       const distXZSq = dx * dx + dz * dz;
@@ -248,7 +254,7 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
         const isHalfJumpOrHigher = G.inAir && (G.py >= (b.y - b.radius * 0.15));
 
         if (isHalfJumpOrHigher) {
-          // 🎉 [돌눈덩이처럼 밟아서 파괴/불발 해제 성공!]: 터지지 않고 소멸하며 점수 콤보 & 상공 솟구침!
+          // 🎉 [필수 해제 성공!]: 밟으면 폭발하지 않고 눈가루 소멸 & 공중 36m 스프링 솟구침!
           b.active = false;
           scene.remove(b.group);
           triggerSnowExplosion(b.x, b.y, b.z);
@@ -260,7 +266,7 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
 
           G.inAir = true;
           G.airTimeTimer = 0;
-          G.vy = 36.0; // 스프링 솟구침!
+          G.vy = 36.0;
           if (soundFx && soundFx.playKickerLaunch) soundFx.playKickerLaunch();
 
           if (stompCombo === 10) {
@@ -276,12 +282,12 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
           continue;
 
         } else if (G.invincibleTimer <= 0 && Math.abs(G.py - b.y) < b.radius + 0.8) {
-          // 💥 [돌눈덩이처럼 부딪혔을 때]: 넉백 충격 + 펑! 눈가루 파티클 소멸!
+          // 💥 [지상 부딪힘/폭발]: 해제 실패로 인해 펑! 대폭발하며 뒤로 넉백!
           b.active = false;
           scene.remove(b.group);
           triggerSnowExplosion(b.x, b.y, b.z);
 
-          G.pz += 8.0; // 뒤로 넉백!
+          G.pz += 12.0; // 넉백!
           G.spd = 0;
           G.stunTimer = 0.5;
           G.invincibleTimer = 2.0;
@@ -291,11 +297,20 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
         }
       }
 
-      // 💣 돌눈덩이처럼 부딪히거나 밟지 않은 채 3.8초 경과 시 펑! 시간 만료 폭발
+      // 💣 3.8초 동안 해제하지 못하면 플레이어 옆에서 펑! 자폭 대폭발하며 뒤로 넉백!
       if (b.stateTimer >= 3.8) {
         b.active = false;
         scene.remove(b.group);
         triggerSnowExplosion(b.x, b.y, b.z);
+
+        if (Math.hypot(G.px - b.x, G.pz - b.z) < 20.0 && G.invincibleTimer <= 0) {
+          G.pz += 12.0;
+          G.spd = 0;
+          G.stunTimer = 0.5;
+          G.invincibleTimer = 2.0;
+          if (ui && ui.showBonusToast) ui.showBonusToast('TIMED EXPLOSION KNOCKBACK! 💣💥', false);
+        }
+
         if (soundFx && soundFx.playCrash) soundFx.playCrash();
         bombs.splice(i, 1);
       }
