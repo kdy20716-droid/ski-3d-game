@@ -1,7 +1,7 @@
 // ────────────────────────────────────────────────────────
-// 🏆 SNOWFALL 3D - Firebase Realtime Database & Express Server Module
+// 🏆 SNOWFALL 3D - Pure Firebase Realtime Database Module
 // ────────────────────────────────────────────────────────
-import { getFlagEmoji } from './i18n.js?v=14.0.0';
+import { getFlagEmoji } from './i18n.js?v=32.0.0';
 
 // Firebase Realtime Database Web SDK (v10 Modular CDN imports)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -9,7 +9,7 @@ import {
   getDatabase, ref, push, get, child
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-// ⚙️ 유저 실제 파이어베이스 프로젝트 & 싱가포르 Realtime Database URL 연동!
+// ⚙️ 유저 실제 파이어베이스 프로젝트 & 싱가포르 Realtime Database 연동
 const firebaseConfig = {
   apiKey: "AIzaSyD1QIETWAlLJZHOeQ1jzCIx96XhF5JjtU4",
   authDomain: "ski-3d-game.firebaseapp.com",
@@ -29,22 +29,14 @@ try {
   const app = initializeApp(firebaseConfig);
   rtdb = getDatabase(app);
   useFirebase = true;
-  console.log('[Leaderboard] Firebase Realtime Database (Singapore) initialized successfully!');
+  console.log('[Leaderboard] Pure Firebase Realtime Database (Singapore Cloud) Ready!');
 } catch (err) {
-  console.warn('[Leaderboard] Firebase init fallback to Local Express API (localhost:5000):', err);
+  console.warn('[Leaderboard] Firebase init failed:', err);
   useFirebase = false;
 }
 
-const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1' ||
-  window.location.hostname === '[::1]'
-);
-
-const LOCAL_API_URL = 'http://localhost:5000/api';
-
-// 1. 리더보드 조회 (sortType: 'score' | 'time')
-export const fetchLeaderboardData = async (sortType = 'score') => {
+// 1. 순위 리더보드 조회 (sortType: 'time' | 'score')
+export const fetchLeaderboardData = async (sortType = 'time') => {
   if (useFirebase && rtdb) {
     try {
       const dbRef = ref(rtdb);
@@ -61,28 +53,15 @@ export const fetchLeaderboardData = async (sortType = 'score') => {
         return { sort: sortType, leaderboard: list.slice(0, 10) };
       }
     } catch (firebaseErr) {
-      console.warn('[Leaderboard] Firebase RTDB fetch failed:', firebaseErr);
+      console.warn('[Leaderboard] Firebase fetch failed:', firebaseErr);
     }
   }
 
-  // 🔄 Local Express Server Fallback (로컬 localhost 개발 환경에서만 시도하여 GitHub Pages CORS 에러 방지!)
-  if (isLocalhost) {
-    try {
-      const res = await fetch(`${LOCAL_API_URL}/leaderboard?sort=${sortType}`);
-      if (res.ok) {
-        const data = await res.json();
-        return data;
-      }
-    } catch (localErr) {
-      console.warn('[Leaderboard] Local Express server not available:', localErr);
-    }
-  }
-
-  // 📌 오프라인 상태 빈 순위 데이터 (초기 상태)
+  // 📌 랭킹 데이터가 비어있을 때 반환하는 초기 빈 배열
   return { sort: sortType, leaderboard: [] };
 };
 
-// 2. 점수/기록 등록 (POST)
+// 2. 완주 클리어 점수/기록 등록 (POST)
 export const submitLeaderboardScoreData = async (entryData) => {
   const payload = {
     country: entryData.country || 'KR',
@@ -95,29 +74,15 @@ export const submitLeaderboardScoreData = async (entryData) => {
 
   let saved = false;
 
-  // Firebase Realtime Database 저장 시도
+  // 순수 Firebase Realtime Database 구글 클라우드 서버로 실시간 등록!
   if (useFirebase && rtdb) {
     try {
       const scoresRef = ref(rtdb, 'leaderboard');
       await push(scoresRef, payload);
       saved = true;
-      console.log('[Leaderboard] Successfully saved to Firebase Realtime Database!');
+      console.log('[Leaderboard] Successfully registered record to Firebase Cloud!');
     } catch (err) {
       console.warn('[Leaderboard] Firebase RTDB push failed:', err);
-    }
-  }
-
-  // Express 로컬 서버 동시 저장 시도 (localhost 환경일 때만)
-  if (isLocalhost) {
-    try {
-      const res = await fetch(`${LOCAL_API_URL}/score/challenge`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) saved = true;
-    } catch (err) {
-      console.warn('[Leaderboard] Express server save failed:', err);
     }
   }
 
