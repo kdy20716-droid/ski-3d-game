@@ -35,6 +35,12 @@ try {
   useFirebase = false;
 }
 
+const isLocalhost = Boolean(
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '[::1]'
+);
+
 const LOCAL_API_URL = 'http://localhost:5000/api';
 
 // 1. 리더보드 조회 (sortType: 'score' | 'time')
@@ -55,24 +61,25 @@ export const fetchLeaderboardData = async (sortType = 'score') => {
         return { sort: sortType, leaderboard: list.slice(0, 10) };
       }
     } catch (firebaseErr) {
-      console.warn('[Leaderboard] Firebase RTDB fetch failed, falling back to local server:', firebaseErr);
+      console.warn('[Leaderboard] Firebase RTDB fetch failed:', firebaseErr);
     }
   }
 
-  // 🔄 Local Express Server Fallback
-  try {
-    const res = await fetch(`${LOCAL_API_URL}/leaderboard?sort=${sortType}`);
-    if (res.ok) {
-      const data = await res.json();
-      return data;
+  // 🔄 Local Express Server Fallback (로컬 localhost 개발 환경에서만 시도하여 GitHub Pages CORS 에러 방지!)
+  if (isLocalhost) {
+    try {
+      const res = await fetch(`${LOCAL_API_URL}/leaderboard?sort=${sortType}`);
+      if (res.ok) {
+        const data = await res.json();
+        return data;
+      }
+    } catch (localErr) {
+      console.warn('[Leaderboard] Local Express server not available:', localErr);
     }
-  } catch (localErr) {
-    console.warn('[Leaderboard] Local Express server not available, using offline default mockup:', localErr);
   }
 
   // 📌 오프라인 상태 빈 순위 데이터 (초기 상태)
-  const fallbackData = [];
-  return { sort: sortType, leaderboard: fallbackData };
+  return { sort: sortType, leaderboard: [] };
 };
 
 // 2. 점수/기록 등록 (POST)
@@ -100,16 +107,18 @@ export const submitLeaderboardScoreData = async (entryData) => {
     }
   }
 
-  // Express 로컬 서버 동시 저장 시도
-  try {
-    const res = await fetch(`${LOCAL_API_URL}/score/challenge`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) saved = true;
-  } catch (err) {
-    console.warn('[Leaderboard] Express server save failed:', err);
+  // Express 로컬 서버 동시 저장 시도 (localhost 환경일 때만)
+  if (isLocalhost) {
+    try {
+      const res = await fetch(`${LOCAL_API_URL}/score/challenge`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) saved = true;
+    } catch (err) {
+      console.warn('[Leaderboard] Express server save failed:', err);
+    }
   }
 
   return saved;
