@@ -250,7 +250,7 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
       const distXZSq = dx * dx + dz * dz;
       const hitRadiusXZ = b.radius + 1.85;
 
-      if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.dead) {
+      if (G.selectedChar !== 'beta' && distXZSq < hitRadiusXZ * hitRadiusXZ && !G.dead) {
         const relY = G.py - b.y;
         // 🎯 [정밀 밟기 높이 판정]: 플레이어 높이(G.py)가 눈덩이 상단 표면 부근(b.radius * 0.25 ~ 2.2)일 때만 밟기 인정!
         const isStompHeight = G.inAir && (relY >= b.radius * 0.25) && (relY <= b.radius * 2.2);
@@ -299,13 +299,13 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
         }
       }
 
-      // 💣 3.8초 동안 해제하지 못하면 플레이어 옆에서 펑! 자폭 대폭발하며 뒤로 넉백!
+      // 💣 3.8초 동안 해제하지 못하면 플레이어 옆에서 펑! 자폭 대폭발!
       if (b.stateTimer >= 3.8) {
         b.active = false;
         scene.remove(b.group);
         triggerSnowExplosion(b.x, b.y, b.z);
 
-        if (Math.hypot(G.px - b.x, G.pz - b.z) < 20.0 && G.invincibleTimer <= 0) {
+        if (G.selectedChar !== 'beta' && Math.hypot(G.px - b.x, G.pz - b.z) < 20.0 && G.invincibleTimer <= 0) {
           G.pz += 12.0;
           G.spd = 0;
           G.stunTimer = 0.5;

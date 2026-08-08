@@ -225,7 +225,7 @@ export const createSnowballHazardSystem = (scene) => {
       const distXZSq = dx * dx + dz * dz;
       const hitRadiusXZ = b.radius + 1.65; // 수평 감지 범위 넉넉히 확보!
 
-      if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
+      if (G.selectedChar !== 'beta' && distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
         const groundY = getTerrainY(G.px, G.pz);
         const isJumpingState = G.inAir || (G.py > groundY + 0.15) || (G.vy > 0);
         // 플레이어 foot Y 높이가 눈덩이 중간 이상에 위치하는지 체크

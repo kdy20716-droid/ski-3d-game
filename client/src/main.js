@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=38.0.0';
-import { STAGES } from './stages.js?v=38.0.0';
-import { createSky } from './sky.js?v=38.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=38.0.0';
-import { makeSkier } from './skier.js?v=38.0.0';
-import { createEnvironment } from './environment.js?v=38.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=38.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=38.0.0';
-import { createSpawnManager } from './spawnManager.js?v=38.0.0';
-import { createDriftSystem } from './driftSystem.js?v=38.0.0';
-import { setupUI } from './ui.js?v=38.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=38.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=38.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=38.0.0';
-import { soundFx } from './soundSystem.js?v=38.0.0';
-import { loadSelectedCharacter } from './characters.js?v=38.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=38.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=38.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=38.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=38.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=38.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=38.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=38.0.0';
+import { CFG } from './config.js?v=39.0.0';
+import { STAGES } from './stages.js?v=39.0.0';
+import { createSky } from './sky.js?v=39.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=39.0.0';
+import { makeSkier } from './skier.js?v=39.0.0';
+import { createEnvironment } from './environment.js?v=39.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=39.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=39.0.0';
+import { createSpawnManager } from './spawnManager.js?v=39.0.0';
+import { createDriftSystem } from './driftSystem.js?v=39.0.0';
+import { setupUI } from './ui.js?v=39.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=39.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=39.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=39.0.0';
+import { soundFx } from './soundSystem.js?v=39.0.0';
+import { loadSelectedCharacter } from './characters.js?v=39.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=39.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=39.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=39.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=39.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=39.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=39.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=39.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -794,8 +794,8 @@ const update = (dt, time) => {
     }
   }
 
-  // 💀 산사태 덮침 사망 판정 (사망 시에는 랭킹 등록 팝업 X, 오직 완주 클리어 시에만 랭킹 등록!)
-  if (G.avalancheZ <= G.pz + 3.5) {
+  // 💀 산사태 덮침 사망 판정 (베타테스터 캐릭터는 산사태 무적!)
+  if (G.selectedChar !== 'beta' && G.avalancheZ <= G.pz + 3.5) {
     G.play = false; G.dead = true;
     if (ui && ui.setDangerVignette) ui.setDangerVignette(0);
     soundFx.playGameOver(); // 💀 산사태 삼켜짐 저음 사운드 FX
@@ -855,8 +855,8 @@ const update = (dt, time) => {
     }
   }
 
-  // 🦅 공중 새 기믹 (2스테이지~ 흰색 새, 4스테이지~ 검은새 기습 급강하, 10스테이지 100% 검은새)
-  if (birdHazardSystem && G.play && !G.isOpeningCutscene && !G.isVictoryCeremony) {
+  // 🦅 공중 새 기믹 (베타테스터 캐릭터는 새 공격 무적!)
+  if (G.selectedChar !== 'beta' && birdHazardSystem && G.play && !G.isOpeningCutscene && !G.isVictoryCeremony) {
     birdHazardSystem.update(G.pz, G.px, G.py, G.stage, dt, time, (type) => {
       if (G.invincibleTimer <= 0) {
         G.pz += 6.0; // 뒤로 넉백!
@@ -874,18 +874,20 @@ const update = (dt, time) => {
     explodingSnowballHazardSystem.update(G, dt, soundFx, ui);
   }
 
-  // 💥 나무/바위 충돌 시 뒤로 넉백 보정! (충돌 판정 범위를 살짝 보강하여 나무 줄기/가지 스침도 충돌 반응!)
-  const hitRadiusMult = 1.45 + Math.min(0.35, (G.stage - 1) * 0.05);
-  for (const tree of env.treeList) {
-    const dx = G.px - tree.x, dz = G.pz - tree.z;
-    if (dx*dx + dz*dz < tree.r2 * hitRadiusMult && !G.inAir) {
-      if (G.invincibleTimer <= 0) {
-        G.pz += 8.0; // 뒤로 넉백 튕김!
-        G.spd = 0;
-        G.stunTimer = 0.5; // 0.5초 살짝 밀려났다 재가속
-        G.invincibleTimer = 1.8; // 1.8초 무적 보호
-        soundFx.playCrash();
-        if (ui) ui.showBonusToast('CRASH! 💥', false);
+  // 💥 나무/바위 충돌 시 뒤로 넉백 보정 (베타테스터 캐릭터는 장애물 충돌 무적 통과!)
+  if (G.selectedChar !== 'beta') {
+    const hitRadiusMult = 1.45 + Math.min(0.35, (G.stage - 1) * 0.05);
+    for (const tree of env.treeList) {
+      const dx = G.px - tree.x, dz = G.pz - tree.z;
+      if (dx*dx + dz*dz < tree.r2 * hitRadiusMult && !G.inAir) {
+        if (G.invincibleTimer <= 0) {
+          G.pz += 8.0; // 뒤로 넉백 튕김!
+          G.spd = 0;
+          G.stunTimer = 0.5; // 0.5초 살짝 밀려났다 재가속
+          G.invincibleTimer = 1.8; // 1.8초 무적 보호
+          soundFx.playCrash();
+          if (ui) ui.showBonusToast('CRASH! 💥', false);
+        }
       }
     }
   }

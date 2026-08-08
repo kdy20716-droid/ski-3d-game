@@ -221,7 +221,7 @@ export const createRockySnowballHazardSystem = (scene) => {
       const distXZSq = dx * dx + dz * dz;
       const hitRadiusXZ = b.radius + 1.85;
 
-      if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
+      if (G.selectedChar !== 'beta' && distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
         const relY = G.py - b.y;
         // 🎯 [정밀 바위 밟기 높이 판정]: 플레이어가 눈덩이 상단 표면 근처(b.radius * 0.25 ~ 2.2)에 닿을 때만 밟기 인정!
         const isStompHeight = G.inAir && (relY >= b.radius * 0.25) && (relY <= b.radius * 2.2);
