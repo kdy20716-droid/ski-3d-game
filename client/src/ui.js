@@ -112,6 +112,7 @@ export const setupUI = (handlers) => {
     if (btnEndlessEl) btnEndlessEl.textContent = t('endlessStart');
     if (btnRestartEl) btnRestartEl.textContent = t('retry');
     if (btnQuitEl) btnQuitEl.textContent = t('quit');
+    if (btnResumeEl) btnResumeEl.textContent = t('resume');
 
     const btnEditCharEl = document.getElementById('btnEditChar');
     if (btnEditCharEl) btnEditCharEl.textContent = t('editChar');

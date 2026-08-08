@@ -30,6 +30,7 @@ const TRANSLATIONS = {
     recordDesc: 'Congratulations! You set a new record. Leave your name on the global leaderboard!',
     submitBtn: 'REGISTER 🚀',
     quit: 'MAIN MENU',
+    resume: 'RESUME',
   },
   ko: {
     title: '3D 스키 아발란체',
@@ -52,6 +53,7 @@ const TRANSLATIONS = {
     recordDesc: '축하합니다! 신기록을 달성했습니다. 전 세계 랭킹표에 이름을 남겨보세요!',
     submitBtn: '랭킹 등록 🚀',
     quit: '메인 메뉴로 나가기',
+    resume: '계속하기',
   },
   ja: {
     title: '3D スキーアバランチ',
@@ -74,6 +76,7 @@ const TRANSLATIONS = {
     recordDesc: 'おめでとうございます！新記録を達成しました。世界ランキングに名を刻もう！',
     submitBtn: '登録する 🚀',
     quit: 'メインメニューへ',
+    resume: 'ゲーム再開',
   },
   zh: {
     title: '3D 极限雪崩滑雪',
@@ -96,6 +99,7 @@ const TRANSLATIONS = {
     recordDesc: '恭喜！您创造了新纪录。在全球排行榜上留下您的名字！',
     submitBtn: '立即提交 🚀',
     quit: '返回主菜单',
+    resume: '继续游戏',
   },
   fr: {
     title: '3D SKI AVALANCHE',
@@ -118,6 +122,7 @@ const TRANSLATIONS = {
     recordDesc: 'Félicitations! Vous avez établi un nouveau record. Inscrivez votre nom!',
     submitBtn: 'ENREGISTRER 🚀',
     quit: 'MENU PRINCIPAL',
+    resume: 'REPRENDRE',
   }
 };
 
