@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=26.0.0';
-import { STAGES } from './stages.js?v=26.0.0';
-import { createSky } from './sky.js?v=26.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=26.0.0';
-import { makeSkier } from './skier.js?v=26.0.0';
-import { createEnvironment } from './environment.js?v=26.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=26.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=26.0.0';
-import { createSpawnManager } from './spawnManager.js?v=26.0.0';
-import { createDriftSystem } from './driftSystem.js?v=26.0.0';
-import { setupUI } from './ui.js?v=26.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=26.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=26.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=26.0.0';
-import { soundFx } from './soundSystem.js?v=26.0.0';
-import { loadSelectedCharacter } from './characters.js?v=26.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=26.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=26.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=26.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=26.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=26.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=26.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=26.0.0';
+import { CFG } from './config.js?v=28.0.0';
+import { STAGES } from './stages.js?v=28.0.0';
+import { createSky } from './sky.js?v=28.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=28.0.0';
+import { makeSkier } from './skier.js?v=28.0.0';
+import { createEnvironment } from './environment.js?v=28.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=28.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=28.0.0';
+import { createSpawnManager } from './spawnManager.js?v=28.0.0';
+import { createDriftSystem } from './driftSystem.js?v=28.0.0';
+import { setupUI } from './ui.js?v=28.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=28.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=28.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=28.0.0';
+import { soundFx } from './soundSystem.js?v=28.0.0';
+import { loadSelectedCharacter } from './characters.js?v=28.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=28.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=28.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=28.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=28.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=28.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=28.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=28.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -187,13 +187,14 @@ let cheatWarpKey = null;
 let cheatWarpStartTime = 0;
 let cheatWarpTargetStage = 0;
 
-const warpToStage = (stageNum) => {
+const warpToStage = (stageNum, mode = 'endless') => {
   const targetIdx = Math.max(1, Math.min(10, stageNum));
   soundFx.playVictory(); // 🎺 스테이지 워프 완료 사운드
 
   const stageDist = 10000;
   const startDist = (targetIdx - 1) * stageDist;
 
+  G.mode = mode;
   G.play = true;
   G.paused = false;
   G.dead = false;
@@ -217,19 +218,6 @@ const warpToStage = (stageNum) => {
   G.invincibleTimer = 3.0; // 워프 직후 3초 무적
   G.stunTimer = 0.0;
   G.avalancheZ = G.pz + 95.0;
-const warpToStage = (targetIdx, mode = 'endless') => {
-  G.mode = mode;
-  G.play = true;
-  G.paused = false;
-  G.dead = false;
-  G.stage = targetIdx;
-  G.nextFlagDist = targetIdx * 10000;
-  G.pz = -(targetIdx - 1) * 10000;
-  G.dist = -G.pz;
-  G.px = 0;
-  G.py = getTerrainY(0, G.pz);
-  G.avalancheZ = G.pz + 95.0;
-  G.isOpeningCutscene = false;
   G.isVictoryCeremony = false;
 
   skier.position.set(0, G.py, G.pz);
