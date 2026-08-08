@@ -222,11 +222,11 @@ export const createRockySnowballHazardSystem = (scene) => {
       const hitRadiusXZ = b.radius + 1.85;
 
       if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.isCrashed) {
-        const groundY = getTerrainY(G.px, G.pz);
-        // 🎯 [거대 바위 밟기 조건]: 플레이어가 절반 점프 이상 높이 (b.y - radius * 0.15 이상)에 닿아야만 밟기 성공!
-        const isHalfJumpOrHigher = G.inAir && (G.py >= (b.y - b.radius * 0.15));
+        const relY = G.py - b.y;
+        // 🎯 [정밀 바위 밟기 높이 판정]: 플레이어가 눈덩이 상단 표면 근처(b.radius * 0.25 ~ 2.2)에 닿을 때만 밟기 인정!
+        const isStompHeight = G.inAir && (relY >= b.radius * 0.25) && (relY <= b.radius * 2.2);
 
-        if (isHalfJumpOrHigher) {
+        if (isStompHeight) {
           // 🎉 [절반 점프 이상 고공 밟기 성공!]: 묵직하게 쿵-! 파괴 소멸되며 상공 52m 초고공 솟구침!
           b.active = false;
           scene.remove(b.group);

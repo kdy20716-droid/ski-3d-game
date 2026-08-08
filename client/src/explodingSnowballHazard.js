@@ -251,9 +251,11 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
       const hitRadiusXZ = b.radius + 1.85;
 
       if (distXZSq < hitRadiusXZ * hitRadiusXZ && !G.dead) {
-        const isHalfJumpOrHigher = G.inAir && (G.py >= (b.y - b.radius * 0.15));
+        const relY = G.py - b.y;
+        // 🎯 [정밀 밟기 높이 판정]: 플레이어 높이(G.py)가 눈덩이 상단 표면 부근(b.radius * 0.25 ~ 2.2)일 때만 밟기 인정!
+        const isStompHeight = G.inAir && (relY >= b.radius * 0.25) && (relY <= b.radius * 2.2);
 
-        if (isHalfJumpOrHigher) {
+        if (isStompHeight) {
           // 🎉 [필수 해제 성공!]: 밟으면 폭발하지 않고 눈가루 소멸 & 공중 36m 스프링 솟구침!
           b.active = false;
           scene.remove(b.group);
