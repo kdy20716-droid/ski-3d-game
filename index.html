@@ -192,7 +192,7 @@
               box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
             "
           >
-            🎮 조작 방법 GUIDE
+            🎮 조작 방법
           </button>
           <div style="margin-top: 16px">
             <select
@@ -338,8 +338,8 @@
     <div class="screen off" id="scControls" style="z-index: 30000;">
       <div class="record-popup-card" style="max-width: 580px; text-align: center; border-color: #00F0FF; box-shadow: 0 0 45px rgba(0, 240, 255, 0.4);">
         <div style="font-size: 38px; margin-bottom: 4px;">🎮</div>
-        <div class="record-popup-title" id="lblControlsTitle" style="color: #00F0FF; font-size: 22px;">HOW TO PLAY / 조작 방법</div>
-        <div class="record-popup-desc" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 18px;">
+        <div class="record-popup-title" id="lblControlsTitle" style="color: #00F0FF; font-size: 22px;">🎮 조작 방법</div>
+        <div class="record-popup-desc" id="lblControlsDesc" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 18px;">
           키보드로 스키어를 자유자재로 제어하여 거대 산사태를 탈출하세요!
         </div>
 
@@ -359,7 +359,7 @@
             </div>
             <div class="key-guide-info">
               <div class="key-guide-label" id="lblKeyTurn">방향 전환 & 가속 / 감속</div>
-              <div class="key-guide-sub">Turn Left/Right & Speed Control</div>
+              <div class="key-guide-sub" id="lblKeyTurnSub">Turn Left/Right & Speed Control</div>
             </div>
           </div>
 
@@ -372,7 +372,7 @@
             </div>
             <div class="key-guide-info">
               <div class="key-guide-label" id="lblKeyDrift">고속 드리프트 급회전</div>
-              <div class="key-guide-sub">High-Speed Drift Turn</div>
+              <div class="key-guide-sub" id="lblKeyDriftSub">High-Speed Drift Turn</div>
             </div>
           </div>
 
@@ -382,8 +382,8 @@
               <span class="keycap space">SPACEBAR</span>
             </div>
             <div class="key-guide-info">
-              <div class="key-guide-label" id="lblKeyJump">점프 게이지 차지 & 점프 (Hold & Release)</div>
-              <div class="key-guide-sub">Charge & Launch Manual Jump</div>
+              <div class="key-guide-label" id="lblKeyJump">점프 게이지 차지 & 도약</div>
+              <div class="key-guide-sub" id="lblKeyJumpSub">Charge & Launch Manual Jump</div>
             </div>
           </div>
 
@@ -394,7 +394,7 @@
             </div>
             <div class="key-guide-info">
               <div class="key-guide-label" id="lblKeyPause">게임 일시 정지 (Pause)</div>
-              <div class="key-guide-sub">Pause / Resume Game</div>
+              <div class="key-guide-sub" id="lblKeyPauseSub">Pause / Resume Game (ESC)</div>
             </div>
           </div>
         </div>
@@ -429,7 +429,7 @@
       <button class="btn btn-secondary" id="btnOverQuit" style="margin-top: 14px;">MAIN MENU</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v49.0.0 - Multi-language Stage Names & Escape Toast Translation) -->
-    <script type="module" src="client/src/main.js?v=49.0.0"></script>
+    <!-- Main Module Script (Client Architecture v50.0.0 - Preserved Keycaps Controls UI & Clean Button Label) -->
+    <script type="module" src="client/src/main.js?v=50.0.0"></script>
   </body>
 </html>

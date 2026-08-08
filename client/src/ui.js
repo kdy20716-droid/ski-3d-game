@@ -172,14 +172,29 @@ export const setupUI = (handlers) => {
     // 조작법 안내 모달
     const lblControlsTitleEl = document.getElementById('lblControlsTitle');
     if (lblControlsTitleEl) lblControlsTitleEl.textContent = t('controlsTitle');
+    const lblControlsDescEl = document.getElementById('lblControlsDesc');
+    if (lblControlsDescEl) lblControlsDescEl.textContent = t('controlsDesc');
+
     const lblKeyTurnEl = document.getElementById('lblKeyTurn');
     if (lblKeyTurnEl) lblKeyTurnEl.textContent = t('keyTurnLabel');
+    const lblKeyTurnSubEl = document.getElementById('lblKeyTurnSub');
+    if (lblKeyTurnSubEl) lblKeyTurnSubEl.textContent = t('keyTurnSub');
+
     const lblKeyDriftEl = document.getElementById('lblKeyDrift');
     if (lblKeyDriftEl) lblKeyDriftEl.textContent = t('keyDriftLabel');
+    const lblKeyDriftSubEl = document.getElementById('lblKeyDriftSub');
+    if (lblKeyDriftSubEl) lblKeyDriftSubEl.textContent = t('keyDriftSub');
+
     const lblKeyJumpEl = document.getElementById('lblKeyJump');
     if (lblKeyJumpEl) lblKeyJumpEl.textContent = t('keyJumpLabel');
+    const lblKeyJumpSubEl = document.getElementById('lblKeyJumpSub');
+    if (lblKeyJumpSubEl) lblKeyJumpSubEl.textContent = t('keyJumpSub');
+
     const lblKeyPauseEl = document.getElementById('lblKeyPause');
     if (lblKeyPauseEl) lblKeyPauseEl.textContent = t('keyPauseLabel');
+    const lblKeyPauseSubEl = document.getElementById('lblKeyPauseSub');
+    if (lblKeyPauseSubEl) lblKeyPauseSubEl.textContent = t('keyPauseSub');
+
     if (btnControlsCloseEl) btnControlsCloseEl.textContent = t('ok');
 
     // 베타테스터 완주 화면
