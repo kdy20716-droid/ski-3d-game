@@ -308,6 +308,14 @@
           <button class="btn-record-skip" id="btnRecordSkip">SKIP</button>
         </div>
       </div>
+    <!-- 🏂 베타 테스터 선택 안내 팝업 모달 (Z-Index: 35000 최상단 표출) -->
+    <div class="screen off" id="scBetaNotice" style="z-index: 35000;">
+      <div class="record-popup-card" style="max-width: 440px; text-align: center; border-color: #FF8800; box-shadow: 0 0 45px rgba(255, 136, 0, 0.45);">
+        <div style="font-size: 42px; margin-bottom: 8px;">🏂</div>
+        <div class="record-popup-title" id="lblBetaNoticeTitle" style="color: #FF9900; font-size: 20px;">모든 장애물을 무시 하고 달립니다</div>
+        <div class="record-popup-desc" id="lblBetaNoticeSub" style="color: #FFD700; font-size: 14px; margin-top: 8px; margin-bottom: 24px;">(도전모드 기록이 되지않습니다)</div>
+        <button class="btn" id="btnBetaNoticeOk" style="margin-top: 0; padding: 12px 40px; font-size: 13px;">확인 (OK)</button>
+      </div>
     </div>
 
     <div class="screen off" id="scOver">
@@ -318,7 +326,7 @@
       <button class="btn btn-secondary" id="btnOverQuit" style="margin-top: 14px;">MAIN MENU</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v40.0.0 - Fixed G.selectedChar Assignment for Beta Tester Obstacle Bypass) -->
-    <script type="module" src="client/src/main.js?v=40.0.0"></script>
+    <!-- Main Module Script (Client Architecture v41.0.0 - Dedicated Beta Notice Modal & Infinite Invincibility Shield) -->
+    <script type="module" src="client/src/main.js?v=41.0.0"></script>
   </body>
 </html>

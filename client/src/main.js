@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=40.0.0';
-import { STAGES } from './stages.js?v=40.0.0';
-import { createSky } from './sky.js?v=40.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=40.0.0';
-import { makeSkier } from './skier.js?v=40.0.0';
-import { createEnvironment } from './environment.js?v=40.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=40.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=40.0.0';
-import { createSpawnManager } from './spawnManager.js?v=40.0.0';
-import { createDriftSystem } from './driftSystem.js?v=40.0.0';
-import { setupUI } from './ui.js?v=40.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=40.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=40.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=40.0.0';
-import { soundFx } from './soundSystem.js?v=40.0.0';
-import { loadSelectedCharacter } from './characters.js?v=40.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=40.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=40.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=40.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=40.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=40.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=40.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=40.0.0';
+import { CFG } from './config.js?v=41.0.0';
+import { STAGES } from './stages.js?v=41.0.0';
+import { createSky } from './sky.js?v=41.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=41.0.0';
+import { makeSkier } from './skier.js?v=41.0.0';
+import { createEnvironment } from './environment.js?v=41.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=41.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=41.0.0';
+import { createSpawnManager } from './spawnManager.js?v=41.0.0';
+import { createDriftSystem } from './driftSystem.js?v=41.0.0';
+import { setupUI } from './ui.js?v=41.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=41.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=41.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=41.0.0';
+import { soundFx } from './soundSystem.js?v=41.0.0';
+import { loadSelectedCharacter } from './characters.js?v=41.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=41.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=41.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=41.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=41.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=41.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=41.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=41.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -457,6 +457,13 @@ if (ui && ui.triggerDissolveRespawn) {
 //  MAIN UPDATE LOOP
 // ─────────────────────────────────────────
 const update = (dt, time) => {
+  // 🏂 베타테스터 캐릭터 장애물 무적 보호막 100% 보장 (모든 충돌/넉백/사망 무시!)
+  const curChar = G.selectedChar || loadSelectedCharacter();
+  if (curChar === 'beta') {
+    G.selectedChar = 'beta';
+    G.invincibleTimer = 999999.0;
+  }
+
   // 🤫 개발자 전용 3초 홀드 워프 타이머 체킹 (메인메뉴/인게임 어디서나 동작!)
   checkSecretCheatWarp(dt);
 

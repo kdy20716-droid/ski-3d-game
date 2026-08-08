@@ -737,16 +737,28 @@ export const setupUI = (handlers) => {
           handlers.onCharacterSelect(charInfo.id);
         }
 
-        // 🏂 베타테스터 캐릭터 선택 시 특수 안내 토스트 표출!
+        // 🏂 베타테스터 캐릭터 선택 시 전용 안내 팝업 모달 표출!
         if (charInfo.id === 'beta') {
-          showToast('모든 장애물을 무시 하고 달립니다', '(도전모드 기록이 되지않습니다)');
-          showBonusToast('🏂 베타테스터: 모든 장애물 무시 (기록 미등록)', true);
+          const scBetaNoticeEl = document.getElementById('scBetaNotice');
+          const btnBetaNoticeOkEl = document.getElementById('btnBetaNoticeOk');
+          if (scBetaNoticeEl) {
+            scBetaNoticeEl.classList.remove('off');
+            if (btnBetaNoticeOkEl) {
+              btnBetaNoticeOkEl.onclick = () => {
+                soundFx.playClick();
+                scBetaNoticeEl.classList.add('off');
+                closeCharSelect();
+              };
+            }
+          } else {
+            setTimeout(() => { closeCharSelect(); }, 350);
+          }
+        } else {
+          // 0.35초 후 선택 화면 닫고 메인으로
+          setTimeout(() => {
+            closeCharSelect();
+          }, 350);
         }
-
-        // 0.35초 후 선택 화면 닫고 메인으로
-        setTimeout(() => {
-          closeCharSelect();
-        }, 350);
       });
     });
 
