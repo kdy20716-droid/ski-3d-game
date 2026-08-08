@@ -181,6 +181,19 @@
           >
             무한 모드 시작
           </button>
+          <button
+            class="btn"
+            id="btnControls"
+            style="
+              margin-top: 12px;
+              background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(200, 230, 255, 0.05) 100%);
+              border: 1px solid rgba(0, 240, 255, 0.45);
+              color: #00F0FF;
+              box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+            "
+          >
+            🎮 조작 방법 GUIDE
+          </button>
           <div style="margin-top: 16px">
             <select
               id="langSelect"
@@ -318,6 +331,80 @@
           <button class="btn-record-submit" id="btnRecordSubmit">REGISTER 🚀</button>
           <button class="btn-record-skip" id="btnRecordSkip">SKIP</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 🎮 게임 플레이 조작법 키보드 안내 모달 (Z-Index: 30000) -->
+    <div class="screen off" id="scControls" style="z-index: 30000;">
+      <div class="record-popup-card" style="max-width: 580px; text-align: center; border-color: #00F0FF; box-shadow: 0 0 45px rgba(0, 240, 255, 0.4);">
+        <div style="font-size: 38px; margin-bottom: 4px;">🎮</div>
+        <div class="record-popup-title" id="lblControlsTitle" style="color: #00F0FF; font-size: 22px;">HOW TO PLAY / 조작 방법</div>
+        <div class="record-popup-desc" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 18px;">
+          키보드로 스키어를 자유자재로 제어하여 거대 산사태를 탈출하세요!
+        </div>
+
+        <div class="controls-keyboard-grid">
+          <!-- 조작 1: 이동/턴 -->
+          <div class="key-guide-row">
+            <div class="keycap-group">
+              <span class="keycap">W</span>
+              <span class="keycap">A</span>
+              <span class="keycap">S</span>
+              <span class="keycap">D</span>
+              <span class="keycap-sub">or</span>
+              <span class="keycap">↑</span>
+              <span class="keycap">←</span>
+              <span class="keycap">↓</span>
+              <span class="keycap">→</span>
+            </div>
+            <div class="key-guide-info">
+              <div class="key-guide-label" id="lblKeyTurn">방향 전환 & 가속 / 감속</div>
+              <div class="key-guide-sub">Turn Left/Right & Speed Control</div>
+            </div>
+          </div>
+
+          <!-- 조작 2: 드리프트 -->
+          <div class="key-guide-row">
+            <div class="keycap-group">
+              <span class="keycap wide">SHIFT</span>
+              <span class="keycap-sub">+</span>
+              <span class="keycap">A</span> / <span class="keycap">D</span>
+            </div>
+            <div class="key-guide-info">
+              <div class="key-guide-label" id="lblKeyDrift">고속 드리프트 급회전</div>
+              <div class="key-guide-sub">High-Speed Drift Turn</div>
+            </div>
+          </div>
+
+          <!-- 조작 3: 수동 점프 -->
+          <div class="key-guide-row">
+            <div class="keycap-group">
+              <span class="keycap space">SPACEBAR</span>
+            </div>
+            <div class="key-guide-info">
+              <div class="key-guide-label" id="lblKeyJump">점프 게이지 차지 & 점프 (Hold & Release)</div>
+              <div class="key-guide-sub">Charge & Launch Manual Jump</div>
+            </div>
+          </div>
+
+          <!-- 조작 4: 일시 정지 -->
+          <div class="key-guide-row">
+            <div class="keycap-group">
+              <span class="keycap wide">ESC</span>
+            </div>
+            <div class="key-guide-info">
+              <div class="key-guide-label" id="lblKeyPause">게임 일시 정지 (Pause)</div>
+              <div class="key-guide-sub">Pause / Resume Game</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" id="btnControlsClose" style="margin-top: 22px; padding: 12px 48px; font-size: 14px;">
+          OK / 확인
+        </button>
+      </div>
+    </div>
+
     <!-- 🏂 베타 테스터 전용 10스테이지 완주 축하 화면 (메뉴로 돌아가기 버튼 전용 노출) -->
     <div class="screen off" id="scBetaClear">
       <div class="screen-sub" style="color: #FF9900;">BETA TEST COMPLETE</div>
@@ -342,7 +429,7 @@
       <button class="btn btn-secondary" id="btnOverQuit" style="margin-top: 14px;">MAIN MENU</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v44.0.0 - 105km Race Bar Sync, Beta Finish Screen, Bird Visibility, Line Detonation) -->
-    <script type="module" src="client/src/main.js?v=44.0.0"></script>
+    <!-- Main Module Script (Client Architecture v49.0.0 - Multi-language Stage Names & Escape Toast Translation) -->
+    <script type="module" src="client/src/main.js?v=49.0.0"></script>
   </body>
 </html>

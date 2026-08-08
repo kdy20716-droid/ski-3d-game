@@ -121,20 +121,74 @@ export const setupUI = (handlers) => {
     };
   }
 
+  const btnControlsEl = document.getElementById('btnControls');
+  const btnControlsCloseEl = document.getElementById('btnControlsClose');
+  const scControlsEl = document.getElementById('scControls');
+
+  if (btnControlsEl && scControlsEl) {
+    btnControlsEl.onclick = () => {
+      soundFx.playClick();
+      scControlsEl.classList.remove('off');
+    };
+  }
+
+  if (btnControlsCloseEl && scControlsEl) {
+    btnControlsCloseEl.onclick = () => {
+      soundFx.playClick();
+      scControlsEl.classList.add('off');
+    };
+  }
+
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
-    const { t, getCharTranslation } = window.i18n;
+    const { t, getCharTranslation, getLang } = window.i18n;
 
+    // 언어 선택 드롭다운 상태 동기화
+    if (langSelectEl) langSelectEl.value = getLang();
+
+    // 메인 메뉴 로고 서브타이틀 & 버튼
     if (lblLogoSubEl) lblLogoSubEl.textContent = t('subTitle');
     if (btnStartEl) btnStartEl.textContent = t('start');
     if (btnEndlessEl) btnEndlessEl.textContent = t('endlessStart');
+    if (btnControlsEl) btnControlsEl.textContent = t('btnControls');
     if (btnRestartEl) btnRestartEl.textContent = t('retry');
     if (btnQuitEl) btnQuitEl.textContent = t('quit');
     if (btnOverQuitEl) btnOverQuitEl.textContent = t('quit');
     if (btnResumeEl) btnResumeEl.textContent = t('resume');
 
+    // 캐릭터 변경 / 캐릭터 선택 버튼
     const btnEditCharEl = document.getElementById('btnEditChar');
     if (btnEditCharEl) btnEditCharEl.textContent = t('editChar');
+
+    const btnConfirmCharEl = document.getElementById('btnConfirmChar');
+    if (btnConfirmCharEl) btnConfirmCharEl.textContent = t('confirmChar');
+
+    // 메인 리더보드 헤더 & 탭
+    const lbTitleEl = document.querySelector('#mainLeaderboardCard .lb-title');
+    if (lbTitleEl) lbTitleEl.textContent = t('lbTitle');
+    if (btnLbTime) btnLbTime.textContent = t('lbTabTime');
+    if (btnLbScore) btnLbScore.textContent = t('lbTabScore');
+
+    // 조작법 안내 모달
+    const lblControlsTitleEl = document.getElementById('lblControlsTitle');
+    if (lblControlsTitleEl) lblControlsTitleEl.textContent = t('controlsTitle');
+    const lblKeyTurnEl = document.getElementById('lblKeyTurn');
+    if (lblKeyTurnEl) lblKeyTurnEl.textContent = t('keyTurnLabel');
+    const lblKeyDriftEl = document.getElementById('lblKeyDrift');
+    if (lblKeyDriftEl) lblKeyDriftEl.textContent = t('keyDriftLabel');
+    const lblKeyJumpEl = document.getElementById('lblKeyJump');
+    if (lblKeyJumpEl) lblKeyJumpEl.textContent = t('keyJumpLabel');
+    const lblKeyPauseEl = document.getElementById('lblKeyPause');
+    if (lblKeyPauseEl) lblKeyPauseEl.textContent = t('keyPauseLabel');
+    if (btnControlsCloseEl) btnControlsCloseEl.textContent = t('ok');
+
+    // 베타테스터 완주 화면
+    const betaClearTitleEl = document.querySelector('#scBetaClear .over-title');
+    if (betaClearTitleEl) betaClearTitleEl.innerHTML = t('betaClearTitle');
+    const betaClearStatsEl = document.getElementById('betaClearStats');
+    if (betaClearStatsEl) betaClearStatsEl.innerHTML = t('betaClearDesc');
+    const btnBetaClearQuitEl = document.getElementById('btnBetaClearQuit');
+    if (btnBetaClearQuitEl) btnBetaClearQuitEl.textContent = t('betaClearBtn');
 
     // 캐릭터 선택 헤더 & 뒤로가기 버튼
     const titleEl = document.querySelector('#scCharSelect .charsel-title');
@@ -153,8 +207,8 @@ export const setupUI = (handlers) => {
     const pauseHintEl = document.querySelector('#scPause .hint-text');
     if (pauseHintEl) pauseHintEl.textContent = t('pauseHint');
 
-    const gameOverTitleEl = document.querySelector('#scGameOver .over-title');
-    if (gameOverTitleEl) gameOverTitleEl.textContent = t('gameOver');
+    const gameOverTitleEl = document.querySelector('#scOver .over-title');
+    if (gameOverTitleEl) gameOverTitleEl.textContent = 'WIPEOUT!';
 
     // 메인화면 3D 프리뷰 이름 갱신
     const mainCharId = loadSelectedCharacter();
@@ -281,23 +335,37 @@ export const setupUI = (handlers) => {
     playerEl.style.boxShadow = `0 0 14px ${col}`;
   };
 
-  // 🏁 레이스 진행 바 초기화 (총 105,000m: 1~9스테이지 각 10km + 10스테이지 15km 피날레)
+  // 🏁 레이스 진행 바 초기화 (S1 0m ~ S10 90km ~ FINISH 100km 완주 코스)
   const initRaceBar = (stages) => {
     const flagsEl = document.getElementById('raceFlags');
     if (!flagsEl || !stages) return;
     flagsEl.innerHTML = '';
-    const totalDist = 105000;
+    const totalDist = 100000;
+
+    // 1. 맨 왼쪽 (0m): 1스테이지 (S1) 출발 표식
+    const startFlagEl = document.createElement('div');
+    startFlagEl.className = 'race-flag';
+    startFlagEl.style.left = '2%';
+    startFlagEl.innerHTML = `
+      <div class="race-flag-banner" style="background:#00F0FF99; border-color:#00F0FF;"></div>
+      <div class="race-flag-pole"></div>
+      <div class="race-flag-label">S1</div>
+    `;
+    flagsEl.appendChild(startFlagEl);
+
+    // 2. S2(10k)부터 S10(90k) 중간 관문 깃발 배치
     for (let i = 1; i < stages.length; i++) {
-      const gateDist = i * 10000; // S1=10k, S2=20k, ..., S9=90k
+      const gateDist = i * 10000; // S2=10k, S3=20k... S10=90k
       const globalPct = gateDist / totalDist;
-      const pct = (0.02 + globalPct * 0.94) * 100; // 트랙 내 실제 깃발 위치
+      const pct = (0.02 + globalPct * 0.94) * 100;
       const flagEl = document.createElement('div');
       flagEl.className = 'race-flag';
       flagEl.style.left = `${pct}%`;
+      const stageNum = i + 1;
       flagEl.innerHTML = `
         <div class="race-flag-banner" style="background:${stages[i]?.textColor || '#FFE040'}99; border-color:${stages[i]?.textColor || '#FFE040'};"></div>
         <div class="race-flag-pole"></div>
-        <div class="race-flag-label">S${i}</div>
+        <div class="race-flag-label">S${stageNum}</div>
       `;
       flagsEl.appendChild(flagEl);
     }
@@ -306,7 +374,7 @@ export const setupUI = (handlers) => {
   };
 
   // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 시각적 100% 1:1 동기화!
-  const updateRaceBar = (currentDist, totalDist = 105000, isCutscene = false) => {
+  const updateRaceBar = (currentDist, totalDist = 100000, isCutscene = false) => {
     const playerEl = document.getElementById('racePlayer');
     if (!playerEl) return;
 

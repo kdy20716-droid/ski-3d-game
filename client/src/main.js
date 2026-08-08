@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=44.0.0';
-import { STAGES } from './stages.js?v=44.0.0';
-import { createSky } from './sky.js?v=44.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=44.0.0';
-import { makeSkier } from './skier.js?v=44.0.0';
-import { createEnvironment } from './environment.js?v=44.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=44.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=44.0.0';
-import { createSpawnManager } from './spawnManager.js?v=44.0.0';
-import { createDriftSystem } from './driftSystem.js?v=44.0.0';
-import { setupUI } from './ui.js?v=44.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=44.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=44.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=44.0.0';
-import { soundFx } from './soundSystem.js?v=44.0.0';
-import { loadSelectedCharacter } from './characters.js?v=44.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=44.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=44.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=44.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=44.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=44.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=44.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=44.0.0';
+import { CFG } from './config.js?v=49.0.0';
+import { STAGES } from './stages.js?v=49.0.0';
+import { createSky } from './sky.js?v=49.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=49.0.0';
+import { makeSkier } from './skier.js?v=49.0.0';
+import { createEnvironment } from './environment.js?v=49.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=49.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=49.0.0';
+import { createSpawnManager } from './spawnManager.js?v=49.0.0';
+import { createDriftSystem } from './driftSystem.js?v=49.0.0';
+import { setupUI } from './ui.js?v=49.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji, getStageTranslation } from './i18n.js?v=49.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=49.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=49.0.0';
+import { soundFx } from './soundSystem.js?v=49.0.0';
+import { loadSelectedCharacter } from './characters.js?v=49.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=49.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=49.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=49.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=49.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=49.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=49.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=49.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -417,10 +417,11 @@ const startGame = (mode = 'challenge') => {
   skyMaterial.uniforms.uSun.value.copy(s0.sunDir);
   skyMaterial.uniforms.uSkyCol.value.set(...s0.skyCol);
   skyMaterial.uniforms.uStage.value = 0;
-  if (ui) ui.updateStageTitle(1, s0.name, s0.textColor);
+  const s0Name = getStageTranslation(0);
+  if (ui) ui.updateStageTitle(1, s0Name, s0.textColor);
 
   env.spawnFlagGate(G.nextFlagDist);
-  if (ui) ui.showToast('AVALANCHE ESCAPE', '산사태를 탈출하라!');
+  if (ui) ui.showToast(t('escapeToastTitle'), t('escapeToastSub'));
 };
 
 const endGame = () => {
@@ -837,8 +838,9 @@ const update = (dt, time) => {
 
       const stageIdx = (G.stage - 1) % STAGES.length;
       const sNext = STAGES[stageIdx];
+      const sNextName = getStageTranslation(stageIdx);
       triggerStageTransition(stageIdx);
-      if (ui) ui.updateStageTitle(G.stage, sNext.name, sNext.textColor); // 3초간 시원하게 각 테마 네온 컬러로 상단에 노출!
+      if (ui) ui.updateStageTitle(G.stage, sNextName, sNext.textColor); // 3초간 시원하게 각 테마 네온 컬러로 상단에 노출!
 
       // 2. 🥇 메달 빠져나와 점수판으로 흡수되는 애니메이션 재생!
       if (prevMedalCount > 0) {
@@ -849,7 +851,7 @@ const update = (dt, time) => {
       }
 
       const isFinalGate = (G.stage === 10);
-      const nextStepDist = isFinalGate ? 15000 : 10000;
+      const nextStepDist = 10000;
       G.nextFlagDist += nextStepDist;
       env.spawnFlagGate(G.nextFlagDist, isFinalGate);
 
@@ -860,9 +862,9 @@ const update = (dt, time) => {
       }
 
       if (isFinalGate) {
-        if (ui) ui.showToast('STAGE 10 FINAL', '15km 챔피언의 영광 피날레 코스!');
+        if (ui) ui.showToast('STAGE 10 FINAL', t('stage10FinalToast'));
       } else {
-        if (ui) ui.showToast(`STAGE ${G.stage}`, sNext.name);
+        if (ui) ui.showToast(`STAGE ${G.stage}`, sNextName);
       }
 
     }
@@ -922,7 +924,7 @@ const update = (dt, time) => {
 
   // 🏁 레이스 진행 바 업데이트 (3D 인게임 실제 위치와 100% 동일한 밀리초 동기화!)
   if (ui && ui.updateRaceBar) {
-    ui.updateRaceBar(G.dist, 105000, G.isOpeningCutscene);
+    ui.updateRaceBar(G.dist, 100000, G.isOpeningCutscene);
   }
 };
 

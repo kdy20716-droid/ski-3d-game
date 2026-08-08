@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 
+// 🏁 도전 모드 총 10스테이지 (각 10,000m = 총 100,000m 100km 완주 코스)
 export const STAGES = [
   { name: '새벽의 여명', sub: 'EARLY DAWN', textColor: '#00F0FF', sunDir: new THREE.Vector3(-0.6, 0.35, -0.7).normalize(), skyCol: [0.85, 0.35, 0.45], lightCol: 0xFFA07A, ambientCol: 0x685075, hemiSky: 0xFFA07A, hemiGround: 0x402850, fogCol: 0x582E60, stageVal: 0, snowGlow: 0x2A1535 },
   { name: '상쾌한 아침', sub: 'MORNING SUNRISE', textColor: '#FFB855', sunDir: new THREE.Vector3(-0.55, 0.45, -0.65).normalize(), skyCol: [0.95, 0.55, 0.35], lightCol: 0xFFE0B0, ambientCol: 0x705585, hemiSky: 0xFFE0B0, hemiGround: 0x452855, fogCol: 0x683B65, stageVal: 1, snowGlow: 0x301840 },
@@ -10,6 +11,5 @@ export const STAGES = [
   { name: '붉은 석양', sub: 'RED MAGIC HOUR', textColor: '#FF3355', sunDir: new THREE.Vector3(-0.85, 0.22, -0.5).normalize(), skyCol: [0.90, 0.15, 0.25], lightCol: 0xFF4455, ambientCol: 0x582845, hemiSky: 0xFF4455, hemiGround: 0x401838, fogCol: 0x501550, stageVal: 6, snowGlow: 0x450825 },
   { name: '초저녁 푸른 어둠', sub: 'TWILIGHT BLUE', textColor: '#77A0FF', sunDir: new THREE.Vector3(-0.3, 0.25, -0.7).normalize(), skyCol: [0.20, 0.18, 0.55], lightCol: 0x7799FF, ambientCol: 0x383058, hemiSky: 0x7799FF, hemiGround: 0x282245, fogCol: 0x221B40, stageVal: 7, snowGlow: 0x101538 },
   { name: '별빛 쏟아지는 밤', sub: 'STARRY NIGHT', textColor: '#A8C5FF', sunDir: new THREE.Vector3(0.3, 0.60, -0.6).normalize(), skyCol: [0.08, 0.12, 0.35], lightCol: 0x99CCFF, ambientCol: 0x303855, hemiSky: 0x99CCFF, hemiGround: 0x202540, fogCol: 0x181D35, stageVal: 8, snowGlow: 0x0A1228 },
-  { name: '달빛과 오로라 밤', sub: 'MOONLIT AURORA', textColor: '#00FFBB', sunDir: new THREE.Vector3(0.45, 0.70, -0.5).normalize(), skyCol: [0.05, 0.10, 0.32], lightCol: 0xA0E0FF, ambientCol: 0x283555, hemiSky: 0xA0E0FF, hemiGround: 0x202A45, fogCol: 0x172032, stageVal: 9, snowGlow: 0x081530 },
-  { name: '챔피언의 영광', sub: 'FINAL GLORY', textColor: '#FFD700', sunDir: new THREE.Vector3(0.0, 0.75, -0.66).normalize(), skyCol: [0.85, 0.70, 0.40], lightCol: 0xFFD700, ambientCol: 0x3D2210, hemiSky: 0xFFD700, hemiGround: 0x2A150A, fogCol: 0x4A301A, stageVal: 10, snowGlow: 0xFFAA00, nextDist: 15000 }
+  { name: '챔피언의 영광 (피날레)', sub: 'FINAL GLORY', textColor: '#FFD700', sunDir: new THREE.Vector3(0.0, 0.75, -0.66).normalize(), skyCol: [0.85, 0.70, 0.40], lightCol: 0xFFD700, ambientCol: 0x3D2210, hemiSky: 0xFFD700, hemiGround: 0x2A150A, fogCol: 0x4A301A, stageVal: 9, snowGlow: 0xFFAA00 }
 ];
