@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { soundFx } from './soundSystem.js?v=32.0.0';
-import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=32.0.0';
-import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=32.0.0';
+import { soundFx } from './soundSystem.js?v=37.0.0';
+import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=37.0.0';
+import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=37.0.0';
 
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
@@ -103,6 +103,14 @@ export const setupUI = (handlers) => {
     };
   }
 
+  const btnOverQuitEl = document.getElementById('btnOverQuit');
+  if (btnOverQuitEl) {
+    btnOverQuitEl.onclick = () => {
+      soundFx.playClick();
+      if (handlers.onQuit) handlers.onQuit();
+    };
+  }
+
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
     const { t, getCharTranslation } = window.i18n;
@@ -112,6 +120,7 @@ export const setupUI = (handlers) => {
     if (btnEndlessEl) btnEndlessEl.textContent = t('endlessStart');
     if (btnRestartEl) btnRestartEl.textContent = t('retry');
     if (btnQuitEl) btnQuitEl.textContent = t('quit');
+    if (btnOverQuitEl) btnOverQuitEl.textContent = t('quit');
     if (btnResumeEl) btnResumeEl.textContent = t('resume');
 
     const btnEditCharEl = document.getElementById('btnEditChar');
