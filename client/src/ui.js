@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { soundFx } from './soundSystem.js?v=13.0.0';
-import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=13.0.0';
-import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=15.0.0';
+import { soundFx } from './soundSystem.js?v=31.0.0';
+import { CHARACTER_LIST, makeCharacterModel, saveSelectedCharacter, loadSelectedCharacter } from './characters.js?v=31.0.0';
+import { fetchLeaderboardData, submitLeaderboardScoreData } from './leaderboard.js?v=31.0.0';
 
 export const setupUI = (handlers) => {
   const $score = document.getElementById('hScore');
