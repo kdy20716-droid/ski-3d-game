@@ -740,16 +740,17 @@ export const setupUI = (handlers) => {
         // 🏂 베타테스터 캐릭터 선택 시 전용 안내 팝업 모달 표출!
         if (charInfo.id === 'beta') {
           const scBetaNoticeEl = document.getElementById('scBetaNotice');
-          const btnBetaNoticeOkEl = document.getElementById('btnBetaNoticeOk');
           if (scBetaNoticeEl) {
             scBetaNoticeEl.classList.remove('off');
-            if (btnBetaNoticeOkEl) {
-              btnBetaNoticeOkEl.onclick = () => {
-                soundFx.playClick();
-                scBetaNoticeEl.classList.add('off');
-                closeCharSelect();
-              };
-            }
+            // 💡 모달창 영역 어디든 한 번만 클릭해도 바로 닫히고 메인메뉴로 복귀!
+            const dismissModal = (e) => {
+              if (e) e.stopPropagation();
+              soundFx.playClick();
+              scBetaNoticeEl.classList.add('off');
+              scBetaNoticeEl.onclick = null;
+              closeCharSelect();
+            };
+            scBetaNoticeEl.onclick = dismissModal;
           } else {
             setTimeout(() => { closeCharSelect(); }, 350);
           }

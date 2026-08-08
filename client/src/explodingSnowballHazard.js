@@ -116,7 +116,7 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
   };
 
   // 💣 스폰 함수 (돌눈덩이와 동일하게 플레이어 전방에서 스폰)
-  const spawnExplodingSnowball = (playerX, playerZ, playerSpd) => {
+  const spawnExplodingSnowball = (playerX, playerZ, playerSpd, soundFx) => {
     const radius = 2.5 + Math.random() * 1.5;
     const sideOffset = (Math.random() < 0.5 ? -1 : 1) * (15.0 + Math.random() * 30.0);
     const startX = playerX + sideOffset;
@@ -193,7 +193,7 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
     if (spawnTimer >= cooldown) {
       spawnTimer = 0;
       if (G.play && !G.dead) {
-        spawnExplodingSnowball(G.px, G.pz, G.spd);
+        spawnExplodingSnowball(G.px, G.pz, G.spd, soundFx);
       }
     }
 
