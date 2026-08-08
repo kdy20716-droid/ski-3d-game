@@ -318,7 +318,21 @@
           <button class="btn-record-submit" id="btnRecordSubmit">REGISTER 🚀</button>
           <button class="btn-record-skip" id="btnRecordSkip">SKIP</button>
         </div>
+    <!-- 🏂 베타 테스터 전용 10스테이지 완주 축하 화면 (메뉴로 돌아가기 버튼 전용 노출) -->
+    <div class="screen off" id="scBetaClear">
+      <div class="screen-sub" style="color: #FF9900;">BETA TEST COMPLETE</div>
+      <div class="over-title" style="background: linear-gradient(135deg, #FFD700, #FF8800); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        STAGE 10 FINALE! 🏆
       </div>
+      <div class="over-stats" id="betaClearStats">
+        🏆 <strong>BETA TESTER CHAMPION CLEAR!</strong><br>
+        모든 장애물 무적 테스트 코스를 완주했습니다!<br>
+        <span style="color: #FFD700; font-size: 13px;">(도전 모드 공식 랭킹 기록은 등록되지 않습니다)</span>
+      </div>
+      <button class="btn" id="btnBetaClearQuit" style="margin-top: 24px; padding: 14px 44px; font-size: 14px; background: linear-gradient(135deg, #00F0FF 0%, #0077FF 100%); border-color: #00F0FF; color: #FFFFFF; box-shadow: 0 0 30px rgba(0, 200, 255, 0.6);">
+        MAIN MENU / 메뉴로 돌아가기
+      </button>
+    </div>
 
     <div class="screen off" id="scOver">
       <div class="screen-sub">SESSION TERMINATED</div>
@@ -328,7 +342,7 @@
       <button class="btn btn-secondary" id="btnOverQuit" style="margin-top: 14px;">MAIN MENU</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v43.0.0 - Top Beta Toast & Bottom Confirm Button Flow) -->
-    <script type="module" src="client/src/main.js?v=43.0.0"></script>
+    <!-- Main Module Script (Client Architecture v44.0.0 - 105km Race Bar Sync, Beta Finish Screen, Bird Visibility, Line Detonation) -->
+    <script type="module" src="client/src/main.js?v=44.0.0"></script>
   </body>
 </html>

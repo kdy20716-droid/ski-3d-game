@@ -127,8 +127,10 @@ export const updateVictoryCeremony = (G, dt, camera, skier, ui, getTerrainY) => 
       if (ui) ui.showScreen('over', `🏆 <strong>SURVIVED! CHAMPION VICTORY!</strong><br>최종 점수: <strong>${Math.floor(G.score).toLocaleString()} pts</strong><br>산사태 탈출 성공 및 챔피언 등극!`);
     };
 
-    // 🏆 랭킹 등록 팝업 모달 띄우기 (닉네임/국가 선택 - 베타테스터 캐릭터는 도전모드 기록 미등록)
-    if (G.selectedChar !== 'beta' && ui && ui.showRecordPopup) {
+    // 🏆 랭킹 등록 팝업 모달 띄우기 (베타테스터 캐릭터는 전용 완주 축하 화면 노출)
+    if (G.selectedChar === 'beta') {
+      if (ui) ui.showScreen('betaClear');
+    } else if (ui && ui.showRecordPopup) {
       ui.showRecordPopup({
         score: G.score || 0,
         clearTime: G.elapsed || 0,

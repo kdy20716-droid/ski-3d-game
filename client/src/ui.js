@@ -111,6 +111,16 @@ export const setupUI = (handlers) => {
     };
   }
 
+  const btnBetaClearQuitEl = document.getElementById('btnBetaClearQuit');
+  if (btnBetaClearQuitEl) {
+    btnBetaClearQuitEl.onclick = () => {
+      soundFx.playClick();
+      const scrBetaClear = document.getElementById('scBetaClear');
+      if (scrBetaClear) scrBetaClear.classList.add('off');
+      if (handlers.onQuit) handlers.onQuit();
+    };
+  }
+
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
     const { t, getCharTranslation } = window.i18n;
@@ -271,14 +281,15 @@ export const setupUI = (handlers) => {
     playerEl.style.boxShadow = `0 0 14px ${col}`;
   };
 
-  // 🏁 레이스 진행 바 초기화 (도전 모드 10개 스테이지: 9개 중간 깃발 관문 S1~S9 + 1개 FINISH 체커보드)
+  // 🏁 레이스 진행 바 초기화 (총 105,000m: 1~9스테이지 각 10km + 10스테이지 15km 피날레)
   const initRaceBar = (stages) => {
     const flagsEl = document.getElementById('raceFlags');
     if (!flagsEl || !stages) return;
     flagsEl.innerHTML = '';
-    const total = stages.length; // 10
-    for (let i = 1; i < total; i++) {
-      const globalPct = i / total; // 0.1, 0.2, ..., 0.9 (10k, 20k, ..., 90k)
+    const totalDist = 105000;
+    for (let i = 1; i < stages.length; i++) {
+      const gateDist = i * 10000; // S1=10k, S2=20k, ..., S9=90k
+      const globalPct = gateDist / totalDist;
       const pct = (0.02 + globalPct * 0.94) * 100; // 트랙 내 실제 깃발 위치
       const flagEl = document.createElement('div');
       flagEl.className = 'race-flag';
@@ -294,24 +305,25 @@ export const setupUI = (handlers) => {
     updateRacePlayerAvatar(selectedCharId);
   };
 
-  // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 시각적 100% 동일 동기화!
-  const updateRaceBar = (currentDist, totalDist = 100000, isCutscene = false) => {
+  // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 시각적 100% 1:1 동기화!
+  const updateRaceBar = (currentDist, totalDist = 105000, isCutscene = false) => {
     const playerEl = document.getElementById('racePlayer');
     if (!playerEl) return;
 
     // 1. 오프닝 컷씬 진행 중일 때에는 상단 진행 아바타를 0m 시작점에 고정!
     const effectiveDist = isCutscene ? 0 : Math.max(0, currentDist);
 
-    // 2. 2D 아바타 원형 반지름 시각적 앞서감 보정 (-280m 오프셋 적용)
-    // 3D 스키어가 관문 깃발을 통과하는 바로 그 밀리초 순간 상단 아바타 전면도 깃발을 정확히 통과!
-    const calibDist = Math.max(0, effectiveDist - 280);
-    const rawPct = Math.min(1.0, Math.max(0.0, calibDist / totalDist));
+    // 2. 3D 스키어가 관문 깃발을 통과하는 바로 그 밀리초 순간 상단 아바타 위치도 깃발을 100% 정확히 일치 통과!
+    const rawPct = Math.min(1.0, Math.max(0.0, effectiveDist / totalDist));
     const pctInTrack = 0.02 + rawPct * 0.94; // 2% ~ 96% 범위
     playerEl.style.left = `${pctInTrack * 100}%`;
   };
 
   const showScreen = (type, statsText = '', mode = 'challenge') => {
     const raceBarEl = document.getElementById('raceBar');
+    const scrBetaClear = document.getElementById('scBetaClear');
+    if (scrBetaClear) scrBetaClear.classList.add('off');
+
     if (type === 'start') {
       scrStart.classList.remove('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
       if (raceBarEl) raceBarEl.style.display = 'none';
@@ -331,6 +343,11 @@ export const setupUI = (handlers) => {
       scrOver.classList.remove('off');
       if (raceBarEl) raceBarEl.style.display = 'none';
       setMangaSpeedLines(false); // 게임 오버 시 스피드 라인 100% 비활성화!
+    } else if (type === 'betaClear') {
+      if (scrBetaClear) scrBetaClear.classList.remove('off');
+      scrStart.classList.add('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
+      if (raceBarEl) raceBarEl.style.display = 'none';
+      setMangaSpeedLines(false);
     }
   };
 

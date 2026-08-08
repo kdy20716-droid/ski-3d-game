@@ -244,73 +244,69 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
         b.spikes.forEach(s => { s.emissiveIntensity = 3.5; });
       }
 
-      // ── 충돌 & 밟기 판정 ───────────────────────────────────
+      // ── 1. 공중 밟기(Jump Stomp Disarm) 해제 판정 ─────────────────────────
       const dx = G.px - b.x;
       const dz = G.pz - b.z;
       const distXZSq = dx * dx + dz * dz;
       const hitRadiusXZ = b.radius + 1.85;
 
-      if (G.selectedChar !== 'beta' && distXZSq < hitRadiusXZ * hitRadiusXZ && !G.dead) {
-        const relY = G.py - b.y;
-        // 🎯 [정밀 밟기 높이 판정]: 플레이어 높이(G.py)가 눈덩이 상단 표면 부근(b.radius * 0.25 ~ 2.2)일 때만 밟기 인정!
-        const isStompHeight = G.inAir && (relY >= b.radius * 0.25) && (relY <= b.radius * 2.2);
+      const relY = G.py - b.y;
+      const isStompHeight = G.inAir && (relY >= b.radius * 0.25) && (relY <= b.radius * 2.2);
 
-        if (isStompHeight) {
-          // 🎉 [필수 해제 성공!]: 밟으면 폭발하지 않고 눈가루 소멸 & 공중 36m 스프링 솟구침!
-          b.active = false;
-          scene.remove(b.group);
-          triggerSnowExplosion(b.x, b.y, b.z);
-
-          stompCombo += 1;
-          const comboPts = Math.min(10, stompCombo) * 100;
-          G.score += comboPts;
-          if (ui && ui.updateScore) ui.updateScore(G.score);
-
-          G.inAir = true;
-          G.airTimeTimer = 0;
-          G.vy = 36.0;
-          if (soundFx && soundFx.playKickerLaunch) soundFx.playKickerLaunch();
-
-          if (stompCombo === 10) {
-            G.score += 10000;
-            if (ui) {
-              ui.showToast('👑 콤보왕! COMBO KING! 👑', '+10,000 BONUS PTS! 🎉');
-              if (ui.showBonusToast) ui.showBonusToast('👑 콤보왕 10-COMBO MASTER! +10,000 PTS 🎆', true);
-            }
-            triggerFireworks(soundFx);
-          } else {
-            if (ui && ui.showBonusToast) ui.showBonusToast(`STOMP! +${comboPts} PTS (COMBO x${stompCombo}) 👟✨`, true);
-          }
-          continue;
-
-        } else if (G.invincibleTimer <= 0 && Math.abs(G.py - b.y) < b.radius + 0.8) {
-          // 💥 [지상 부딪힘/폭발]: 해제 실패로 인해 펑! 대폭발하며 뒤로 넉백!
-          b.active = false;
-          scene.remove(b.group);
-          triggerSnowExplosion(b.x, b.y, b.z);
-
-          G.pz += 12.0; // 넉백!
-          G.spd = 0;
-          G.stunTimer = 0.5;
-          G.invincibleTimer = 2.0;
-          if (soundFx && soundFx.playCrash) soundFx.playCrash();
-          if (ui && ui.showBonusToast) ui.showBonusToast('BOOM CRASH! 💣💥', false);
-          continue;
-        }
-      }
-
-      // 💣 3.8초 동안 해제하지 못하면 플레이어 옆에서 펑! 자폭 대폭발!
-      if (b.stateTimer >= 3.8) {
+      if (distXZSq < hitRadiusXZ * hitRadiusXZ && isStompHeight) {
+        // 🎉 [필수 해제 성공!]: 밟으면 폭발하지 않고 눈가루 소멸 & 공중 36m 스프링 솟구침!
         b.active = false;
         scene.remove(b.group);
         triggerSnowExplosion(b.x, b.y, b.z);
 
-        if (G.selectedChar !== 'beta' && Math.hypot(G.px - b.x, G.pz - b.z) < 20.0 && G.invincibleTimer <= 0) {
-          G.pz += 12.0;
-          G.spd = 0;
-          G.stunTimer = 0.5;
-          G.invincibleTimer = 2.0;
-          if (ui && ui.showBonusToast) ui.showBonusToast('TIMED EXPLOSION KNOCKBACK! 💣💥', false);
+        stompCombo += 1;
+        const comboPts = Math.min(10, stompCombo) * 100;
+        G.score += comboPts;
+        if (ui && ui.updateScore) ui.updateScore(G.score);
+
+        G.inAir = true;
+        G.airTimeTimer = 0;
+        G.vy = 36.0;
+        if (soundFx && soundFx.playKickerLaunch) soundFx.playKickerLaunch();
+
+        if (stompCombo === 10) {
+          G.score += 10000;
+          if (ui) {
+            ui.showToast('👑 콤보왕! COMBO KING! 👑', '+10,000 BONUS PTS! 🎉');
+            if (ui.showBonusToast) ui.showBonusToast('👑 콤보왕 10-COMBO MASTER! +10,000 PTS 🎆', true);
+          }
+          triggerFireworks(soundFx);
+        } else {
+          if (ui && ui.showBonusToast) ui.showBonusToast(`STOMP! +${comboPts} PTS (COMBO x${stompCombo}) 👟✨`, true);
+        }
+        bombs.splice(i, 1);
+        continue;
+      }
+
+      // ── 2. 캐릭터와 가로로 같은 선상(Z 라인) 도달 시 펑! 대폭발 판정 ────────
+      const hasReachedPlayerZ = (b.z >= G.pz - 0.5);
+
+      if (hasReachedPlayerZ || b.stateTimer >= 4.5) {
+        b.active = false;
+        scene.remove(b.group);
+        triggerSnowExplosion(b.x, b.y, b.z);
+
+        const inExplosionXRange = Math.abs(G.px - b.x) < (b.radius + 3.5);
+
+        if (inExplosionXRange) {
+          if (!G.inAir) {
+            // 💥 타이밍 점프 실패: 땅에 있다가 같은 라인 폭발에 휩쓸려 넉백!
+            if (G.selectedChar !== 'beta' && G.invincibleTimer <= 0) {
+              G.pz += 12.0; // 넉백!
+              G.spd = 0;
+              G.stunTimer = 0.5;
+              G.invincibleTimer = 2.0;
+              if (ui && ui.showBonusToast) ui.showBonusToast('BOMB EXPLODED ON YOUR LINE! 💣💥', false);
+            }
+          } else {
+            // 🦘 타이밍 점프 성공: 공중에 떠 있어서 같은 라인 폭발 피함 세이프!
+            if (ui && ui.showBonusToast) ui.showBonusToast('SAFE TIMING JUMP! 🦘✨', true);
+          }
         }
 
         if (soundFx && soundFx.playCrash) soundFx.playCrash();

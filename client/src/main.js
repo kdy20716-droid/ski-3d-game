@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=43.0.0';
-import { STAGES } from './stages.js?v=43.0.0';
-import { createSky } from './sky.js?v=43.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=43.0.0';
-import { makeSkier } from './skier.js?v=43.0.0';
-import { createEnvironment } from './environment.js?v=43.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=43.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=43.0.0';
-import { createSpawnManager } from './spawnManager.js?v=43.0.0';
-import { createDriftSystem } from './driftSystem.js?v=43.0.0';
-import { setupUI } from './ui.js?v=43.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=43.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=43.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=43.0.0';
-import { soundFx } from './soundSystem.js?v=43.0.0';
-import { loadSelectedCharacter } from './characters.js?v=43.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=43.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=43.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=43.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=43.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=43.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=43.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=43.0.0';
+import { CFG } from './config.js?v=44.0.0';
+import { STAGES } from './stages.js?v=44.0.0';
+import { createSky } from './sky.js?v=44.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=44.0.0';
+import { makeSkier } from './skier.js?v=44.0.0';
+import { createEnvironment } from './environment.js?v=44.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=44.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=44.0.0';
+import { createSpawnManager } from './spawnManager.js?v=44.0.0';
+import { createDriftSystem } from './driftSystem.js?v=44.0.0';
+import { setupUI } from './ui.js?v=44.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=44.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=44.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=44.0.0';
+import { soundFx } from './soundSystem.js?v=44.0.0';
+import { loadSelectedCharacter } from './characters.js?v=44.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=44.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=44.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=44.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=44.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=44.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=44.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=44.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -868,10 +868,10 @@ const update = (dt, time) => {
     }
   }
 
-  // 🦅 공중 새 기믹 (베타테스터 캐릭터는 새 공격 무적!)
-  if (G.selectedChar !== 'beta' && birdHazardSystem && G.play && !G.isOpeningCutscene && !G.isVictoryCeremony) {
+  // 🦅 공중 새 기믹 (베타테스터 플레이 중에도 새가 시원하게 날아오며 100% 노출! 단, 넉백 공격만 무적 통과)
+  if (birdHazardSystem && G.play && !G.isOpeningCutscene && !G.isVictoryCeremony) {
     birdHazardSystem.update(G.pz, G.px, G.py, G.stage, dt, time, (type) => {
-      if (G.invincibleTimer <= 0) {
+      if (G.selectedChar !== 'beta' && G.invincibleTimer <= 0) {
         G.pz += 6.0; // 뒤로 넉백!
         G.spd = Math.max(0, G.spd - 15.0);
         G.stunTimer = 0.5;
@@ -922,7 +922,7 @@ const update = (dt, time) => {
 
   // 🏁 레이스 진행 바 업데이트 (3D 인게임 실제 위치와 100% 동일한 밀리초 동기화!)
   if (ui && ui.updateRaceBar) {
-    ui.updateRaceBar(G.dist, 100000, G.isOpeningCutscene);
+    ui.updateRaceBar(G.dist, 105000, G.isOpeningCutscene);
   }
 };
 
