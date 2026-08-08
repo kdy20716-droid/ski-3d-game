@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=34.0.0';
-import { STAGES } from './stages.js?v=34.0.0';
-import { createSky } from './sky.js?v=34.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=34.0.0';
-import { makeSkier } from './skier.js?v=34.0.0';
-import { createEnvironment } from './environment.js?v=34.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=34.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=34.0.0';
-import { createSpawnManager } from './spawnManager.js?v=34.0.0';
-import { createDriftSystem } from './driftSystem.js?v=34.0.0';
-import { setupUI } from './ui.js?v=34.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=34.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=34.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=34.0.0';
-import { soundFx } from './soundSystem.js?v=34.0.0';
-import { loadSelectedCharacter } from './characters.js?v=34.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=34.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=34.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=34.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=34.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=34.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=34.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=34.0.0';
+import { CFG } from './config.js?v=35.0.0';
+import { STAGES } from './stages.js?v=35.0.0';
+import { createSky } from './sky.js?v=35.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=35.0.0';
+import { makeSkier } from './skier.js?v=35.0.0';
+import { createEnvironment } from './environment.js?v=35.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=35.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=35.0.0';
+import { createSpawnManager } from './spawnManager.js?v=35.0.0';
+import { createDriftSystem } from './driftSystem.js?v=35.0.0';
+import { setupUI } from './ui.js?v=35.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=35.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=35.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=35.0.0';
+import { soundFx } from './soundSystem.js?v=35.0.0';
+import { loadSelectedCharacter } from './characters.js?v=35.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=35.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=35.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=35.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=35.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=35.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=35.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=35.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -869,31 +869,9 @@ const update = (dt, time) => {
     });
   }
 
-  // 💣 거대 폭발 눈덩이 기믹 (7스테이지~ 스폰, 천천히 추격 유도, 밟기 해제 판정 및 10-콤보 이스터에그)
+  // 💣 돌눈덩이 스타일 폭발 눈덩이 기믹 (7스테이지~ 스폰, 굴러오다 급감속 유도 추격, 부딪힘 & 밟기 불발 소멸)
   if (explodingSnowballHazardSystem && G.play && !G.isOpeningCutscene && !G.isVictoryCeremony) {
-    explodingSnowballHazardSystem.update(G.pz, G.px, G.py, G.spd, G.vy, G.stage, dt, time, soundFx, ui, 
-      (kb) => { // 💥 미처 밟지 못해 2.5초 후 폭발했을 때 넉백
-        if (G.invincibleTimer <= 0) {
-          G.pz += kb.dirZ * kb.force * 0.45;
-          G.px += kb.dirX * kb.force * 0.45;
-          G.invincibleTimer = 1.0;
-
-          if (kb.isFrontExplosion) {
-            G.spd = Math.max(0, G.spd - 20.0);
-            if (ui) ui.showBonusToast('EXPLOSION KNOCKBACK! 💣💥', false);
-          } else {
-            G.spd += 15.0; // 뒤에서 터지면 앞으로 튕겨져 빠른 추진력 획득!
-            if (ui) ui.showBonusToast('BLAST BOOST! 🚀💣', true);
-          }
-        }
-      },
-      (pts) => { // 👟 밟아 해제(Stomp Defuse) 시 점수 추가 & 공중 스프링 리바운드!
-        G.score += pts;
-        G.vy = 22.0; // 스프링 튀어오름!
-        G.inAir = true;
-        if (ui && ui.updateScore) ui.updateScore(G.score);
-      }
-    );
+    explodingSnowballHazardSystem.update(G, dt, soundFx, ui);
   }
 
   // 💥 나무/바위 충돌 시 뒤로 넉백 보정! (충돌 판정 범위를 살짝 보강하여 나무 줄기/가지 스침도 충돌 반응!)
