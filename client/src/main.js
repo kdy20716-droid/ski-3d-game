@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=39.0.0';
-import { STAGES } from './stages.js?v=39.0.0';
-import { createSky } from './sky.js?v=39.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=39.0.0';
-import { makeSkier } from './skier.js?v=39.0.0';
-import { createEnvironment } from './environment.js?v=39.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=39.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=39.0.0';
-import { createSpawnManager } from './spawnManager.js?v=39.0.0';
-import { createDriftSystem } from './driftSystem.js?v=39.0.0';
-import { setupUI } from './ui.js?v=39.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=39.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=39.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=39.0.0';
-import { soundFx } from './soundSystem.js?v=39.0.0';
-import { loadSelectedCharacter } from './characters.js?v=39.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=39.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=39.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=39.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=39.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=39.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=39.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=39.0.0';
+import { CFG } from './config.js?v=40.0.0';
+import { STAGES } from './stages.js?v=40.0.0';
+import { createSky } from './sky.js?v=40.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=40.0.0';
+import { makeSkier } from './skier.js?v=40.0.0';
+import { createEnvironment } from './environment.js?v=40.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=40.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=40.0.0';
+import { createSpawnManager } from './spawnManager.js?v=40.0.0';
+import { createDriftSystem } from './driftSystem.js?v=40.0.0';
+import { setupUI } from './ui.js?v=40.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=40.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=40.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=40.0.0';
+import { soundFx } from './soundSystem.js?v=40.0.0';
+import { loadSelectedCharacter } from './characters.js?v=40.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=40.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=40.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=40.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=40.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=40.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=40.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=40.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -117,6 +117,7 @@ scene.add(camera); // camera를 scene에 추가해야 camera child가 렌더링�
 //  GAME STATE & STAGE TRANSITIONS
 // ─────────────────────────────────────────
 const G = {
+  selectedChar: 'blaze',
   play: false, paused: false, dead: false,
   spd: CFG.BASE_SPD, px: 0, pz: 0, py: 0, vy: 0, vx: 0,
   lean: 0, dist: 0, score: 0, stage: 1, stageMedals: 0,
@@ -349,8 +350,10 @@ const togglePause = () => {
 
 const startGame = (mode = 'challenge') => {
   soundFx.playStart(); // 🎬 게임 시작 / 오프닝 컷씬 웅장한 soundFx
-  updateSkierCharacterModel(loadSelectedCharacter());
+  const charId = loadSelectedCharacter();
+  updateSkierCharacterModel(charId);
   Object.assign(G, {
+    selectedChar: charId,
     mode: mode, play: true, paused: false, dead: false, spd: CFG.BASE_SPD,
     px: 0, pz: 0, py: getTerrainY(0, 0), vy: 0, vx: 0, lean: 0, dist: 0, score: 0, stage: 1, stageMedals: 0,
     nextFlagDist: 10000, jumpCharge: 0, isCharging: false, inAir: false, airTimeTimer: 0.0,
@@ -441,6 +444,7 @@ ui = setupUI({
     }
   },
   onCharacterSelect: (charId) => {
+    G.selectedChar = charId;
     updateSkierCharacterModel(charId);
     if (ui && ui.updateRacePlayerAvatar) ui.updateRacePlayerAvatar(charId);
   }
