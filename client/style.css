@@ -31,7 +31,7 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
 }
 .hud-value span { font-size: 11px; font-weight: 300; color: rgba(255,220,170,0.6); margin-left: 3px; -webkit-text-fill-color: rgba(255,220,170,0.6); }
 .hud-center { text-align: center; padding: 10px 26px; min-width: 220px; }
-/* 🎬 화면 상단 중앙 거대 스테이지 타이틀 배너 (글씨 부분 중심으로 진한 검은색이 묵직하게 감싸고 잘림 없이 자연스러운 소프트 안개 비넷!) */
+/* 🎬 화면 상단 중앙 거대 스테이지 타이틀 배너 (사용자 요청: 그림자/배경 쉐도우 100% 제거) */
 .hud-stage-banner {
   position: absolute;
   top: 75px;
@@ -43,12 +43,11 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
   letter-spacing: 4px;
   color: #00F0FF;
   text-transform: uppercase;
-  text-shadow: 0 0 22px currentColor, 0 0 40px rgba(0, 0, 0, 1.0), 0 0 10px rgba(0,0,0,0.95);
-  /* 🌟 가운데 진한 검은색 범위를 45%까지 더 묵직하게 늘리고 좌우 잘림 없이 서서히 안개처럼 투명해지는 소프트 비넷 그라데이션! */
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.88) 45%, rgba(0, 0, 0, 0.35) 75%, transparent 100%);
+  text-shadow: none !important;
+  background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  padding: 14px 110px;        /* 좌우 여백을 넓혀 섀도우 잘림 현상 100% 해결! */
+  padding: 10px 20px;
   pointer-events: none;
   transition: opacity 0.7s ease-out, transform 0.7s ease-out;
   opacity: 1;
@@ -822,4 +821,174 @@ canvas { display: block; width: 100%; height: 100%; filter: saturate(1.12) contr
     box-shadow: 0 0 45px rgba(255, 0, 51, 1.0), 0 0 22px #FFD700;
     filter: brightness(1.65);
   }
+}
+
+/* ── 🏅 신기록 달성 & 닉네임/국가 등록 팝업 모달 ────────────────────────────── */
+#scRecordPopup {
+  background: rgba(4, 10, 24, 0.82);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.record-popup-card {
+  width: 380px;
+  background: linear-gradient(145deg, rgba(10, 24, 52, 0.95) 0%, rgba(5, 14, 32, 0.98) 100%);
+  border: 1.5px solid rgba(0, 240, 255, 0.5);
+  border-radius: 24px;
+  padding: 24px 28px;
+  box-shadow: 0 0 50px rgba(0, 200, 255, 0.35), inset 0 0 25px rgba(0, 160, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  pointer-events: all;
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.record-popup-badge {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 100px;
+  padding: 4px 14px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+.record-popup-title {
+  font-family: 'Black Han Sans', 'Outfit', sans-serif;
+  font-size: 26px;
+  color: #FFFFFF;
+  text-shadow: 0 0 16px rgba(0, 240, 255, 0.8);
+  margin-top: -4px;
+}
+
+.record-popup-desc {
+  font-size: 11px;
+  color: rgba(200, 230, 255, 0.75);
+  line-height: 1.5;
+}
+
+.record-stats-box {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: rgba(0, 12, 30, 0.7);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+
+.record-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.record-stat-label {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.record-stat-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: #00F0FF;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+}
+
+.record-form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.record-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.record-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #00F0FF;
+}
+
+.record-select, .record-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(10, 20, 45, 0.9);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  border-radius: 10px;
+  color: #FFFFFF;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.record-select:focus, .record-input:focus {
+  border-color: #00F0FF;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+}
+
+.record-btn-group {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.btn-record-submit {
+  flex: 2;
+  padding: 12px 0;
+  background: linear-gradient(135deg, #00F0FF 0%, #0077FF 100%);
+  border: none;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-record-submit:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
+}
+
+.btn-record-skip {
+  flex: 1;
+  padding: 12px 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-record-skip:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
 }

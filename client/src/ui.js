@@ -95,6 +95,14 @@ export const setupUI = (handlers) => {
   if (btnResumeEl)  btnResumeEl.onclick  = () => { soundFx.playClick(); handlers.onTogglePause(); };
   if (btnRestartEl) btnRestartEl.onclick = () => { soundFx.playClick(); handlers.onStart('challenge'); };
 
+  const btnQuitEl = document.getElementById('btnQuit');
+  if (btnQuitEl) {
+    btnQuitEl.onclick = () => {
+      soundFx.playClick();
+      if (handlers.onQuit) handlers.onQuit();
+    };
+  }
+
   const updateLanguageUI = () => {
     if (typeof window.i18n === 'undefined') return;
     const { t, getCharTranslation } = window.i18n;
@@ -103,6 +111,7 @@ export const setupUI = (handlers) => {
     if (btnStartEl) btnStartEl.textContent = t('start');
     if (btnEndlessEl) btnEndlessEl.textContent = t('endlessStart');
     if (btnRestartEl) btnRestartEl.textContent = t('retry');
+    if (btnQuitEl) btnQuitEl.textContent = t('quit');
 
     const btnEditCharEl = document.getElementById('btnEditChar');
     if (btnEditCharEl) btnEditCharEl.textContent = t('editChar');
@@ -207,8 +216,9 @@ export const setupUI = (handlers) => {
   const updateStageTitle = (stageNum, stageName, textColor = '#00F0FF') => {
     if (!$stage) return;
     $stage.textContent = `STAGE ${stageNum} · ${stageName}`;
-    $stage.style.color = textColor; // 🎨 스테이지 테마별 대표 네온 컬러로 실시간 글씨 색상 적용!
-    $stage.style.textShadow = `0 0 18px ${textColor}, 0 0 35px rgba(0,0,0,0.9)`;
+    $stage.style.color = textColor; // 🎨 스테이지 테마별 대표 네온 컬러로 글씨 색상 적용!
+    $stage.style.textShadow = 'none';
+    $stage.style.background = 'transparent';
     $stage.classList.remove('fade-out');
 
     if (stageTitleTimer) clearTimeout(stageTitleTimer);
@@ -251,14 +261,14 @@ export const setupUI = (handlers) => {
     playerEl.style.boxShadow = `0 0 14px ${col}`;
   };
 
-  // 🏁 레이스 진행 바 초기화 (클래식 디자인 복원: 깃발 깃봉 + 배너 + 라벨)
+  // 🏁 레이스 진행 바 초기화 (도전 모드 10개 스테이지: 9개 중간 깃발 관문 S1~S9 + 1개 FINISH 체커보드)
   const initRaceBar = (stages) => {
     const flagsEl = document.getElementById('raceFlags');
     if (!flagsEl || !stages) return;
     flagsEl.innerHTML = '';
     const total = stages.length; // 10
     for (let i = 1; i < total; i++) {
-      const globalPct = i / total; // 0.1, 0.2, ..., 0.9
+      const globalPct = i / total; // 0.1, 0.2, ..., 0.9 (10k, 20k, ..., 90k)
       const pct = (0.02 + globalPct * 0.94) * 100; // 트랙 내 실제 깃발 위치
       const flagEl = document.createElement('div');
       flagEl.className = 'race-flag';
@@ -266,7 +276,7 @@ export const setupUI = (handlers) => {
       flagEl.innerHTML = `
         <div class="race-flag-banner" style="background:${stages[i]?.textColor || '#FFE040'}99; border-color:${stages[i]?.textColor || '#FFE040'};"></div>
         <div class="race-flag-pole"></div>
-        <div class="race-flag-label">S${i + 1}</div>
+        <div class="race-flag-label">S${i}</div>
       `;
       flagsEl.appendChild(flagEl);
     }
@@ -290,12 +300,17 @@ export const setupUI = (handlers) => {
     playerEl.style.left = `${pctInTrack * 100}%`;
   };
 
-  const showScreen = (type, statsText = '') => {
+  const showScreen = (type, statsText = '', mode = 'challenge') => {
+    const raceBarEl = document.getElementById('raceBar');
     if (type === 'start') {
       scrStart.classList.remove('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
+      if (raceBarEl) raceBarEl.style.display = 'none';
       setMangaSpeedLines(false);
     } else if (type === 'game') {
       scrStart.classList.add('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
+      if (raceBarEl) {
+        raceBarEl.style.display = (mode === 'endless') ? 'none' : 'flex';
+      }
     } else if (type === 'pause') {
       scrPause.classList.remove('off');
       setMangaSpeedLines(false); // 일시 정지 시 스피드 라인 100% 비활성화!
@@ -304,7 +319,80 @@ export const setupUI = (handlers) => {
     } else if (type === 'over') {
       document.getElementById('overStats').innerHTML = statsText;
       scrOver.classList.remove('off');
+      if (raceBarEl) raceBarEl.style.display = 'none';
       setMangaSpeedLines(false); // 게임 오버 시 스피드 라인 100% 비활성화!
+    }
+  };
+
+  // 🏅 신기록 달성 & 닉네임/국가 입력 팝업 모달 제어
+  const scrRecordPopup = document.getElementById('scRecordPopup');
+  const popStatScoreEl  = document.getElementById('popStatScore');
+  const popStatTimeEl   = document.getElementById('popStatTime');
+  const popCountrySelect = document.getElementById('popCountrySelect');
+  const popNicknameInput = document.getElementById('popNicknameInput');
+  const btnRecordSubmit  = document.getElementById('btnRecordSubmit');
+  const btnRecordSkip    = document.getElementById('btnRecordSkip');
+
+  const showRecordPopup = ({ score = 0, clearTime = 0, onDone }) => {
+    if (!scrRecordPopup) {
+      if (onDone) onDone();
+      return;
+    }
+
+    if (popStatScoreEl) popStatScoreEl.textContent = `${Math.floor(score).toLocaleString()} pts`;
+    if (popStatTimeEl) {
+      const sec = Number(clearTime) || 0;
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toFixed(1);
+      popStatTimeEl.textContent = m > 0 ? `${m}m ${s}s (${sec.toFixed(1)}s)` : `${s}s`;
+    }
+
+    // 닉네임 & 국가 기억 값 또는 기본 선택 캐릭터명 로드
+    const savedNick = localStorage.getItem('ski3d_nickname') || loadSelectedCharacter() || 'SkiRider';
+    const savedCountry = localStorage.getItem('ski3d_country') || (window.i18n ? window.i18n.getLang().toUpperCase() : 'KR');
+
+    if (popNicknameInput) popNicknameInput.value = savedNick;
+    if (popCountrySelect) popCountrySelect.value = savedCountry;
+
+    // 언어 다국어 텍스트 적용
+    if (window.i18n) {
+      const { t } = window.i18n;
+      const lblTitle = document.getElementById('lblRecordPopupTitle');
+      const lblDesc  = document.getElementById('lblRecordPopupDesc');
+      if (lblTitle) lblTitle.textContent = t('recordTitle');
+      if (lblDesc)  lblDesc.textContent  = t('recordDesc');
+      if (btnRecordSubmit) btnRecordSubmit.textContent = t('submitBtn');
+    }
+
+    scrRecordPopup.classList.remove('off');
+
+    const handleDone = async (shouldSave = false) => {
+      scrRecordPopup.classList.add('off');
+      if (shouldSave) {
+        const nickname = popNicknameInput ? popNicknameInput.value.trim() : savedNick;
+        const country  = popCountrySelect ? popCountrySelect.value : savedCountry;
+
+        localStorage.setItem('ski3d_nickname', nickname || 'SkiRider');
+        localStorage.setItem('ski3d_country', country);
+
+        await submitLeaderboardScoreData({
+          country,
+          nickname: nickname || 'SkiRider',
+          clearTime,
+          score
+        });
+
+        renderLeaderboard(currentLbSort);
+        showBonusToast('RANKING REGISTERED! 🚀', true);
+      }
+      if (onDone) onDone();
+    };
+
+    if (btnRecordSubmit) {
+      btnRecordSubmit.onclick = () => { soundFx.playClick(); handleDone(true); };
+    }
+    if (btnRecordSkip) {
+      btnRecordSkip.onclick = () => { soundFx.playClick(); handleDone(false); };
     }
   };
 
@@ -706,6 +794,6 @@ export const setupUI = (handlers) => {
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
     updateDriftChargeUI, updateStageTitle, updateCornerWarningUI, updateMedalHUD,
     initRaceBar, updateRaceBar, updateScore, updateRacePlayerAvatar, renderLeaderboard,
-    initMainCharPreview, loadSelectedCharacter,
+    showRecordPopup, initMainCharPreview, loadSelectedCharacter,
   };
 };

@@ -123,16 +123,19 @@ export const updateVictoryCeremony = (G, dt, camera, skier, ui, getTerrainY) => 
   if (vt >= 2.8) {
     G.play = false;
 
-    // 🏆 리더보드 점수 및 완주/생존 기록 등록 & 메인메뉴 랭킹 갱신!
-    submitLeaderboardScoreData({
-      country: getLang ? getLang().toUpperCase() : 'KR',
-      nickname: loadSelectedCharacter() || 'SkiRider',
-      clearTime: G.elapsed || 0,
-      score: G.score || 0
-    }).then(() => {
-      if (ui && ui.renderLeaderboard) ui.renderLeaderboard();
-    });
+    const showOverScreen = () => {
+      if (ui) ui.showScreen('over', `🏆 <strong>SURVIVED! CHAMPION VICTORY!</strong><br>최종 점수: <strong>${Math.floor(G.score).toLocaleString()} pts</strong><br>산사태 탈출 성공 및 챔피언 등극!`);
+    };
 
-    if (ui) ui.showScreen('over', `🏆 <strong>SURVIVED! CHAMPION VICTORY!</strong><br>최종 점수: <strong>${Math.floor(G.score)} pts</strong><br>산사태 탈출 성공 및 리더보드 등록 완료!`);
+    // 🏆 랭킹 등록 팝업 모달 띄우기 (닉네임/국가 선택)
+    if (ui && ui.showRecordPopup) {
+      ui.showRecordPopup({
+        score: G.score || 0,
+        clearTime: G.elapsed || 0,
+        onDone: showOverScreen
+      });
+    } else {
+      showOverScreen();
+    }
   }
 };

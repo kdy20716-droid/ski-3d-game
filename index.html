@@ -226,8 +226,66 @@
       >
         PAUSED
       </div>
-      <div class="over-stats">PAUSED</div>
       <button class="btn" id="btnResume">RESUME</button>
+      <button
+        class="btn"
+        id="btnQuit"
+        style="
+          margin-top: 12px;
+          background: linear-gradient(135deg, rgba(255, 50, 50, 0.85) 0%, rgba(200, 20, 20, 0.95) 100%);
+          border-color: rgba(255, 100, 100, 0.6);
+          box-shadow: 0 0 20px rgba(255, 50, 50, 0.45);
+        "
+      >
+        MAIN MENU
+      </button>
+    </div>
+
+    <!-- 🏅 신기록 달성 & 닉네임/국가 랭킹 등록 팝업 모달 -->
+    <div class="screen off" id="scRecordPopup">
+      <div class="record-popup-card">
+        <div class="record-popup-badge">NEW RECORD!</div>
+        <div class="record-popup-title" id="lblRecordPopupTitle">🏆 랭킹 등록!</div>
+        <div class="record-popup-desc" id="lblRecordPopupDesc">축하합니다! 신기록을 달성했습니다. 전 세계 랭킹표에 이름을 남겨보세요!</div>
+        
+        <div class="record-stats-box">
+          <div class="record-stat-item">
+            <span class="record-stat-label">SCORE</span>
+            <span class="record-stat-val" id="popStatScore">0 pts</span>
+          </div>
+          <div class="record-stat-item">
+            <span class="record-stat-label">TIME</span>
+            <span class="record-stat-val" id="popStatTime">0.0s</span>
+          </div>
+        </div>
+
+        <div class="record-form-group">
+          <div class="record-input-wrap">
+            <label class="record-label">COUNTRY / 국가</label>
+            <select id="popCountrySelect" class="record-select">
+              <option value="KR" selected>🇰🇷 대한민국 (KR)</option>
+              <option value="US">🇺🇸 미국 (US)</option>
+              <option value="JP">🇯🇵 일본 (JP)</option>
+              <option value="CN">🇨🇳 중국 (CN)</option>
+              <option value="FR">🇫🇷 프랑스 (FR)</option>
+              <option value="GB">🇬🇧 영국 (GB)</option>
+              <option value="DE">🇩🇪 독일 (DE)</option>
+              <option value="CA">🇨🇦 캐나다 (CA)</option>
+              <option value="AU">🇦🇺 호주 (AU)</option>
+            </select>
+          </div>
+
+          <div class="record-input-wrap">
+            <label class="record-label">NICKNAME / 닉네임</label>
+            <input type="text" id="popNicknameInput" class="record-input" maxlength="14" placeholder="닉네임 입력 (최대 14자)" />
+          </div>
+        </div>
+
+        <div class="record-btn-group">
+          <button class="btn-record-submit" id="btnRecordSubmit">REGISTER 🚀</button>
+          <button class="btn-record-skip" id="btnRecordSkip">SKIP</button>
+        </div>
+      </div>
     </div>
 
     <div class="screen off" id="scOver">
@@ -237,7 +295,7 @@
       <button class="btn" id="btnRestart">TRY AGAIN</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v19.0.0 - Fixed WebGL Shader Stutter on Medal Collect) -->
-    <script type="module" src="client/src/main.js?v=19.0.0"></script>
+    <!-- Main Module Script (Client Architecture v22.0.0 - Clean Stage Title Text Without Shadow) -->
+    <script type="module" src="client/src/main.js?v=22.0.0"></script>
   </body>
 </html>

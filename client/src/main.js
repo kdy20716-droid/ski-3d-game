@@ -1,25 +1,25 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=19.0.0';
-import { STAGES } from './stages.js?v=19.0.0';
-import { createSky } from './sky.js?v=19.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=19.0.0';
-import { makeSkier } from './skier.js?v=19.0.0';
-import { createEnvironment } from './environment.js?v=19.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=19.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=19.0.0';
-import { createSpawnManager } from './spawnManager.js?v=19.0.0';
-import { createDriftSystem } from './driftSystem.js?v=19.0.0';
-import { setupUI } from './ui.js?v=19.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=19.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=19.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=19.0.0';
-import { soundFx } from './soundSystem.js?v=19.0.0';
-import { loadSelectedCharacter } from './characters.js?v=19.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=19.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=19.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=19.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=19.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=19.0.0';
+import { CFG } from './config.js?v=22.0.0';
+import { STAGES } from './stages.js?v=22.0.0';
+import { createSky } from './sky.js?v=22.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=22.0.0';
+import { makeSkier } from './skier.js?v=22.0.0';
+import { createEnvironment } from './environment.js?v=22.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=22.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=22.0.0';
+import { createSpawnManager } from './spawnManager.js?v=22.0.0';
+import { createDriftSystem } from './driftSystem.js?v=22.0.0';
+import { setupUI } from './ui.js?v=22.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji } from './i18n.js?v=22.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=22.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=22.0.0';
+import { soundFx } from './soundSystem.js?v=22.0.0';
+import { loadSelectedCharacter } from './characters.js?v=22.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=22.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=22.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=22.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=22.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=22.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -384,9 +384,9 @@ const startGame = (mode = 'challenge') => {
   if (snowballHazard && snowballHazard.reset) snowballHazard.reset();
   if (rockySnowballHazard && rockySnowballHazard.reset) rockySnowballHazard.reset();
 
-  if (ui) ui.showScreen('game');
+  if (ui) ui.showScreen('game', '', mode);
   if (ui && ui.initRaceBar) ui.initRaceBar(STAGES); // 🏁 레이스 진행 바 깃발 초기화
-  if (ui && ui.updateRaceBar) ui.updateRaceBar(0, 100000, G.mode); // 시작 위치
+  if (ui && ui.updateRaceBar) ui.updateRaceBar(0, 100000, G.isOpeningCutscene); // 시작 위치
   if (ui && ui.showVictoryOverlay) ui.showVictoryOverlay(false);
   if (ui && ui.showSurpriseBadge) ui.showSurpriseBadge(false);
 
@@ -419,6 +419,18 @@ const endGame = () => {
 ui = setupUI({
   onStart: startGame,
   onTogglePause: togglePause,
+  onQuit: () => {
+    G.play = false;
+    G.paused = false;
+    G.dead = false;
+    G.isOpeningCutscene = false;
+    G.isVictoryCeremony = false;
+    if (ui) {
+      ui.showScreen('start');
+      ui.setDangerVignette(0);
+      ui.renderLeaderboard();
+    }
+  },
   onCharacterSelect: (charId) => {
     updateSkierCharacterModel(charId);
     if (ui && ui.updateRacePlayerAvatar) ui.updateRacePlayerAvatar(charId);
@@ -779,17 +791,20 @@ const update = (dt, time) => {
     if (ui && ui.setDangerVignette) ui.setDangerVignette(0);
     soundFx.playGameOver(); // 💀 산사태 삼켜짐 저음 사운드 FX
 
-    // 🏆 리더보드 점수 및 완주/생존 기록 등록 & 메인메뉴 랭킹 갱신!
-    submitLeaderboardScoreData({
-      country: getLang() ? getLang().toUpperCase() : 'KR',
-      nickname: loadSelectedCharacter() || 'SkiRider',
-      clearTime: G.elapsed || 0,
-      score: G.score || 0
-    }).then(() => {
-      if (ui && ui.renderLeaderboard) ui.renderLeaderboard();
-    });
+    const showOverScreen = () => {
+      if (ui) ui.showScreen('over', `💀 <strong>AVALANCHE OVERTOOK YOU!</strong><br>거대 산사태에 삼켜졌습니다!<br>최종 점수: <strong>${Math.floor(G.score).toLocaleString()} pts</strong>`);
+    };
 
-    if (ui) ui.showScreen('over', `💀 <strong>AVALANCHE OVERTOOK YOU!</strong><br>거대 산사태에 삼켜졌습니다!<br>최종 점수: <strong>${Math.floor(G.score)} pts</strong>`);
+    // 🏆 랭킹 등록 팝업 모달 띄우기 (닉네임/국가 선택)
+    if (ui && ui.showRecordPopup) {
+      ui.showRecordPopup({
+        score: G.score || 0,
+        clearTime: G.elapsed || 0,
+        onDone: showOverScreen
+      });
+    } else {
+      showOverScreen();
+    }
     return;
   }
 
