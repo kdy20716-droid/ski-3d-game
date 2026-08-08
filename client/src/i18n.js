@@ -1,20 +1,10 @@
-// 🌐 다국어 (i18n) 및 국적 Flag 매핑 매니저
-
-export const FLAGS = {
-  KR: { name: '대한민국 (Korea)', flag: '🇰🇷', lang: 'ko' },
-  US: { name: 'USA (United States)', flag: '🇺🇸', lang: 'en' },
-  JP: { name: '日本 (Japan)', flag: '🇯🇵', lang: 'ja' },
-  CN: { name: '中国 (China)', flag: '🇨🇳', lang: 'zh' },
-  FR: { name: 'France', flag: '🇫🇷', lang: 'fr' },
-};
-
-const TRANSLATIONS = {
+export const i18n = {
   en: {
     title: '3D SKI AVALANCHE',
-    subTitle: 'ESCAPE THE AVALANCHE! HIGH-SPEED ALPINE DESCENT',
-    start: 'CHALLENGE MODE',
-    endlessStart: 'ENDLESS MODE',
-    editChar: '✏ EDIT',
+    subTitle: 'ESCAPE THE AVALANCHE! HIGH-SPEED SURVIVAL DESCENT',
+    start: 'START CHALLENGE',
+    endlessStart: 'START ENDLESS',
+    editChar: '✏ EDIT CHARACTER',
     charSelectTitle: 'CHARACTER SELECT',
     back: '← BACK',
     selected: 'SELECTED',
@@ -31,6 +21,7 @@ const TRANSLATIONS = {
     submitBtn: 'REGISTER 🚀',
     quit: 'MAIN MENU',
     resume: 'RESUME',
+    selectChar: 'SELECT CHARACTER',
   },
   ko: {
     title: '3D 스키 아발란체',
@@ -54,6 +45,7 @@ const TRANSLATIONS = {
     submitBtn: '랭킹 등록 🚀',
     quit: '메인 메뉴로 나가기',
     resume: '계속하기',
+    selectChar: '캐릭터 선택하기',
   },
   ja: {
     title: '3D スキーアバランチ',
@@ -77,6 +69,7 @@ const TRANSLATIONS = {
     submitBtn: '登録する 🚀',
     quit: 'メインメニューへ',
     resume: 'ゲーム再開',
+    selectChar: 'キャラクター決定',
   },
   zh: {
     title: '3D 极限雪崩滑雪',
@@ -100,6 +93,7 @@ const TRANSLATIONS = {
     submitBtn: '立即提交 🚀',
     quit: '返回主菜单',
     resume: '继续游戏',
+    selectChar: '确认选择角色',
   },
   fr: {
     title: '3D SKI AVALANCHE',
@@ -123,53 +117,33 @@ const TRANSLATIONS = {
     submitBtn: 'ENREGISTRER 🚀',
     quit: 'MENU PRINCIPAL',
     resume: 'REPRENDRE',
+    selectChar: 'CHOISIR LE PERSONNAGE',
   }
 };
 
-export const CHARACTER_TRANSLATIONS = {
-  blaze:    { ko: { name: '블레이즈', desc: '불꽃 스피더' },       en: { name: 'Blaze', desc: 'Flame Speed Racer' },       ja: { name: 'ブレイズ', desc: '炎のスピードレーサー' },   zh: { name: '烈焰赛手', desc: '烈焰赛车手' },         fr: { name: 'Blaze', desc: 'Skieur de Feu' } },
-  cyber:    { ko: { name: '프로스트바이트', desc: '사이버 수트' }, en: { name: 'Frostbite', desc: 'Cyber Suit' },          ja: { name: 'フロストバイト', desc: 'サイバースーツ' },   zh: { name: '霜冻战士', desc: '赛博雪装' },           fr: { name: 'Frostbite', desc: 'Combinaison Cyber' } },
-  hunter:   { ko: { name: '알파인 레인저', desc: '산악 레인저' },  en: { name: 'Alpine Ranger', desc: 'Mountain Ranger' }, ja: { name: 'アルパインレンジャー', desc: '山岳レンジャー' }, zh: { name: '高山巡逻员', desc: '高山护林员' },     fr: { name: 'Chasseur des Alpes', desc: 'Garde-Forestier' } },
-  phantom:  { ko: { name: '팬텀', desc: '스텔스 수트' },           en: { name: 'Phantom', desc: 'Stealth Suit' },          ja: { name: 'ファントム', desc: 'ステルススーツ' },     zh: { name: '幽灵潜行者', desc: '隐形战服' },         fr: { name: 'Fantôme', desc: 'Combinaison Furtive' } },
-  champion: { ko: { name: '챔피언', desc: '골드 메달리스트' },     en: { name: 'Champion', desc: 'Gold Medalist' },        ja: { name: 'チャンピオン', desc: '金メダリスト' },     zh: { name: '金牌冠军', desc: '金牌得主' },           fr: { name: 'Champion', desc: 'Médaillé d\'Or' } },
-  fiona:    { ko: { name: '피오나', desc: '눈의 여왕' },           en: { name: 'Fiona', desc: 'Snow Queen' },              ja: { name: 'フィオナ', desc: '雪の女王' },             zh: { name: '菲奥娜', desc: '冰雪女王' },             fr: { name: 'Fiona', desc: 'Reine des Neiges' } },
-  bear:     { ko: { name: '곰돌이', desc: '설산 마스코트' },       en: { name: 'Mountain Bear', desc: 'Alpine Bear' },     ja: { name: 'クマさん', desc: '雪山のマスコット' },       zh: { name: '雪山熊', desc: '雪山吉祥物' },           fr: { name: 'Ours', desc: 'Mascotte des Alpes' } },
-  penguin:  { ko: { name: '펭귄', desc: '빙하 미끄럼꾼' },         en: { name: 'Ice Penguin', desc: 'Glacier Glider' },    ja: { name: 'ペンギン', desc: '氷河のグライダー' },       zh: { name: '冰川企鹅', desc: '冰川滑翔者' },         fr: { name: 'Pingouin', desc: 'Glisseur des Glaces' } },
-  yeti:     { ko: { name: '예티', desc: '설산의 전설' },           en: { name: 'Snow Yeti', desc: 'Legend of Alps' },      ja: { name: 'イエティ', desc: '雪山の伝説' },           zh: { name: '雪人伊提', desc: '雪山传说' },           fr: { name: 'Yéti', desc: 'Légende des Alpes' } },
-  beta:     { ko: { name: '베타테스터', desc: '원조 테스트 스키어' },en: { name: 'Beta Tester', desc: 'Original Skier' },    ja: { name: 'ベータテスター', desc: '元祖テスター' },     zh: { name: '测试员', desc: '元老测试员' },           fr: { name: 'Bêta Testeur', desc: 'Testeur d\'Origine' } }
-};
-
-let currentLang = 'ko'; // Default to Korean
+let currentLang = 'ko';
 
 export const getLang = () => currentLang;
 
-export const setLang = (langCode) => {
-  if (TRANSLATIONS[langCode]) {
-    currentLang = langCode;
-    console.log(`[i18n] Language changed to: ${langCode}`);
-    return true;
+export const setLang = (lang) => {
+  if (i18n[lang]) {
+    currentLang = lang;
+    localStorage.setItem('ski_lang', lang);
   }
-  return false;
 };
 
 export const t = (key) => {
-  const langObj = TRANSLATIONS[currentLang] || TRANSLATIONS.ko;
-  return langObj[key] || TRANSLATIONS.ko[key] || key;
+  const dict = i18n[currentLang] || i18n.ko;
+  return dict[key] || key;
 };
 
-export const getCharTranslation = (charId, langCode = currentLang) => {
-  const charObj = CHARACTER_TRANSLATIONS[charId] || CHARACTER_TRANSLATIONS.blaze;
-  return charObj[langCode] || charObj.ko || charObj.en;
+export const getFlagEmoji = (lang) => {
+  switch (lang) {
+    case 'ko': return '🇰🇷';
+    case 'en': return '🇺🇸';
+    case 'ja': return '🇯🇵';
+    case 'zh': return '🇨🇳';
+    case 'fr': return '🇫🇷';
+    default: return '🌐';
+  }
 };
-
-export const getFlagEmoji = (countryCode) => {
-  const code = (countryCode || 'KR').toUpperCase();
-  return FLAGS[code] ? FLAGS[code].flag : '🚩';
-};
-
-export const i18n = { getLang, setLang, t, getCharTranslation, getFlagEmoji, FLAGS };
-
-// 브라우저 글로벌 디버그용 노출
-if (typeof window !== 'undefined') {
-  window.i18n = i18n;
-}

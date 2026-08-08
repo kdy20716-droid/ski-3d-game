@@ -682,6 +682,36 @@ export const setupUI = (handlers) => {
 
     const renderer3D = getCardSharedRenderer();
     const currentId = loadSelectedCharacter();
+    let pendingCharId = currentId;
+    let toastTimer = null;
+
+    const showTopCharToast = (title, sub) => {
+      const toastEl = document.getElementById('charSelToast');
+      const titleEl = document.getElementById('charSelToastTitle');
+      const subEl   = document.getElementById('charSelToastSub');
+      if (!toastEl) return;
+
+      if (titleEl) titleEl.textContent = title;
+      if (subEl) subEl.textContent = sub;
+
+      toastEl.style.opacity = '1';
+      toastEl.style.transform = 'translate(-50%, 0px)';
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translate(-50%, -10px)';
+      }, 3500);
+    };
+
+    const hideTopCharToast = () => {
+      const toastEl = document.getElementById('charSelToast');
+      if (toastEl) {
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translate(-50%, -10px)';
+      }
+      if (toastTimer) clearTimeout(toastTimer);
+    };
 
     CHARACTER_LIST.forEach(charInfo => {
       const card = document.createElement('div');
@@ -724,44 +754,46 @@ export const setupUI = (handlers) => {
       card.append(cvs, nameEl, descEl, badge);
       grid.appendChild(card);
 
-      // 클릭: 캐릭터 선택 + 메인화면으로 복귀
+      // 클릭: 캐릭터 선택 (자동으로 메뉴 이동하지 않고 카드를 선택 상태로 지정 + 베타테스터 시 상단 토스트 알림)
       card.addEventListener('click', () => {
         soundFx.playClick();
+        pendingCharId = charInfo.id;
         saveSelectedCharacter(charInfo.id);
+
         // 선택 표시 갱신
         grid.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
+
         // 메인 프리뷰 갱신
         initMainCharPreview(charInfo.id);
         if (handlers && handlers.onCharacterSelect) {
           handlers.onCharacterSelect(charInfo.id);
         }
 
-        // 🏂 베타테스터 캐릭터 선택 시 전용 안내 팝업 모달 표출!
+        // 🏂 베타테스터 캐릭터 클릭 시 화면 상단에 토스트 메시지 노출 후 자동 서서히 사라짐!
         if (charInfo.id === 'beta') {
-          const scBetaNoticeEl = document.getElementById('scBetaNotice');
-          if (scBetaNoticeEl) {
-            scBetaNoticeEl.classList.remove('off');
-            // 💡 모달창 영역 어디든 한 번만 클릭해도 바로 닫히고 메인메뉴로 복귀!
-            const dismissModal = (e) => {
-              if (e) e.stopPropagation();
-              soundFx.playClick();
-              scBetaNoticeEl.classList.add('off');
-              scBetaNoticeEl.onclick = null;
-              closeCharSelect();
-            };
-            scBetaNoticeEl.onclick = dismissModal;
-          } else {
-            setTimeout(() => { closeCharSelect(); }, 350);
-          }
+          showTopCharToast('모든 장애물을 무시 하고 달립니다', '(도전모드 기록이 되지않습니다)');
         } else {
-          // 0.35초 후 선택 화면 닫고 메인으로
-          setTimeout(() => {
-            closeCharSelect();
-          }, 350);
+          hideTopCharToast();
         }
       });
     });
+
+    // 🔘 캐릭터 칸 밑에 위치한 "캐릭터 선택하기" 버튼 클릭 시 저장 후 메뉴로 이동!
+    const btnConfirmChar = document.getElementById('btnConfirmChar');
+    if (btnConfirmChar) {
+      const localizedText = (window.i18n ? window.i18n.t('selectChar') : 'SELECT CHARACTER') + ' / 캐릭터 선택하기';
+      btnConfirmChar.textContent = localizedText;
+      btnConfirmChar.onclick = () => {
+        soundFx.playClick();
+        hideTopCharToast();
+        saveSelectedCharacter(pendingCharId);
+        if (handlers && handlers.onCharacterSelect) {
+          handlers.onCharacterSelect(pendingCharId);
+        }
+        closeCharSelect();
+      };
+    }
 
     const loopCards = () => {
       cardSelectRAF = requestAnimationFrame(loopCards);
