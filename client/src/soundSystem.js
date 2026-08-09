@@ -424,11 +424,49 @@ class SoundManager {
     gain.gain.setValueAtTime(0.25, t);
     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
 
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-
     osc.start(t);
     osc.stop(t + 0.04);
+  }
+
+  // 11. 🎵 MP3/OGG BGM 재생 엔진 (Stage 10/11 및 메인 테마 음악 자동 로드 & 무한 루프)
+  playBGM(trackName = 'stage10') {
+    this.ensureContext();
+    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) return;
+
+    this.stopBGM();
+
+    const possiblePaths = [
+      `client/assets/audio/bgm/${trackName}.mp3`,
+      `client/assets/audio/bgm/${trackName}.ogg`,
+      `client/assets/audio/bgm/${trackName}_finale.mp3`,
+      `client/assets/audio/bgm/${trackName}_bonus.mp3`,
+    ];
+
+    const audio = new Audio();
+    audio.loop = true;
+    audio.volume = 0.45;
+
+    let pathIdx = 0;
+    const tryNextPath = () => {
+      if (pathIdx >= possiblePaths.length) return;
+      audio.src = possiblePaths[pathIdx++];
+      audio.play().catch(() => {
+        tryNextPath();
+      });
+    };
+
+    this.bgmAudio = audio;
+    this.currentBGMTrack = trackName;
+    tryNextPath();
+  }
+
+  stopBGM() {
+    if (this.bgmAudio) {
+      this.bgmAudio.pause();
+      this.bgmAudio.currentTime = 0;
+      this.bgmAudio = null;
+    }
+    this.currentBGMTrack = null;
   }
 }
 

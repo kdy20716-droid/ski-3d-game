@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=51.0.0';
-import { STAGES } from './stages.js?v=51.0.0';
-import { createSky } from './sky.js?v=51.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=51.0.0';
-import { makeSkier } from './skier.js?v=51.0.0';
-import { createEnvironment } from './environment.js?v=51.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=51.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=51.0.0';
-import { createSpawnManager } from './spawnManager.js?v=51.0.0';
-import { createDriftSystem } from './driftSystem.js?v=51.0.0';
-import { setupUI } from './ui.js?v=51.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji, getStageTranslation } from './i18n.js?v=51.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=51.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=51.0.0';
-import { soundFx } from './soundSystem.js?v=51.0.0';
-import { loadSelectedCharacter } from './characters.js?v=51.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=51.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=51.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=51.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=51.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=51.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=51.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=51.0.0';
+import { CFG } from './config.js?v=52.0.0';
+import { STAGES } from './stages.js?v=52.0.0';
+import { createSky } from './sky.js?v=52.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=52.0.0';
+import { makeSkier } from './skier.js?v=52.0.0';
+import { createEnvironment } from './environment.js?v=52.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=52.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=52.0.0';
+import { createSpawnManager } from './spawnManager.js?v=52.0.0';
+import { createDriftSystem } from './driftSystem.js?v=52.0.0';
+import { setupUI } from './ui.js?v=52.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji, getStageTranslation } from './i18n.js?v=52.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=52.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=52.0.0';
+import { soundFx } from './soundSystem.js?v=52.0.0';
+import { loadSelectedCharacter } from './characters.js?v=52.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=52.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=52.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=52.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=52.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=52.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=52.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=52.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -422,10 +422,15 @@ const startGame = (mode = 'challenge') => {
 
   env.spawnFlagGate(G.nextFlagDist);
   if (ui) ui.showToast(t('escapeToastTitle'), t('escapeToastSub'));
+
+  // 🎵 1~11 스테이지 전용 BGM 자동 재생 연동 (무한모드일 경우 stage11 BGM, 도전모드 시작 시 stage1 BGM)
+  const startBgmTrack = (mode === 'endless') ? 'stage11' : 'stage1';
+  if (soundFx && soundFx.playBGM) soundFx.playBGM(startBgmTrack);
 };
 
 const endGame = () => {
   G.play = false; G.dead = true;
+  if (soundFx && soundFx.stopBGM) soundFx.stopBGM();
   if (ui) ui.showScreen('over', `획득 점수: <strong>${Math.floor(G.score)} pts</strong><br>달성 스테이지: STAGE ${G.stage}`);
 };
 
@@ -438,6 +443,7 @@ ui = setupUI({
     G.dead = false;
     G.isOpeningCutscene = false;
     G.isVictoryCeremony = false;
+    if (soundFx && soundFx.stopBGM) soundFx.stopBGM();
     if (ui) {
       ui.showScreen('start');
       ui.setDangerVignette(0);
@@ -841,6 +847,10 @@ const update = (dt, time) => {
       const sNextName = getStageTranslation(stageIdx);
       triggerStageTransition(stageIdx);
       if (ui) ui.updateStageTitle(G.stage, sNextName, sNext.textColor); // 3초간 시원하게 각 테마 네온 컬러로 상단에 노출!
+
+      // 🎵 각 스테이지별 음원 (stage1 ~ stage11) 루프 재생 전환!
+      const nextBgmTrack = 'stage' + Math.min(11, G.stage);
+      if (soundFx && soundFx.playBGM) soundFx.playBGM(nextBgmTrack);
 
       // 2. 🥇 메달 빠져나와 점수판으로 흡수되는 애니메이션 재생!
       if (prevMedalCount > 0) {
