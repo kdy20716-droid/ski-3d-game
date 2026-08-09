@@ -1,27 +1,27 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-import { CFG } from './config.js?v=54.0.0';
-import { STAGES } from './stages.js?v=54.0.0';
-import { createSky } from './sky.js?v=54.0.0';
-import { createTerrainSystem, getTerrainY } from './terrain.js?v=54.0.0';
-import { makeSkier } from './skier.js?v=54.0.0';
-import { createEnvironment } from './environment.js?v=54.0.0';
-import { createDiamondArchSystem } from './diamondArch.js?v=54.0.0';
-import { createKickerRampSystem } from './kickerRamp.js?v=54.0.0';
-import { createSpawnManager } from './spawnManager.js?v=54.0.0';
-import { createDriftSystem } from './driftSystem.js?v=54.0.0';
-import { setupUI } from './ui.js?v=54.0.0';
-import { i18n, getLang, setLang, t, getFlagEmoji, getStageTranslation } from './i18n.js?v=54.0.0';
-import { createAvalancheSystem } from './avalancheSystem.js?v=54.0.0';
-import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=54.0.0';
-import { soundFx } from './soundSystem.js?v=54.0.0';
-import { loadSelectedCharacter } from './characters.js?v=54.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=54.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=54.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=54.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=54.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=54.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=54.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=54.0.0';
+import { CFG } from './config.js?v=57.0.0';
+import { STAGES } from './stages.js?v=57.0.0';
+import { createSky } from './sky.js?v=57.0.0';
+import { createTerrainSystem, getTerrainY } from './terrain.js?v=57.0.0';
+import { makeSkier } from './skier.js?v=57.0.0';
+import { createEnvironment } from './environment.js?v=57.0.0';
+import { createDiamondArchSystem } from './diamondArch.js?v=57.0.0';
+import { createKickerRampSystem } from './kickerRamp.js?v=57.0.0';
+import { createSpawnManager } from './spawnManager.js?v=57.0.0';
+import { createDriftSystem } from './driftSystem.js?v=57.0.0';
+import { setupUI } from './ui.js?v=57.0.0';
+import { i18n, getLang, setLang, t, getFlagEmoji, getStageTranslation } from './i18n.js?v=57.0.0';
+import { createAvalancheSystem } from './avalancheSystem.js?v=57.0.0';
+import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=57.0.0';
+import { soundFx } from './soundSystem.js?v=57.0.0';
+import { loadSelectedCharacter } from './characters.js?v=57.0.0';
+import { createSnowballHazardSystem } from './snowballHazard.js?v=57.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=57.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=57.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=57.0.0';
+import { submitLeaderboardScoreData } from './leaderboard.js?v=57.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=57.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=57.0.0';
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -443,7 +443,7 @@ ui = setupUI({
     G.dead = false;
     G.isOpeningCutscene = false;
     G.isVictoryCeremony = false;
-    if (soundFx && soundFx.fadeToBGM) soundFx.fadeToBGM('robby', 0, 1000);
+    if (soundFx && soundFx.stopBGM) soundFx.stopBGM();
     if (ui) {
       ui.showScreen('start');
       ui.setDangerVignette(0);
@@ -550,7 +550,7 @@ const update = (dt, time) => {
   // 🏎️ 4. 독립 드리프트 시스템 모듈 (driftSystem.js) 안전하게 구동
   let driftRes = null;
   if (driftSystem) {
-    driftRes = driftSystem.update(G, keys, dt, ui);
+    driftRes = driftSystem.update(G, keys, dt, ui, soundFx);
   }
 
   const targetSpd = Math.min(currentMaxSpd, (G.boosterTimer > 0 ? currentMaxSpd : CFG.BASE_SPD) + (G.stage-1)*5 + G.elapsed*1.8);

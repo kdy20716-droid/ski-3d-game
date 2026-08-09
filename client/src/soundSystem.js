@@ -11,9 +11,11 @@ class SoundManager {
     this.goldCombo = 0;
     this.lastGoldTime = 0;
 
-    // 🔊 BGM 및 SFX 개별 볼륨 / 음소거 저장 상태
-    this.bgmVolume = parseFloat(localStorage.getItem('ski_bgm_vol') ?? '0.45');
-    this.sfxVolume = parseFloat(localStorage.getItem('ski_sfx_vol') ?? '0.50');
+    // 🔊 BGM 및 SFX 개별 볼륨 / 음소거 저장 상태 (NaN 방지 보정)
+    const rawBgm = parseFloat(localStorage.getItem('ski_bgm_vol'));
+    const rawSfx = parseFloat(localStorage.getItem('ski_sfx_vol'));
+    this.bgmVolume = isNaN(rawBgm) ? 0.45 : Math.max(0, Math.min(1, rawBgm));
+    this.sfxVolume = isNaN(rawSfx) ? 0.50 : Math.max(0, Math.min(1, rawSfx));
     this.bgmMuted = localStorage.getItem('ski_bgm_mute') === 'true';
     this.sfxMuted = localStorage.getItem('ski_sfx_mute') === 'true';
   }
@@ -65,6 +67,11 @@ class SoundManager {
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
+  }
+
+  getSFXGain(baseVal = 1.0) {
+    if (this.isMuted || this.sfxMuted) return 0;
+    return baseVal * this.sfxVolume;
   }
 
   // 1. 🎬 오프닝 컷씬 / 스타트 웅장한 저음 파동 + 신시사이저 소리
@@ -255,7 +262,7 @@ class SoundManager {
     noise.stop(t + 0.12);
   }
 
-  // 6. 🔷 일반 크리스탈 / 다이아몬드 획득음 (100% 빠짐없이 즉각 울리는 아케이드 띵-! 소리)
+  // 6. 🔷 일반 크리스탈/다이아몬드 획득음 (맑고 밝은 "띠링~" 사운드)
   playGold() {
     this.ensureContext();
     if (!this.ctx || this.isMuted) return;
@@ -269,50 +276,70 @@ class SoundManager {
     this.lastGoldTime = now;
 
     const t = this.ctx.currentTime;
-    // 콤보에 따른 피치 스케일링 (연속 획득 시 띵 띵 띵! 소리가 높아짐)
-    const pitchMult = 1.0 + this.goldCombo * 0.06;
-    const baseFreqs = [659.25, 1046.50];
-
-    baseFreqs.forEach((freq, idx) => {
+    const pitchMult = 1.0 + this.goldCombo * 0.08;
+    // 띠링~ : 주파수가 높은 사인파 + 짧은 decay로 맑고 깨끗하게
+    const freqs = [1046.50, 1318.51]; // C6, E6
+    freqs.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
+      const gainNode = this.ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq * pitchMult, t + idx * 0.02);
-
-      gain.gain.setValueAtTime(0.35, t + idx * 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.02 + 0.14);
-
-      osc.connect(gain);
-      gain.connect(this.masterGain);
-
-      osc.start(t + idx * 0.02);
-      osc.stop(t + idx * 0.02 + 0.14);
+      osc.frequency.setValueAtTime(freq * pitchMult, t + idx * 0.04);
+      gainNode.gain.setValueAtTime(0.0, t + idx * 0.04);
+      gainNode.gain.linearRampToValueAtTime(0.4, t + idx * 0.04 + 0.008);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.04 + 0.28);
+      osc.connect(gainNode);
+      gainNode.connect(this.masterGain);
+      osc.start(t + idx * 0.04);
+      osc.stop(t + idx * 0.04 + 0.30);
     });
   }
 
-  // 7. 🌟 황금 다이아몬드/메달 전용 경량화 챠링-! 획득음 (오디오 스레드 렉 100% 차단)
+  // 7. 🌟 황금 다이아몬드 "띠링~" 획득음 (밝고 깨끗한 3음 아르페지오 벨 사운드)
   playGoldenDiamond() {
     this.ensureContext();
     if (!this.ctx || this.isMuted) return;
 
     const t = this.ctx.currentTime;
-    const notes = [659.25, 1046.50, 1318.51]; // E5 - C6 - E6 3음 아르페지오 (경량 믹서 연산)
+    // 띠링~ : 높은 음정 3개를 빠르게 아르페지오로, 긴 decay로 여운 남기기 (C-E-G 코드)
+    const notes = [1046.50, 1318.51, 1568.00]; // C6 - E6 - G6
     notes.forEach((freq, idx) => {
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
+      const gainNode = this.ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t + idx * 0.03);
+      osc.frequency.setValueAtTime(freq, t + idx * 0.05);
+      gainNode.gain.setValueAtTime(0.0, t + idx * 0.05);
+      gainNode.gain.linearRampToValueAtTime(0.38, t + idx * 0.05 + 0.008);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.05 + 0.45);
+      osc.connect(gainNode);
+      gainNode.connect(this.masterGain);
+      osc.start(t + idx * 0.05);
+      osc.stop(t + idx * 0.05 + 0.50);
+    });
+  }
 
-      gain.gain.setValueAtTime(0.3, t + idx * 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.03 + 0.14);
+  // 7-1. 🥇 황금 메달 전용 "딸랑~" 획득음 (더욱 청아하고 영롱한 벨 사운드)
+  playMedalGet() {
+    this.ensureContext();
+    if (!this.ctx || this.isMuted) return;
 
-      osc.connect(gain);
-      gain.connect(this.masterGain);
+    const t = this.ctx.currentTime;
+    // 딸랑~: 더 높은 음과 triangle 파형으로 청아하고 영롱한 벨/차임 소리 구현
+    const notes = [1568.00, 1975.53, 2349.32]; // G6 - B6 - D7
+    notes.forEach((freq, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gainNode = this.ctx.createGain();
+      osc.type = 'triangle'; // 'sine'보다 부드럽고 차임에 가까운 소리
+      osc.frequency.setValueAtTime(freq, t + idx * 0.06);
 
-      osc.start(t + idx * 0.03);
-      osc.stop(t + idx * 0.03 + 0.14);
+      gainNode.gain.setValueAtTime(0.0, t + idx * 0.06);
+      gainNode.gain.linearRampToValueAtTime(0.35, t + idx * 0.06 + 0.01);
+      // 더 긴 decay로 여운을 남겨 '딸랑~' 느낌 강조
+      gainNode.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.06 + 0.75);
+
+      osc.connect(gainNode);
+      gainNode.connect(this.masterGain);
+      osc.start(t + idx * 0.06);
+      osc.stop(t + idx * 0.06 + 0.80);
     });
   }
 
@@ -439,135 +466,34 @@ class SoundManager {
     osc.stop(t + 0.032);
   }
 
-  // 11. 🎵 MP3/OGG BGM 재생 엔진 (로비, 캐릭터선택, 스테이지 BGM 페이드 크로스전환)
-  playBGM(trackName = 'robby', startTime = 0) {
+  // 11. 🎵 MP3/OGG BGM 재생 엔진 (Stage 10/11 및 메인 테마 음악 자동 로드 & 무한 루프)
+  playBGM(trackName = 'stage10') {
     this.ensureContext();
-    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) {
-      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
-      return;
-    }
+    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) return;
 
     this.stopBGM();
 
-    let nameVariants = [trackName];
-    if (trackName === 'robby') nameVariants = ['robby', 'lobby', 'menu_theme'];
-    else if (trackName === 'character') nameVariants = ['character', 'char', 'character_select'];
-
-    const possiblePaths = [];
-    for (const name of nameVariants) {
-      possiblePaths.push(`client/assets/audio/bgm/${name}.mp3`);
-      possiblePaths.push(`client/assets/audio/bgm/${name}.ogg`);
-      possiblePaths.push(`client/assets/audio/bgm/${name}.wav`);
-      possiblePaths.push(`client/assets/audio/bgm/${name}.m4a`);
-      possiblePaths.push(`${name}.mp3`);
-    }
+    const possiblePaths = [
+      `client/assets/audio/bgm/${trackName}.mp3`,
+      `client/assets/audio/bgm/${trackName}.ogg`,
+      `client/assets/audio/bgm/${trackName}_finale.mp3`,
+      `client/assets/audio/bgm/${trackName}_bonus.mp3`,
+    ];
 
     const audio = new Audio();
     audio.loop = true;
-    const targetVol = this.bgmMuted ? 0 : this.bgmVolume;
-    audio.volume = targetVol;
+    audio.volume = this.bgmMuted ? 0 : this.bgmVolume;
 
     let pathIdx = 0;
     const tryNextPath = () => {
       if (pathIdx >= possiblePaths.length) return;
-      const path = possiblePaths[pathIdx++];
-      audio.src = path;
-
-      const setTrackTime = () => {
-        if (startTime > 0) {
-          try { audio.currentTime = startTime; } catch (e) {}
-        }
-      };
-      audio.addEventListener('loadedmetadata', setTrackTime);
-
-      audio.play().then(() => {
-        setTrackTime();
-      }).catch(() => {
+      audio.src = possiblePaths[pathIdx++];
+      audio.play().catch(() => {
         tryNextPath();
       });
     };
 
     this.bgmAudio = audio;
-    this.currentBGMTrack = trackName;
-    tryNextPath();
-  }
-
-  // 🎚️ 로비 ➔ 캐릭터 선택 곡 간의 매끄러운 1초 크로스 페이드 교체
-  fadeToBGM(trackName = 'robby', startTime = 0, fadeDuration = 1000) {
-    this.ensureContext();
-    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) {
-      return;
-    }
-
-    const oldAudio = this.bgmAudio;
-
-    // 기존 음악 페이드 아웃
-    if (oldAudio) {
-      const startVol = oldAudio.volume;
-      const startTimeTs = performance.now();
-      const fadeOutInterval = setInterval(() => {
-        const elapsed = performance.now() - startTimeTs;
-        const progress = Math.min(1, elapsed / fadeDuration);
-        oldAudio.volume = Math.max(0, startVol * (1 - progress));
-        if (progress >= 1) {
-          clearInterval(fadeOutInterval);
-          oldAudio.pause();
-          oldAudio.currentTime = 0;
-        }
-      }, 30);
-    }
-
-    let nameVariants = [trackName];
-    if (trackName === 'robby') nameVariants = ['robby', 'lobby', 'menu_theme'];
-    else if (trackName === 'character') nameVariants = ['character', 'char', 'character_select'];
-
-    const possiblePaths = [];
-    for (const name of nameVariants) {
-      possiblePaths.push(`client/assets/audio/bgm/${name}.mp3`);
-      possiblePaths.push(`client/assets/audio/bgm/${name}.ogg`);
-      possiblePaths.push(`client/assets/audio/bgm/${name}.wav`);
-      possiblePaths.push(`client/assets/audio/bgm/${name}.m4a`);
-      possiblePaths.push(`${name}.mp3`);
-    }
-
-    const newAudio = new Audio();
-    newAudio.loop = true;
-    newAudio.volume = 0; // 페이드 인을 위해 0부터 시작
-
-    let pathIdx = 0;
-    const tryNextPath = () => {
-      if (pathIdx >= possiblePaths.length) return;
-      const path = possiblePaths[pathIdx++];
-      newAudio.src = path;
-
-      const setTrackTime = () => {
-        if (startTime > 0) {
-          try { newAudio.currentTime = startTime; } catch (e) {}
-        }
-      };
-
-      newAudio.addEventListener('loadedmetadata', setTrackTime);
-
-      newAudio.play().then(() => {
-        setTrackTime();
-        // 페이드 인 애니메이션
-        const fadeStartTime = performance.now();
-        const fadeInInterval = setInterval(() => {
-          const elapsed = performance.now() - fadeStartTime;
-          const progress = Math.min(1, elapsed / fadeDuration);
-          const curTargetVol = this.bgmMuted ? 0 : this.bgmVolume;
-          newAudio.volume = curTargetVol * progress;
-          if (progress >= 1) {
-            clearInterval(fadeInInterval);
-            newAudio.volume = curTargetVol;
-          }
-        }, 30);
-      }).catch(() => {
-        tryNextPath();
-      });
-    };
-
-    this.bgmAudio = newAudio;
     this.currentBGMTrack = trackName;
     tryNextPath();
   }
@@ -579,6 +505,106 @@ class SoundManager {
       this.bgmAudio = null;
     }
     this.currentBGMTrack = null;
+  }
+
+  // 🔊 실시간 BGM/SFX 볼륨 및 음소거 설정 메서드
+  setBGMVolume(vol) {
+    this.bgmVolume = Math.max(0, Math.min(1, vol));
+    localStorage.setItem('ski_bgm_vol', this.bgmVolume.toString());
+    if (this.bgmAudio) {
+      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+    }
+  }
+
+  setSFXVolume(vol) {
+    this.sfxVolume = Math.max(0, Math.min(1, vol));
+    localStorage.setItem('ski_sfx_vol', this.sfxVolume.toString());
+    if (this.driftGain && this.ctx) {
+      this.driftGain.gain.setValueAtTime(this.sfxMuted ? 0 : this.sfxVolume * 0.16, this.ctx.currentTime);
+    }
+  }
+
+  toggleBGMMute() {
+    this.bgmMuted = !this.bgmMuted;
+    localStorage.setItem('ski_bgm_mute', this.bgmMuted ? 'true' : 'false');
+    if (this.bgmAudio) {
+      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+    }
+    return this.bgmMuted;
+  }
+
+  toggleSFXMute() {
+    this.sfxMuted = !this.sfxMuted;
+    localStorage.setItem('ski_sfx_mute', this.sfxMuted ? 'true' : 'false');
+    if (this.driftGain && this.ctx) {
+      this.driftGain.gain.setValueAtTime(this.sfxMuted ? 0 : this.sfxVolume * 0.16, this.ctx.currentTime);
+    }
+    return this.sfxMuted;
+  }
+
+  // 12. ❄️ 고속 드리프트 슬라이딩 효과음 (작게 스으윽... 사운드 루프)
+  startDriftLoop() {
+    this.ensureContext();
+    if (!this.ctx || this.isMuted || this.sfxMuted || this.sfxVolume <= 0) return;
+    if (this.driftNode) return; // 이미 재생 중
+
+    try {
+      const bufferSize = this.ctx.sampleRate * 1.0;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(650, this.ctx.currentTime);
+      filter.Q.setValueAtTime(1.8, this.ctx.currentTime);
+
+      const gain = this.ctx.createGain();
+      const targetGain = this.sfxMuted ? 0 : this.sfxVolume * 0.16; // 은은하고 작게 스으윽...
+      gain.gain.setValueAtTime(targetGain, this.ctx.currentTime);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      noise.start();
+      this.driftNode = noise;
+      this.driftGain = gain;
+    } catch (e) {
+      console.warn('Drift loop start failed:', e);
+    }
+  }
+
+  stopDriftLoop() {
+    if (this.driftNode && this.ctx) {
+      try {
+        const now = this.ctx.currentTime;
+        if (this.driftGain) {
+          this.driftGain.gain.setValueAtTime(this.driftGain.gain.value, now);
+          this.driftGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        }
+        setTimeout(() => {
+          if (this.driftNode) {
+            this.driftNode.stop();
+            this.driftNode.disconnect();
+            this.driftNode = null;
+            this.driftGain = null;
+          }
+        }, 100);
+      } catch (e) {
+        this.driftNode = null;
+        this.driftGain = null;
+      }
+    }
+  }
+
+  // ⚡ 드리프트 떼고 부스터 발동 시: 점프 착지 후 부스트와 동일한 시원한 바람 소리!
+  playDriftBoost() {
+    this.playBoost();
   }
 }
 

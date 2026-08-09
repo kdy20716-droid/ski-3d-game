@@ -198,8 +198,8 @@ export const setupUI = (handlers) => {
     if (btnControlsCloseEl) btnControlsCloseEl.textContent = t('ok');
 
     // 사운드 설정 모달 다국어
-    const btnSoundSettingsEl = document.getElementById('btnSoundSettings');
-    if (btnSoundSettingsEl) btnSoundSettingsEl.textContent = t('btnSoundSettings');
+    const btnPauseSoundEl = document.getElementById('btnPauseSound');
+    if (btnPauseSoundEl) btnPauseSoundEl.textContent = t('btnSoundSettings');
     const lblSoundTitleEl = document.getElementById('lblSoundTitle');
     if (lblSoundTitleEl) lblSoundTitleEl.textContent = t('soundTitle');
     const lblSoundDescEl = document.getElementById('lblSoundDesc');
@@ -420,9 +420,6 @@ export const setupUI = (handlers) => {
     if (scrBetaClear) scrBetaClear.classList.add('off');
 
     if (type === 'start') {
-      if (soundFx && soundFx.fadeToBGM) {
-        soundFx.fadeToBGM('robby', 0, 1000);
-      }
       scrStart.classList.remove('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
       if (raceBarEl) raceBarEl.style.display = 'none';
       setMangaSpeedLines(false);
@@ -765,9 +762,6 @@ export const setupUI = (handlers) => {
   };
 
   const closeCharSelect = () => {
-    if (soundFx && soundFx.fadeToBGM) {
-      soundFx.fadeToBGM('robby', 0, 1000);
-    }
     disposeCardRenderers();
     document.getElementById('scCharSelect').classList.add('off');
     document.getElementById('scStart').classList.remove('off');
@@ -939,9 +933,6 @@ export const setupUI = (handlers) => {
   // ── EDIT 버튼 / 캐릭터 프리뷰 클릭 → 선택 화면 열기 ──────────────
   const openCharSelect = () => {
     soundFx.playClick();
-    if (soundFx && soundFx.fadeToBGM) {
-      soundFx.fadeToBGM('character', 22.0, 1000); // 🎚️ 22초부터 캐릭터 BGM 재생!
-    }
     buildCharSelectScreen();
     document.getElementById('scStart').classList.add('off');
     document.getElementById('scCharSelect').classList.remove('off');
@@ -971,7 +962,7 @@ export const setupUI = (handlers) => {
 
   // ── 🔊 사운드 설정 모달 제어 ──────────────────────────────────────
   const scSoundModal = document.getElementById('scSoundModal');
-  const btnSoundSettings = document.getElementById('btnSoundSettings');
+  const btnPauseSound = document.getElementById('btnPauseSound');
   const btnSoundClose = document.getElementById('btnSoundClose');
   const sliderBgm = document.getElementById('sliderBgm');
   const sliderSfx = document.getElementById('sliderSfx');
@@ -980,13 +971,21 @@ export const setupUI = (handlers) => {
   const btnBgmSpeaker = document.getElementById('btnBgmSpeaker');
   const btnSfxSpeaker = document.getElementById('btnSfxSpeaker');
 
+  // 슬라이더 채워진 구간(fill)을 배경 그라디언트로 실시간 갱신
+  const updateSliderFill = (slider) => {
+    const pct = ((parseFloat(slider.value) - parseFloat(slider.min)) / (parseFloat(slider.max) - parseFloat(slider.min))) * 100;
+    slider.style.background = `linear-gradient(to right, #00F0FF ${pct}%, rgba(255,255,255,0.2) ${pct}%)`;
+  };
+
   const syncSoundUI = () => {
     if (sliderBgm) {
       sliderBgm.value = soundFx.bgmVolume;
+      updateSliderFill(sliderBgm);
       if (lblBgmVal) lblBgmVal.textContent = `${Math.round(soundFx.bgmVolume * 100)}%`;
     }
     if (sliderSfx) {
       sliderSfx.value = soundFx.sfxVolume;
+      updateSliderFill(sliderSfx);
       if (lblSfxVal) lblSfxVal.textContent = `${Math.round(soundFx.sfxVolume * 100)}%`;
     }
     if (btnBgmSpeaker) {
@@ -998,10 +997,11 @@ export const setupUI = (handlers) => {
       btnSfxSpeaker.style.opacity = soundFx.sfxMuted ? '0.45' : '1.0';
     }
   };
+
   syncSoundUI();
 
-  if (btnSoundSettings) {
-    btnSoundSettings.addEventListener('click', (e) => {
+  if (btnPauseSound) {
+    btnPauseSound.addEventListener('click', (e) => {
       e.stopPropagation();
       soundFx.playClick();
       syncSoundUI();
@@ -1021,6 +1021,7 @@ export const setupUI = (handlers) => {
     sliderBgm.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
       soundFx.setBGMVolume(val);
+      updateSliderFill(sliderBgm);
       if (lblBgmVal) lblBgmVal.textContent = `${Math.round(val * 100)}%`;
     });
   }
@@ -1029,6 +1030,7 @@ export const setupUI = (handlers) => {
     sliderSfx.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
       soundFx.setSFXVolume(val);
+      updateSliderFill(sliderSfx);
       if (lblSfxVal) lblSfxVal.textContent = `${Math.round(val * 100)}%`;
     });
   }

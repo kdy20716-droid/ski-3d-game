@@ -43,11 +43,12 @@ export const createDriftSystem = (scene, skierGroup) => {
   let driftCharge = 0.0;   // Shift 누른 채 좌우로 이동한 누적 게이지 (0.0 ~ 1.0)
 
   // 🏎️ 2. 드리프트 및 카트라이더 순간 부스터 업데이트
-  const update = (G, keys, dt, ui) => {
-    // 🚫 1) 공중에 떴을 때: 드리프트 락 해제 및 눈보라 파티클 0.2초간 민첩하게 Fade-Out!
+  const update = (G, keys, dt, ui, soundFx) => {
+    // 🚫 1) 공중에 떴을 때: 드리프트 락 해제 및 파티클 & 사운드 비활성화
     if (G.inAir) {
       sprayMat.opacity = Math.max(0.0, sprayMat.opacity - dt * 5.0);
       driftYawAngle += (0 - driftYawAngle) * dt * 8.0;
+      if (wasDrifting && soundFx && soundFx.stopDriftLoop) soundFx.stopDriftLoop();
       wasDrifting = false;
       lockedDriftDir = 0;
       driftCharge = 0.0;
@@ -69,12 +70,23 @@ export const createDriftSystem = (scene, skierGroup) => {
 
     const isDrifting = shift && lockedDriftDir !== 0;
 
+    // ❄️ 둔탁하지 않고 은은하게 "스으윽..." 하는 3D 눈길 슬라이딩 사운드 루프 제어!
+    if (isDrifting) {
+      if (soundFx && soundFx.startDriftLoop) soundFx.startDriftLoop();
+    } else {
+      if (soundFx && soundFx.stopDriftLoop) soundFx.stopDriftLoop();
+    }
+
     // ⚡ 2) Shift를 뗐을 때: 최소 35% 이상(driftCharge >= 0.35) 꽉 채워졌을 때만 부스터 발동!
     if (wasDrifting && !isDrifting) {
       if (driftCharge >= 0.35) {
         const boostDuration = 0.6 + driftCharge * 2.2; // 0.6s ~ 2.8s 절제된 비례 부스터!
         G.boosterTimer = Math.max(G.boosterTimer, boostDuration);
         G.spd += 4.0 + driftCharge * 4.0;
+        
+        // 🚀 Shift 떼서 부스터 발동 시 점프대 착지/부스트와 동일한 시원한 효과음 재생!
+        if (soundFx && soundFx.playDriftBoost) soundFx.playDriftBoost();
+
         if (ui && ui.showBonusToast) {
           ui.showBonusToast(`DRIFT BOOST! +${boostDuration.toFixed(1)}s ⚡`, true);
         }

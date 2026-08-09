@@ -194,19 +194,6 @@
           >
             🎮 조작 방법
           </button>
-          <button
-            class="btn"
-            id="btnSoundSettings"
-            style="
-              margin-top: 10px;
-              background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(200, 230, 255, 0.05) 100%);
-              border: 1px solid rgba(0, 240, 255, 0.45);
-              color: #00F0FF;
-              box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
-            "
-          >
-            🔊 사운드 설정
-          </button>
           <div style="margin-top: 16px">
             <select
               id="langSelect"
@@ -286,6 +273,19 @@
         PAUSED
       </div>
       <button class="btn" id="btnResume">RESUME</button>
+      <button
+        class="btn"
+        id="btnPauseSound"
+        style="
+          margin-top: 12px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(200, 230, 255, 0.05) 100%);
+          border: 1px solid rgba(0, 240, 255, 0.45);
+          color: #00F0FF;
+          box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+        "
+      >
+        🔊 사운드 설정
+      </button>
       <button
         class="btn"
         id="btnQuit"
@@ -418,42 +418,6 @@
       </div>
     </div>
 
-    <!-- 🔊 사운드 설정 모달 (Z-Index: 31000) -->
-    <div class="screen off" id="scSoundModal" style="z-index: 31000;">
-      <div class="record-popup-card" style="max-width: 480px; text-align: center; border-color: #00F0FF; box-shadow: 0 0 45px rgba(0, 240, 255, 0.4);">
-        <div style="font-size: 38px; margin-bottom: 4px;">🔊</div>
-        <div class="record-popup-title" id="lblSoundTitle" style="color: #00F0FF; font-size: 22px;">SOUND SETTINGS / 사운드 설정</div>
-        <div class="record-popup-desc" id="lblSoundDesc" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 20px;">
-          음악 및 효과음 볼륨 조절과 음소거 설정
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
-          <!-- 🎵 BGM 슬라이더 & 스피커 버튼 -->
-          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(10, 25, 55, 0.7); padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(0, 240, 255, 0.25);">
-            <button id="btnBgmSpeaker" style="background: none; border: none; font-size: 26px; cursor: pointer; color: #00F0FF; transition: transform 0.15s ease;" title="Mute/Unmute BGM">🔊</button>
-            <div style="flex: 1; margin: 0 16px; text-align: left;">
-              <div id="lblBgmTitle" style="font-size: 13px; font-weight: bold; color: #FFFFFF; margin-bottom: 6px;">🎵 BGM / 배경 음악</div>
-              <input type="range" id="sliderBgm" min="0" max="1" step="0.01" value="0.45" style="width: 100%; accent-color: #00F0FF; cursor: pointer;" />
-            </div>
-            <span id="lblBgmVal" style="font-size: 14px; font-weight: bold; color: #00F0FF; width: 44px; text-align: right;">45%</span>
-          </div>
-
-          <!-- 🔊 SFX 효과음 슬라이더 & 스피커 버튼 -->
-          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(10, 25, 55, 0.7); padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(0, 240, 255, 0.25);">
-            <button id="btnSfxSpeaker" style="background: none; border: none; font-size: 26px; cursor: pointer; color: #00F0FF; transition: transform 0.15s ease;" title="Mute/Unmute SFX">🔊</button>
-            <div style="flex: 1; margin: 0 16px; text-align: left;">
-              <div id="lblSfxTitle" style="font-size: 13px; font-weight: bold; color: #FFFFFF; margin-bottom: 6px;">🔊 SFX / 효과음</div>
-              <input type="range" id="sliderSfx" min="0" max="1" step="0.01" value="0.50" style="width: 100%; accent-color: #00F0FF; cursor: pointer;" />
-            </div>
-            <span id="lblSfxVal" style="font-size: 14px; font-weight: bold; color: #00F0FF; width: 44px; text-align: right;">50%</span>
-          </div>
-        </div>
-
-        <button class="btn" id="btnSoundClose" style="margin-top: 24px; padding: 12px 48px; font-size: 14px;">
-          OK / 확인
-        </button>
-      </div>
-    </div>
 
     <!-- 🏂 베타 테스터 전용 10스테이지 완주 축하 화면 (메뉴로 돌아가기 버튼 전용 노출) -->
     <div class="screen off" id="scBetaClear">
@@ -479,7 +443,41 @@
       <button class="btn btn-secondary" id="btnOverQuit" style="margin-top: 14px;">MAIN MENU</button>
     </div>
 
-    <!-- Main Module Script (Client Architecture v54.0.0 - Lobby to Character BGM Smooth Crossfade & 22s Start) -->
-    <script type="module" src="client/src/main.js?v=54.0.0"></script>
+    <!-- 🔊 사운드 설정 모달 (#overlay 밖에 위치 - pointer-events 정상 동작) -->
+    <div class="screen off" id="scSoundModal" style="z-index: 31000;">
+      <div class="record-popup-card" style="max-width: 480px; text-align: center; border-color: #00F0FF; box-shadow: 0 0 45px rgba(0, 240, 255, 0.4);">
+        <div style="font-size: 38px; margin-bottom: 4px;">🔊</div>
+        <div class="record-popup-title" id="lblSoundTitle" style="color: #00F0FF; font-size: 22px;">SOUND SETTINGS / 사운드 설정</div>
+        <div class="record-popup-desc" id="lblSoundDesc" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 20px;">
+          음악 및 효과음 볼륨 조절과 음소거 설정
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+          <!-- 🎵 BGM 슬라이더 & 스피커 버튼 -->
+          <div class="sound-row">
+            <button class="speaker-btn" id="btnBgmSpeaker" title="Mute/Unmute BGM">🔊</button>
+            <div style="flex: 1; margin: 0 16px; text-align: left;">
+              <div id="lblBgmTitle" style="font-size: 13px; font-weight: bold; color: #FFFFFF; margin-bottom: 6px;">🎵 BGM / 배경 음악</div>
+              <input type="range" class="sound-slider-input" id="sliderBgm" min="0" max="1" step="0.01" value="0.45" />
+            </div>
+            <span id="lblBgmVal" style="font-size: 14px; font-weight: bold; color: #00F0FF; width: 44px; text-align: right;">45%</span>
+          </div>
+          <!-- 🔊 SFX 효과음 슬라이더 & 스피커 버튼 -->
+          <div class="sound-row">
+            <button class="speaker-btn" id="btnSfxSpeaker" title="Mute/Unmute SFX">🔊</button>
+            <div style="flex: 1; margin: 0 16px; text-align: left;">
+              <div id="lblSfxTitle" style="font-size: 13px; font-weight: bold; color: #FFFFFF; margin-bottom: 6px;">🔊 SFX / 효과음</div>
+              <input type="range" class="sound-slider-input" id="sliderSfx" min="0" max="1" step="0.01" value="0.50" />
+            </div>
+            <span id="lblSfxVal" style="font-size: 14px; font-weight: bold; color: #00F0FF; width: 44px; text-align: right;">50%</span>
+          </div>
+        </div>
+        <button class="btn" id="btnSoundClose" style="margin-top: 24px; padding: 12px 48px; font-size: 14px;">
+          OK / 확인
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Module Script v57.0.0 - Medal Ding SFX, Drift Boost, Slider Fill Track, NaN-safe BGM Volume -->
+    <script type="module" src="client/src/main.js?v=57.0.0"></script>
   </body>
 </html>

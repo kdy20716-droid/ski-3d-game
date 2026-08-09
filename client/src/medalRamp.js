@@ -198,7 +198,12 @@ export const createMedalRampSystem = (scene) => {
       if (distSq3D < 90.0) {
         mItem.active = false;
         mItem.group.position.set(0, -9999, 0);
-        if (soundFx && soundFx.playGoldenDiamond) soundFx.playGoldenDiamond();
+        // 🔔 황금 메달 전용 '딸랑-' 획득 사운드 재생 (기존 다이아몬드와 차별화)
+        if (soundFx && typeof soundFx.playMedalGet === 'function') {
+          soundFx.playMedalGet();
+        } else if (soundFx && soundFx.playGoldenDiamond) {
+          soundFx.playGoldenDiamond(); // Fallback
+        }
         if (showToast) showToast('GOLDEN MEDAL GET! 🥇', true);
         if (onMedalCollect) onMedalCollect();
       }
