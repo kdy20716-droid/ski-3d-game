@@ -197,6 +197,18 @@ export const setupUI = (handlers) => {
 
     if (btnControlsCloseEl) btnControlsCloseEl.textContent = t('ok');
 
+    // 사운드 설정 모달 다국어
+    const btnSoundSettingsEl = document.getElementById('btnSoundSettings');
+    if (btnSoundSettingsEl) btnSoundSettingsEl.textContent = t('btnSoundSettings');
+    const lblSoundTitleEl = document.getElementById('lblSoundTitle');
+    if (lblSoundTitleEl) lblSoundTitleEl.textContent = t('soundTitle');
+    const lblSoundDescEl = document.getElementById('lblSoundDesc');
+    if (lblSoundDescEl) lblSoundDescEl.textContent = t('soundDesc');
+    const lblBgmTitleEl = document.getElementById('lblBgmTitle');
+    if (lblBgmTitleEl) lblBgmTitleEl.textContent = t('bgmTitle');
+    const lblSfxTitleEl = document.getElementById('lblSfxTitle');
+    if (lblSfxTitleEl) lblSfxTitleEl.textContent = t('sfxTitle');
+
     // 베타테스터 완주 화면
     const betaClearTitleEl = document.querySelector('#scBetaClear .over-title');
     if (betaClearTitleEl) betaClearTitleEl.innerHTML = t('betaClearTitle');
@@ -408,6 +420,9 @@ export const setupUI = (handlers) => {
     if (scrBetaClear) scrBetaClear.classList.add('off');
 
     if (type === 'start') {
+      if (soundFx && soundFx.fadeToBGM) {
+        soundFx.fadeToBGM('robby', 0, 1000);
+      }
       scrStart.classList.remove('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
       if (raceBarEl) raceBarEl.style.display = 'none';
       setMangaSpeedLines(false);
@@ -750,6 +765,9 @@ export const setupUI = (handlers) => {
   };
 
   const closeCharSelect = () => {
+    if (soundFx && soundFx.fadeToBGM) {
+      soundFx.fadeToBGM('robby', 0, 1000);
+    }
     disposeCardRenderers();
     document.getElementById('scCharSelect').classList.add('off');
     document.getElementById('scStart').classList.remove('off');
@@ -921,6 +939,9 @@ export const setupUI = (handlers) => {
   // ── EDIT 버튼 / 캐릭터 프리뷰 클릭 → 선택 화면 열기 ──────────────
   const openCharSelect = () => {
     soundFx.playClick();
+    if (soundFx && soundFx.fadeToBGM) {
+      soundFx.fadeToBGM('character', 22.0, 1000); // 🎚️ 22초부터 캐릭터 BGM 재생!
+    }
     buildCharSelectScreen();
     document.getElementById('scStart').classList.add('off');
     document.getElementById('scCharSelect').classList.remove('off');
@@ -947,6 +968,90 @@ export const setupUI = (handlers) => {
       }
     }
   });
+
+  // ── 🔊 사운드 설정 모달 제어 ──────────────────────────────────────
+  const scSoundModal = document.getElementById('scSoundModal');
+  const btnSoundSettings = document.getElementById('btnSoundSettings');
+  const btnSoundClose = document.getElementById('btnSoundClose');
+  const sliderBgm = document.getElementById('sliderBgm');
+  const sliderSfx = document.getElementById('sliderSfx');
+  const lblBgmVal = document.getElementById('lblBgmVal');
+  const lblSfxVal = document.getElementById('lblSfxVal');
+  const btnBgmSpeaker = document.getElementById('btnBgmSpeaker');
+  const btnSfxSpeaker = document.getElementById('btnSfxSpeaker');
+
+  const syncSoundUI = () => {
+    if (sliderBgm) {
+      sliderBgm.value = soundFx.bgmVolume;
+      if (lblBgmVal) lblBgmVal.textContent = `${Math.round(soundFx.bgmVolume * 100)}%`;
+    }
+    if (sliderSfx) {
+      sliderSfx.value = soundFx.sfxVolume;
+      if (lblSfxVal) lblSfxVal.textContent = `${Math.round(soundFx.sfxVolume * 100)}%`;
+    }
+    if (btnBgmSpeaker) {
+      btnBgmSpeaker.textContent = soundFx.bgmMuted ? '🔈' : '🔊';
+      btnBgmSpeaker.style.opacity = soundFx.bgmMuted ? '0.45' : '1.0';
+    }
+    if (btnSfxSpeaker) {
+      btnSfxSpeaker.textContent = soundFx.sfxMuted ? '🔈' : '🔊';
+      btnSfxSpeaker.style.opacity = soundFx.sfxMuted ? '0.45' : '1.0';
+    }
+  };
+  syncSoundUI();
+
+  if (btnSoundSettings) {
+    btnSoundSettings.addEventListener('click', (e) => {
+      e.stopPropagation();
+      soundFx.playClick();
+      syncSoundUI();
+      if (scSoundModal) scSoundModal.classList.remove('off');
+    });
+  }
+
+  if (btnSoundClose) {
+    btnSoundClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      soundFx.playClick();
+      if (scSoundModal) scSoundModal.classList.add('off');
+    });
+  }
+
+  if (sliderBgm) {
+    sliderBgm.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      soundFx.setBGMVolume(val);
+      if (lblBgmVal) lblBgmVal.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  if (sliderSfx) {
+    sliderSfx.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      soundFx.setSFXVolume(val);
+      if (lblSfxVal) lblSfxVal.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  if (btnBgmSpeaker) {
+    btnBgmSpeaker.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const muted = soundFx.toggleBGMMute();
+      btnBgmSpeaker.textContent = muted ? '🔈' : '🔊';
+      btnBgmSpeaker.style.opacity = muted ? '0.45' : '1.0';
+      soundFx.playClick();
+    });
+  }
+
+  if (btnSfxSpeaker) {
+    btnSfxSpeaker.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const muted = soundFx.toggleSFXMute();
+      btnSfxSpeaker.textContent = muted ? '🔈' : '🔊';
+      btnSfxSpeaker.style.opacity = muted ? '0.45' : '1.0';
+      soundFx.playClick();
+    });
+  }
 
   // 메인화면 진입 시 현재 캐릭터 프리뷰 초기화
   initMainCharPreview(loadSelectedCharacter());

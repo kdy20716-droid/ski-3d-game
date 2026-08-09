@@ -10,6 +10,12 @@ class SoundManager {
     this.initDone = false;
     this.goldCombo = 0;
     this.lastGoldTime = 0;
+
+    // 🔊 BGM 및 SFX 개별 볼륨 / 음소거 저장 상태
+    this.bgmVolume = parseFloat(localStorage.getItem('ski_bgm_vol') ?? '0.45');
+    this.sfxVolume = parseFloat(localStorage.getItem('ski_sfx_vol') ?? '0.50');
+    this.bgmMuted = localStorage.getItem('ski_bgm_mute') === 'true';
+    this.sfxMuted = localStorage.getItem('ski_sfx_mute') === 'true';
   }
 
   // 브라우저 사용자 상호작용 후 AudioContext 및 노이즈 버퍼 사전 할당 (런타임 렉/GC 100% 방지)
@@ -408,54 +414,160 @@ class SoundManager {
     });
   }
 
-  // 10. 🖱️ UI 버튼 클릭음 (세련된 찰칵 팝음)
+  // 10. 🖱️ UI 버튼 클릭음 (차분하고 고급스러운 묵직한 기계식 톡 소리)
   playClick() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted || this.sfxVolume <= 0) return;
 
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, t);
-    osc.frequency.exponentialRampToValueAtTime(400, t + 0.04);
+    // 뿅뿅거리지 않는 차분하고 묵직한 우드/글래스 기계식 틱 (210Hz ➔ 65Hz 지수 감쇄)
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(210, t);
+    osc.frequency.exponentialRampToValueAtTime(65, t + 0.032);
 
-    gain.gain.setValueAtTime(0.25, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+    const effectiveVol = this.sfxVolume * 0.35;
+    gain.gain.setValueAtTime(effectiveVol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.032);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
 
     osc.start(t);
-    osc.stop(t + 0.04);
+    osc.stop(t + 0.032);
   }
 
-  // 11. 🎵 MP3/OGG BGM 재생 엔진 (Stage 10/11 및 메인 테마 음악 자동 로드 & 무한 루프)
-  playBGM(trackName = 'stage10') {
+  // 11. 🎵 MP3/OGG BGM 재생 엔진 (로비, 캐릭터선택, 스테이지 BGM 페이드 크로스전환)
+  playBGM(trackName = 'robby', startTime = 0) {
     this.ensureContext();
-    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) return;
+    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) {
+      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+      return;
+    }
 
     this.stopBGM();
 
-    const possiblePaths = [
-      `client/assets/audio/bgm/${trackName}.mp3`,
-      `client/assets/audio/bgm/${trackName}.ogg`,
-      `client/assets/audio/bgm/${trackName}_finale.mp3`,
-      `client/assets/audio/bgm/${trackName}_bonus.mp3`,
-    ];
+    let nameVariants = [trackName];
+    if (trackName === 'robby') nameVariants = ['robby', 'lobby', 'menu_theme'];
+    else if (trackName === 'character') nameVariants = ['character', 'char', 'character_select'];
+
+    const possiblePaths = [];
+    for (const name of nameVariants) {
+      possiblePaths.push(`client/assets/audio/bgm/${name}.mp3`);
+      possiblePaths.push(`client/assets/audio/bgm/${name}.ogg`);
+      possiblePaths.push(`client/assets/audio/bgm/${name}.wav`);
+      possiblePaths.push(`client/assets/audio/bgm/${name}.m4a`);
+      possiblePaths.push(`${name}.mp3`);
+    }
 
     const audio = new Audio();
     audio.loop = true;
-    audio.volume = 0.45;
+    const targetVol = this.bgmMuted ? 0 : this.bgmVolume;
+    audio.volume = targetVol;
 
     let pathIdx = 0;
     const tryNextPath = () => {
       if (pathIdx >= possiblePaths.length) return;
-      audio.src = possiblePaths[pathIdx++];
-      audio.play().catch(() => {
+      const path = possiblePaths[pathIdx++];
+      audio.src = path;
+
+      const setTrackTime = () => {
+        if (startTime > 0) {
+          try { audio.currentTime = startTime; } catch (e) {}
+        }
+      };
+      audio.addEventListener('loadedmetadata', setTrackTime);
+
+      audio.play().then(() => {
+        setTrackTime();
+      }).catch(() => {
         tryNextPath();
       });
     };
 
     this.bgmAudio = audio;
+    this.currentBGMTrack = trackName;
+    tryNextPath();
+  }
+
+  // 🎚️ 로비 ➔ 캐릭터 선택 곡 간의 매끄러운 1초 크로스 페이드 교체
+  fadeToBGM(trackName = 'robby', startTime = 0, fadeDuration = 1000) {
+    this.ensureContext();
+    if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) {
+      return;
+    }
+
+    const oldAudio = this.bgmAudio;
+
+    // 기존 음악 페이드 아웃
+    if (oldAudio) {
+      const startVol = oldAudio.volume;
+      const startTimeTs = performance.now();
+      const fadeOutInterval = setInterval(() => {
+        const elapsed = performance.now() - startTimeTs;
+        const progress = Math.min(1, elapsed / fadeDuration);
+        oldAudio.volume = Math.max(0, startVol * (1 - progress));
+        if (progress >= 1) {
+          clearInterval(fadeOutInterval);
+          oldAudio.pause();
+          oldAudio.currentTime = 0;
+        }
+      }, 30);
+    }
+
+    let nameVariants = [trackName];
+    if (trackName === 'robby') nameVariants = ['robby', 'lobby', 'menu_theme'];
+    else if (trackName === 'character') nameVariants = ['character', 'char', 'character_select'];
+
+    const possiblePaths = [];
+    for (const name of nameVariants) {
+      possiblePaths.push(`client/assets/audio/bgm/${name}.mp3`);
+      possiblePaths.push(`client/assets/audio/bgm/${name}.ogg`);
+      possiblePaths.push(`client/assets/audio/bgm/${name}.wav`);
+      possiblePaths.push(`client/assets/audio/bgm/${name}.m4a`);
+      possiblePaths.push(`${name}.mp3`);
+    }
+
+    const newAudio = new Audio();
+    newAudio.loop = true;
+    newAudio.volume = 0; // 페이드 인을 위해 0부터 시작
+
+    let pathIdx = 0;
+    const tryNextPath = () => {
+      if (pathIdx >= possiblePaths.length) return;
+      const path = possiblePaths[pathIdx++];
+      newAudio.src = path;
+
+      const setTrackTime = () => {
+        if (startTime > 0) {
+          try { newAudio.currentTime = startTime; } catch (e) {}
+        }
+      };
+
+      newAudio.addEventListener('loadedmetadata', setTrackTime);
+
+      newAudio.play().then(() => {
+        setTrackTime();
+        // 페이드 인 애니메이션
+        const fadeStartTime = performance.now();
+        const fadeInInterval = setInterval(() => {
+          const elapsed = performance.now() - fadeStartTime;
+          const progress = Math.min(1, elapsed / fadeDuration);
+          const curTargetVol = this.bgmMuted ? 0 : this.bgmVolume;
+          newAudio.volume = curTargetVol * progress;
+          if (progress >= 1) {
+            clearInterval(fadeInInterval);
+            newAudio.volume = curTargetVol;
+          }
+        }, 30);
+      }).catch(() => {
+        tryNextPath();
+      });
+    };
+
+    this.bgmAudio = newAudio;
     this.currentBGMTrack = trackName;
     tryNextPath();
   }
