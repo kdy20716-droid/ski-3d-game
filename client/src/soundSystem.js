@@ -17,13 +17,13 @@ class SoundManager {
     this.driftNode = null;
     this.driftGain = null;
 
-    // 🔊 BGM 볼륨을 매우 조용하고 은은한 수준에서 아주 살짝만 키움(0.08 -> 0.13)
+    // 🔊 BGM: 0.13 (은은), SFX: 0.60 (살짝 줄임)
     this.bgmVolume = 0.13;
-    this.sfxVolume = 0.80;
+    this.sfxVolume = 0.60;
     this.masterVolume = 0.70;
 
     localStorage.setItem('ski_bgm_vol', '0.13');
-    localStorage.setItem('ski_sfx_vol', '0.80');
+    localStorage.setItem('ski_sfx_vol', '0.60');
     localStorage.setItem('ski_master_vol', '0.70');
     
     // 기본적으로 무조건 음악/효과음 모두 켜진 상태(false)로 강제 설정하여 자동 재생
