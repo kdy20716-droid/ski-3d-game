@@ -291,17 +291,37 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
         scene.remove(b.group);
         triggerSnowExplosion(b.x, b.y, b.z);
 
-        const inExplosionXRange = Math.abs(G.px - b.x) < (b.radius + 3.5);
+        // 💥 폭발 중심점과의 2D XZ 거리 계산
+        const distXZ = Math.hypot(G.px - b.x, G.pz - b.z);
+        const blastRadius = b.radius + 6.0; // 최대 폭발 반격 영역
 
-        if (inExplosionXRange) {
+        if (distXZ < blastRadius) {
           if (!G.inAir) {
-            // 💥 타이밍 점프 실패: 땅에 있다가 같은 라인 폭발에 휩쓸려 넉백!
+            // 💥 타이밍 점프 실패: 폭발 충격파에 휩쓸려 거리 비례 방사형 넉백!
             if (G.selectedChar !== 'beta' && G.invincibleTimer <= 0) {
-              G.pz += 12.0; // 넉백!
-              G.spd = 0;
-              G.stunTimer = 0.5;
+              const factor = Math.max(0.2, (blastRadius - distXZ) / blastRadius); // 0.2 ~ 1.0 거리 밀집도
+              
+              // 1) 후방 Z 넉백 (폭발 중심과 가까울수록 최소 8m ~ 최대 22m 강력 튕김!)
+              const knockbackZ = 8.0 + factor * 14.0;
+              G.pz += knockbackZ;
+
+              // 2) 측면 X 방사형 넉백 (폭발 위치 기준 좌/우 밀쳐냄!)
+              const dirX = (G.px - b.x) >= 0 ? 1 : -1;
+              const knockbackX = dirX * (3.0 + factor * 7.0);
+              G.px = Math.max(-28.0, Math.min(28.0, G.px + knockbackX));
+
+              // 3) 속도 감속 & 감전 스턴
+              if (factor > 0.55) {
+                G.spd = 0;
+                G.stunTimer = 0.6;
+                if (ui && ui.showBonusToast) ui.showBonusToast('💣 DIRECT BLAST HIT! 💥', false);
+              } else {
+                G.spd = Math.max(0, G.spd - 24.0 * factor);
+                G.stunTimer = 0.3;
+                if (ui && ui.showBonusToast) ui.showBonusToast('💣 BLAST WAVE IMPACT! 💨', false);
+              }
+
               G.invincibleTimer = 2.0;
-              if (ui && ui.showBonusToast) ui.showBonusToast('BOMB EXPLODED ON YOUR LINE! 💣💥', false);
             }
           } else {
             // 🦘 타이밍 점프 성공: 공중에 떠 있어서 같은 라인 폭발 피함 세이프!
