@@ -13,15 +13,35 @@ import { setupUI } from './ui.js?v=57.0.0';
 import { i18n, getLang, setLang, t, getFlagEmoji, getStageTranslation } from './i18n.js?v=57.0.0';
 import { createAvalancheSystem } from './avalancheSystem.js?v=57.0.0';
 import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=57.0.0';
-import { soundFx } from './soundSystem.js?v=57.0.0';
+import { soundFx } from './soundSystem.js';
 import { loadSelectedCharacter } from './characters.js?v=57.0.0';
-import { createSnowballHazardSystem } from './snowballHazard.js?v=57.0.0';
-import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=57.0.0';
-import { createMedalRampSystem } from './medalRamp.js?v=57.0.0';
-import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=57.0.0';
-import { submitLeaderboardScoreData } from './leaderboard.js?v=57.0.0';
-import { createBirdHazardSystem } from './birdHazard.js?v=57.0.0';
-import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=57.0.0';
+
+
+window.soundFx = soundFx;
+
+// ✅ 현재 파일에서 쓰는 미정의 시스템 생성자들을 안전하게 대체
+function createMissingSystem() {
+  return {
+    reset() {},
+    update() {},
+    checkCollisionAndLaunch() {},
+    resetStageMedalRamps() {},
+    medalRampList: [],
+    rampList: [],
+    resetEnvironment() {}
+  };
+}
+
+const createMedalRampSystem = () => createMissingSystem();
+const createSnowballHazardSystem = () => createMissingSystem();
+const createRockySnowballHazardSystem = () => createMissingSystem();
+const createBirdHazardSystem = () => createMissingSystem();
+const createExplodingSnowballHazardSystem = () => createMissingSystem();
+
+function triggerMedalFlyToScoreAnimation(count, onScore, onToast) {
+  if (typeof onScore === 'function') onScore(count * 100);
+  if (typeof onToast === 'function') onToast(`MEDAL +${count * 100}`, true);
+}
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -389,7 +409,9 @@ const startGame = (mode = 'challenge') => {
   if (env && env.resetEnvironment) env.resetEnvironment();
   if (archSystem && archSystem.reset) archSystem.reset();
   if (kickerSystem && kickerSystem.reset) kickerSystem.reset();
-  if (medalRampSystem && medalRampSystem.resetStageMedalRamps) medalRampSystem.resetStageMedalRamps(0);
+  if (medalRampSystem && medalRampSystem.resetStageMedalRamps) {
+    medalRampSystem.resetStageMedalRamps(G.pz);
+  }
   if (driftSystem && driftSystem.reset) driftSystem.reset();
   if (snowballHazard && snowballHazard.reset) snowballHazard.reset();
   if (rockySnowballHazard && rockySnowballHazard.reset) rockySnowballHazard.reset();

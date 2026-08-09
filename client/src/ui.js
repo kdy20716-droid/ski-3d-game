@@ -989,11 +989,11 @@ export const setupUI = (handlers) => {
       if (lblSfxVal) lblSfxVal.textContent = `${Math.round(soundFx.sfxVolume * 100)}%`;
     }
     if (btnBgmSpeaker) {
-      btnBgmSpeaker.textContent = soundFx.bgmMuted ? '🔈' : '🔊';
+      btnBgmSpeaker.textContent = soundFx.bgmMuted ? '🔇' : '🔊';
       btnBgmSpeaker.style.opacity = soundFx.bgmMuted ? '0.45' : '1.0';
     }
     if (btnSfxSpeaker) {
-      btnSfxSpeaker.textContent = soundFx.sfxMuted ? '🔈' : '🔊';
+      btnSfxSpeaker.textContent = soundFx.sfxMuted ? '🔇' : '🔊';
       btnSfxSpeaker.style.opacity = soundFx.sfxMuted ? '0.45' : '1.0';
     }
   };
@@ -1038,9 +1038,8 @@ export const setupUI = (handlers) => {
   if (btnBgmSpeaker) {
     btnBgmSpeaker.addEventListener('click', (e) => {
       e.stopPropagation();
-      const muted = soundFx.toggleBGMMute();
-      btnBgmSpeaker.textContent = muted ? '🔈' : '🔊';
-      btnBgmSpeaker.style.opacity = muted ? '0.45' : '1.0';
+      soundFx.toggleBGMMute();
+      syncSoundUI();
       soundFx.playClick();
     });
   }
@@ -1048,9 +1047,8 @@ export const setupUI = (handlers) => {
   if (btnSfxSpeaker) {
     btnSfxSpeaker.addEventListener('click', (e) => {
       e.stopPropagation();
-      const muted = soundFx.toggleSFXMute();
-      btnSfxSpeaker.textContent = muted ? '🔈' : '🔊';
-      btnSfxSpeaker.style.opacity = muted ? '0.45' : '1.0';
+      soundFx.toggleSFXMute();
+      syncSoundUI();
       soundFx.playClick();
     });
   }

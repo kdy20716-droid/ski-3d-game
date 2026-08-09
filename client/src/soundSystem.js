@@ -6,18 +6,39 @@ class SoundManager {
   constructor() {
     this.ctx = null;
     this.masterGain = null;
+    this.sfxGain = null; // 추가
     this.isMuted = false;
     this.initDone = false;
     this.goldCombo = 0;
     this.lastGoldTime = 0;
+    this.uiBound = false;
+    this.bgmAudio = null;
+    this.currentBGMTrack = null;
+    this.driftNode = null;
+    this.driftGain = null;
 
-    // 🔊 BGM 및 SFX 개별 볼륨 / 음소거 저장 상태 (NaN 방지 보정)
-    const rawBgm = parseFloat(localStorage.getItem('ski_bgm_vol'));
-    const rawSfx = parseFloat(localStorage.getItem('ski_sfx_vol'));
-    this.bgmVolume = isNaN(rawBgm) ? 0.45 : Math.max(0, Math.min(1, rawBgm));
-    this.sfxVolume = isNaN(rawSfx) ? 0.50 : Math.max(0, Math.min(1, rawSfx));
-    this.bgmMuted = localStorage.getItem('ski_bgm_mute') === 'true';
-    this.sfxMuted = localStorage.getItem('ski_sfx_mute') === 'true';
+    // 🔊 BGM 볼륨을 매우 조용하고 은은한 수준에서 아주 살짝만 키움(0.08 -> 0.13)
+    this.bgmVolume = 0.13;
+    this.sfxVolume = 0.80;
+    this.masterVolume = 0.70;
+
+    localStorage.setItem('ski_bgm_vol', '0.13');
+    localStorage.setItem('ski_sfx_vol', '0.80');
+    localStorage.setItem('ski_master_vol', '0.70');
+    
+    // 기본적으로 무조건 음악/효과음 모두 켜진 상태(false)로 강제 설정하여 자동 재생
+    localStorage.setItem('ski_bgm_mute', 'false');
+    localStorage.setItem('ski_sfx_mute', 'false');
+
+    this.bgmMuted = false;
+    this.sfxMuted = false;
+    this.masterMuted = false;
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.bindUIControls(), { once: true });
+    } else {
+      this.bindUIControls();
+    }
   }
 
   // 브라우저 사용자 상호작용 후 AudioContext 및 노이즈 버퍼 사전 할당 (런타임 렉/GC 100% 방지)
@@ -28,14 +49,34 @@ class SoundManager {
       if (AudioCtx) {
         this.ctx = new AudioCtx();
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.setValueAtTime(0.35, this.ctx.currentTime); // 적절한 마스터 볼륨
+        this.masterGain.gain.setValueAtTime(this.getEffectiveMasterVolume(), this.ctx.currentTime);
         this.masterGain.connect(this.ctx.destination);
+        
+        // 효과음 전용 볼륨 제어 노드
+        this.sfxGain = this.ctx.createGain();
+        this.sfxGain.gain.value = this.sfxVolume;
+        if (!this.sfxMuted) {
+          this.sfxGain.connect(this.masterGain);
+        }
+
         this.initSharedNoiseBuffers();
         this.initDone = true;
       }
     } catch (e) {
       console.warn('AudioContext init failed:', e);
     }
+  }
+
+  getEffectiveMasterVolume() {
+    return this.masterMuted ? 0 : this.masterVolume;
+  }
+
+  getEffectiveBGMVolume() {
+    return this.bgmMuted ? 0 : this.bgmVolume * this.getEffectiveMasterVolume();
+  }
+
+  getEffectiveSFXVolume() {
+    return this.sfxMuted ? 0 : this.sfxVolume * this.getEffectiveMasterVolume();
   }
 
   initSharedNoiseBuffers() {
@@ -65,7 +106,9 @@ class SoundManager {
   ensureContext() {
     this.init();
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(e => {
+        // Safe to ignore: Autoplay policy may restrict resuming until a user gesture occurs.
+      });
     }
   }
 
@@ -77,7 +120,7 @@ class SoundManager {
   // 1. 🎬 오프닝 컷씬 / 스타트 웅장한 저음 파동 + 신시사이저 소리
   playStart() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -91,7 +134,7 @@ class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
 
     osc.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     osc.start(t);
     osc.stop(t + 0.6);
@@ -100,7 +143,7 @@ class SoundManager {
   // 2. ❗ 컷씬 스키어 깜짝 도약 시 팝! 경고음 (귀여운 high-pitched 팝 팝 소리)
   playSurprise() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -114,7 +157,7 @@ class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.16);
 
     osc.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     osc.start(t);
     osc.stop(t + 0.16);
@@ -123,7 +166,7 @@ class SoundManager {
   // 3. 🌬️ 부스터 발동 (시원하게 귓전을 휩쓸고 지나가는 정갈하고 세련된 바람 소리)
   playBoost() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     
@@ -152,7 +195,7 @@ class SoundManager {
 
     noise.connect(filter);
     filter.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     noise.start(t);
     noise.stop(t + 0.45);
@@ -161,7 +204,7 @@ class SoundManager {
   // 4. 🦘 눈밭 스키 점프 도약음 (띠옹- 소리 없이 정갈하게 스키 날이 눈을 붕! 차올리는 바람 소리)
   playJump() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
 
@@ -187,7 +230,7 @@ class SoundManager {
 
     noise.connect(filter);
     filter.connect(noiseGain);
-    noiseGain.connect(this.masterGain);
+    noiseGain.connect(this.sfxGain || this.masterGain);
 
     noise.start(t);
     noise.stop(t + 0.18);
@@ -196,7 +239,7 @@ class SoundManager {
   // 4-1. 🚀 대형 점프대 (Kicker Ramp) 강풍 점프 도약음
   playKickerLaunch() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const noise = this.ctx.createBufferSource();
@@ -222,7 +265,7 @@ class SoundManager {
 
     noise.connect(filter);
     filter.connect(noiseGain);
-    noiseGain.connect(this.masterGain);
+    noiseGain.connect(this.sfxGain || this.masterGain);
 
     noise.start(t);
     noise.stop(t + 0.35);
@@ -231,7 +274,7 @@ class SoundManager {
   // 5. 🛬 점프 착지 성공음 (묵직하게 스키 날이 눈을 가르는 착지음)
   playLand() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const noise = this.ctx.createBufferSource();
@@ -256,7 +299,7 @@ class SoundManager {
 
     noise.connect(filter);
     filter.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     noise.start(t);
     noise.stop(t + 0.12);
@@ -265,7 +308,7 @@ class SoundManager {
   // 6. 🔷 일반 크리스탈/다이아몬드 획득음 (맑고 밝은 "띠링~" 사운드)
   playGold() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const now = performance.now();
     if (now - this.lastGoldTime < 600) {
@@ -288,7 +331,7 @@ class SoundManager {
       gainNode.gain.linearRampToValueAtTime(0.4, t + idx * 0.04 + 0.008);
       gainNode.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.04 + 0.28);
       osc.connect(gainNode);
-      gainNode.connect(this.masterGain);
+      gainNode.connect(this.sfxGain || this.masterGain);
       osc.start(t + idx * 0.04);
       osc.stop(t + idx * 0.04 + 0.30);
     });
@@ -297,7 +340,7 @@ class SoundManager {
   // 7. 🌟 황금 다이아몬드 "띠링~" 획득음 (밝고 깨끗한 3음 아르페지오 벨 사운드)
   playGoldenDiamond() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     // 띠링~ : 높은 음정 3개를 빠르게 아르페지오로, 긴 decay로 여운 남기기 (C-E-G 코드)
@@ -311,7 +354,7 @@ class SoundManager {
       gainNode.gain.linearRampToValueAtTime(0.38, t + idx * 0.05 + 0.008);
       gainNode.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.05 + 0.45);
       osc.connect(gainNode);
-      gainNode.connect(this.masterGain);
+      gainNode.connect(this.sfxGain || this.masterGain);
       osc.start(t + idx * 0.05);
       osc.stop(t + idx * 0.05 + 0.50);
     });
@@ -320,7 +363,7 @@ class SoundManager {
   // 7-1. 🥇 황금 메달 전용 "딸랑~" 획득음 (더욱 청아하고 영롱한 벨 사운드)
   playMedalGet() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     // 딸랑~: 더 높은 음과 triangle 파형으로 청아하고 영롱한 벨/차임 소리 구현
@@ -337,7 +380,7 @@ class SoundManager {
       gainNode.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.06 + 0.75);
 
       osc.connect(gainNode);
-      gainNode.connect(this.masterGain);
+      gainNode.connect(this.sfxGain || this.masterGain);
       osc.start(t + idx * 0.06);
       osc.stop(t + idx * 0.06 + 0.80);
     });
@@ -346,7 +389,7 @@ class SoundManager {
   // 7. 💥 나무/바위 충돌 스턴음 (쿠궁- 둔탁하고 묵직한 임팩트 충돌음)
   playCrash() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
 
@@ -362,7 +405,7 @@ class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.28);
 
     osc.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     osc.start(t);
     osc.stop(t + 0.28);
@@ -371,7 +414,7 @@ class SoundManager {
   // 8. 💀 산사태 삼켜짐 게임오버음 (어두운 저음 하강음)
   playGameOver() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -385,7 +428,7 @@ class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.85);
 
     osc.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     osc.start(t);
     osc.stop(t + 0.85);
@@ -394,7 +437,7 @@ class SoundManager {
   // 8-1. 🚩 스테이지 관문 통과 승리 팡파르음 (도-미-솔 C5-E5-G5-C6 아르페지오)
   playStageClear() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 - E5 - G5 - C6
@@ -409,7 +452,7 @@ class SoundManager {
       gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.06 + 0.22);
 
       osc.connect(gain);
-      gain.connect(this.masterGain);
+      gain.connect(this.sfxGain || this.masterGain);
 
       osc.start(t + idx * 0.06);
       osc.stop(t + idx * 0.06 + 0.22);
@@ -419,7 +462,7 @@ class SoundManager {
   // 9. 🏆 Stage 10 완주 공중제비 승리 팡파르음!
   playVictory() {
     this.ensureContext();
-    if (!this.ctx || this.isMuted) return;
+    if (!this.ctx || this.isMuted || this.sfxMuted) return;
 
     const t = this.ctx.currentTime;
     const melody = [523.25, 659.25, 783.99, 1046.50, 1318.51];
@@ -434,7 +477,7 @@ class SoundManager {
       gain.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.08 + 0.25);
 
       osc.connect(gain);
-      gain.connect(this.masterGain);
+      gain.connect(this.sfxGain || this.masterGain);
 
       osc.start(t + idx * 0.08);
       osc.stop(t + idx * 0.08 + 0.25);
@@ -460,7 +503,7 @@ class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.032);
 
     osc.connect(gain);
-    gain.connect(this.masterGain);
+    gain.connect(this.sfxGain || this.masterGain);
 
     osc.start(t);
     osc.stop(t + 0.032);
@@ -469,6 +512,9 @@ class SoundManager {
   // 11. 🎵 MP3/OGG BGM 재생 엔진 (Stage 10/11 및 메인 테마 음악 자동 로드 & 무한 루프)
   playBGM(trackName = 'stage10') {
     this.ensureContext();
+    this.currentBGMTrack = trackName;
+    if (this.bgmMuted) return; // 음소거 상태면 로드/재생 시도조차 하지 않음
+
     if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) return;
 
     this.stopBGM();
@@ -482,10 +528,11 @@ class SoundManager {
 
     const audio = new Audio();
     audio.loop = true;
-    audio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+    audio.volume = this.getEffectiveBGMVolume();
 
     let pathIdx = 0;
     const tryNextPath = () => {
+      if (this.bgmAudio !== audio) return; // BGM이 이미 교체되었거나 정지되었다면 시도 중단
       if (pathIdx >= possiblePaths.length) return;
       audio.src = possiblePaths[pathIdx++];
       audio.play().catch(() => {
@@ -507,38 +554,100 @@ class SoundManager {
     this.currentBGMTrack = null;
   }
 
-  // 🔊 실시간 BGM/SFX 볼륨 및 음소거 설정 메서드
-  setBGMVolume(vol) {
-    this.bgmVolume = Math.max(0, Math.min(1, vol));
-    localStorage.setItem('ski_bgm_vol', this.bgmVolume.toString());
+  applyMasterVolume() {
+    if (!this.ctx || !this.masterGain) return;
+    this.masterGain.gain.setValueAtTime(this.getEffectiveMasterVolume(), this.ctx.currentTime);
     if (this.bgmAudio) {
-      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+      this.bgmAudio.volume = this.getEffectiveBGMVolume();
     }
   }
 
+  setMasterVolume(vol) {
+    this.masterVolume = Math.max(0, Math.min(1, Number(vol) || 0));
+    localStorage.setItem('ski_master_vol', String(this.masterVolume));
+    this.applyMasterVolume();
+    this.syncVolumeUI();
+  }
+
+  toggleMasterMute() {
+    this.masterMuted = !this.masterMuted;
+    localStorage.setItem('ski_master_mute', this.masterMuted ? 'true' : 'false');
+    this.applyMasterVolume();
+    this.syncVolumeUI();
+    return this.masterMuted;
+  }
+
+  bindUIControls() {
+    if (this.uiBound || !document) return;
+    this.uiBound = true;
+    this.syncVolumeUI();
+  }
+
+  syncVolumeUI() {
+    if (!document) return;
+
+    const bgmBtn = document.getElementById("btnBgmSpeaker");
+    if (bgmBtn) {
+      bgmBtn.textContent = this.bgmMuted ? "🔇" : "🔊";
+    }
+
+    const sfxBtn = document.getElementById("btnSfxSpeaker");
+    if (sfxBtn) {
+      sfxBtn.textContent = this.sfxMuted ? "🔇" : "🔊";
+    }
+  }
+
+  // 🔊 실시간 BGM/SFX 볼륨 및 음소거 설정 메서드
+  setBGMVolume(vol) {
+    this.bgmVolume = Math.max(0, Math.min(1, Number(vol) || 0));
+    localStorage.setItem("ski_bgm_vol", String(this.bgmVolume));
+
+    if (this.bgmAudio) {
+      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+    }
+    this.syncVolumeUI();
+  }
+
   setSFXVolume(vol) {
-    this.sfxVolume = Math.max(0, Math.min(1, vol));
-    localStorage.setItem('ski_sfx_vol', this.sfxVolume.toString());
-    if (this.driftGain && this.ctx) {
-      this.driftGain.gain.setValueAtTime(this.sfxMuted ? 0 : this.sfxVolume * 0.16, this.ctx.currentTime);
+    this.sfxVolume = Math.max(0, Math.min(1, Number(vol) || 0));
+    localStorage.setItem("ski_sfx_vol", String(this.sfxVolume));
+    if (this.sfxGain) {
+      this.sfxGain.gain.value = this.sfxMuted ? 0 : this.sfxVolume;
     }
   }
 
   toggleBGMMute() {
     this.bgmMuted = !this.bgmMuted;
-    localStorage.setItem('ski_bgm_mute', this.bgmMuted ? 'true' : 'false');
-    if (this.bgmAudio) {
-      this.bgmAudio.volume = this.bgmMuted ? 0 : this.bgmVolume;
+    localStorage.setItem("ski_bgm_mute", this.bgmMuted ? "true" : "false");
+
+    if (this.bgmMuted) {
+      if (this.bgmAudio) {
+        this.bgmAudio.pause();
+      }
+    } else {
+      if (this.bgmAudio) {
+        this.bgmAudio.play().catch(e => console.warn(e));
+      } else if (this.currentBGMTrack) {
+        this.playBGM(this.currentBGMTrack);
+      }
     }
+
+    this.syncVolumeUI();
     return this.bgmMuted;
   }
 
   toggleSFXMute() {
     this.sfxMuted = !this.sfxMuted;
-    localStorage.setItem('ski_sfx_mute', this.sfxMuted ? 'true' : 'false');
-    if (this.driftGain && this.ctx) {
-      this.driftGain.gain.setValueAtTime(this.sfxMuted ? 0 : this.sfxVolume * 0.16, this.ctx.currentTime);
+    localStorage.setItem("ski_sfx_mute", this.sfxMuted ? "true" : "false");
+    if (this.sfxGain) {
+      if (this.sfxMuted) {
+        this.sfxGain.disconnect();
+      } else {
+        this.sfxGain.disconnect(); // 안전 조치
+        this.sfxGain.connect(this.masterGain);
+      }
     }
+    this.syncVolumeUI();
     return this.sfxMuted;
   }
 
@@ -569,7 +678,7 @@ class SoundManager {
 
       noise.connect(filter);
       filter.connect(gain);
-      gain.connect(this.masterGain);
+      gain.connect(this.sfxGain || this.masterGain);
 
       noise.start();
       this.driftNode = noise;
