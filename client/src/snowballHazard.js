@@ -55,41 +55,29 @@ export const createSnowballHazardSystem = (scene) => {
     }
   };
 
-  // 🏔️ 좌/우 모서리 끝쪽 스폰 위치 계산 (경고 UI 및 실제 스폰 동기화)
-  const calculateSpawnPositions = (playerX, count, radiusMin) => {
-    const list = [];
-    for (let i = 0; i < count; i++) {
-      // 0, 2, 4번째는 좌측 모서리 끝(-90m~-120m), 1, 3, 5번째는 우측 모서리 끝(+90m~+120m)
-      const side = (i % 2 === 0) ? -1 : 1;
-      const x = playerX + side * (85.0 + (i * 12.0) % 35.0);
-      list.push(x);
-    }
-    return list;
-  };
-
-  // ── 2. 눈덩이 스폰 함수 (좌/우 모서리 끝쪽에서 출현!) ───────────────
+  // ── 2. 눈덩이 스폰 함수 (플레이어 좌/우 뒤쪽에서 발사 → 전방 향해 빠르게 굴러가다 천천히 감속!) ──
   const spawnSnowballGroup = (playerX, playerZ, playerSpd, stageNum) => {
     const cfg = getStageConfig(stageNum);
     if (!cfg) return;
 
     const currentPlayerSpd = Math.max(playerSpd, 26.0);
-    const spawnXList = calculateSpawnPositions(playerX, cfg.count, cfg.radiusMin);
 
     for (let i = 0; i < cfg.count; i++) {
       const radius = cfg.radiusMin + Math.random() * (cfg.radiusMax - cfg.radiusMin);
-      const startX = spawnXList[i];
-      const side = (i % 2 === 0) ? -1 : 1;
-      const startZ = playerZ + (5.0 - Math.random() * 15.0); // 플레이어 측면/약간 전방
+      const side = (i % 2 === 0) ? -1 : 1; // 0번째: 좌측 뒤, 1번째: 우측 뒤
 
-      // 🏎️ 초기 속도: 플레이어보다 빠른 속도로 전방 300m 향해 솟구침!
+      // 🏔️ 내 좌/우 뒤쪽에서 발사 (좌우 ±55~80m, 뒤쪽 10~25m)
+      const startX = playerX + side * (55.0 + Math.random() * 25.0);
+      const startZ = playerZ + (10.0 + Math.random() * 15.0);
+
+      // 🏎️ 초기 발사 속도: 플레이어보다 훨씬 빠르게(1.65~1.9배) 전방 향해 솟구침! (쭉 굴러감)
       const initialSpd = currentPlayerSpd * (1.65 + Math.random() * 0.25) * cfg.spdMult;
-      
-      // 🏎️ 300m 지나친 후 감속 목표 속도 (플레이어 속도의 0.75배로 직진 굴러감)
-      const targetSpd = currentPlayerSpd * (0.75 + Math.random() * 0.12) * cfg.spdMult;
 
-      // 🎯 [사선 크로스 궤적]:
-      // 왼쪽 모서리 눈덩이는 전방 중앙~오른쪽으로, 오른쪽 모서리 눈덩이는 전방 중앙~왼쪽으로 가로지르는 X 속도
-      const vx = -side * (14.0 + Math.random() * 18.0);
+      // 🛑 전방으로 사격 후 감속 목표 속도: 플레이어 속도의 15~30% (천천히 감속)
+      const brakeFinalSpd = currentPlayerSpd * (0.15 + Math.random() * 0.15) * cfg.spdMult;
+
+      // 🎯 사선 크로스 궤적: 중앙/반대쪽으로 오도록 X 속도
+      const vx = -side * (12.0 + Math.random() * 10.0);
 
       const mesh = new THREE.Mesh(sphereGeo, snowballMat);
       mesh.scale.setScalar(radius);
@@ -99,6 +87,9 @@ export const createSnowballHazardSystem = (scene) => {
       mesh.position.set(startX, startY, startZ);
       scene.add(mesh);
 
+      // brakeDelay: 1.8~2.6초 동안 플레이어를 추월하며 앞으로 쭉 굴러간 뒤 천천히 브레이크!
+      const brakeDelay = 1.8 + Math.random() * 0.8;
+
       snowballs.push({
         mesh,
         radius,
@@ -106,8 +97,11 @@ export const createSnowballHazardSystem = (scene) => {
         y: startY,
         z: startZ,
         vx,
-        vz: -initialSpd,
-        targetVz: -targetSpd,
+        vz: -initialSpd,              // 발사 시 아주 빠름
+        brakeFinalVz: -brakeFinalSpd, // 감속 후 목표 속도
+        brakeDelay,                   // 쭉 굴러가는 시간
+        stateTimer: 0,
+        braking: false,
         spawnZ: startZ,
         active: true,
       });
@@ -173,14 +167,22 @@ export const createSnowballHazardSystem = (scene) => {
       spawnSnowballGroup(G.px, G.pz, G.spd, G.stage);
     }
 
-    // ── 눈덩이 물리 이동 & 300m 전방 감속 ───────────────────────
+    // ── 눈덩이 물리: 내 좌/우 뒤에서 빠른 속도로 출발해 전방으로 굴러가다 천천히 감속 ─
     for (const b of snowballs) {
       if (!b.active) continue;
 
-      // 🏎️ 300m 전방으로 솟구친 후 내 진로 방향(-Z)으로 감속 굴러감!
-      const distAhead = b.spawnZ - b.z;
-      if (distAhead > 260.0 && b.vz < b.targetVz) {
-        b.vz = Math.min(b.targetVz, b.vz + (G.spd * 0.75) * dt);
+      b.stateTimer += dt;
+
+      if (!b.braking && b.stateTimer >= b.brakeDelay) {
+        // 🛑 전방 도착 후 부드러운 브레이크/감속 시작!
+        b.braking = true;
+      }
+
+      if (b.braking) {
+        // 약 2초에 걸쳐 부드럽게 감속
+        const brakeLerp = 1.0 - Math.pow(1.0 - 0.25, dt * 60);
+        b.vz += (b.brakeFinalVz - b.vz) * brakeLerp;
+        b.vx *= 0.99; // 사선 이동도 부드럽게 줄어듦
       }
 
       // 🛹 점프대(Kicker Ramp) 상호작용: 점프대를 지나면 위로 살짝 붕-! 떠오름
@@ -292,11 +294,12 @@ export const createSnowballHazardSystem = (scene) => {
     cleanupFarObjects(G.pz, dt);
   };
 
-  // ── 5. 소멸 조건: 플레이어 뒤로 지나치면 소멸 ───────────────────
+  // ── 5. 소멸 조건: 플레이어가 지나쳤거나 너무 멀면 소멸 ─────────────
   const cleanupFarObjects = (playerZ, dt) => {
     for (let i = snowballs.length - 1; i >= 0; i--) {
       const b = snowballs[i];
-      if (b.z > playerZ + 20.0 || b.z < playerZ - 550.0 || !b.active) {
+      // 플레이어 뒤 30m 이상 지나쳤거나, 너무 앞에 있거나, 비활성
+      if (b.z > playerZ + 30.0 || b.z < playerZ - 400.0 || !b.active) {
         scene.remove(b.mesh);
         b.mesh.geometry.dispose();
         snowballs.splice(i, 1);
