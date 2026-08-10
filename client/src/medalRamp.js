@@ -32,9 +32,9 @@ export const createMedalRampSystem = (scene) => {
   const medalRimGeo  = new THREE.TorusGeometry(4.25, 0.30, 16, 32);
   const starGeo      = create3DStarGeometry(1.95, 0.75, 0.35);
 
-  const medalSoftGoldMat = new THREE.MeshPhysicalMaterial({
+  const medalSoftGoldMat = new THREE.MeshStandardMaterial({
     color: 0xFFF2A3, emissive: 0xFFD043, emissiveIntensity: 1.6,
-    metalness: 0.75, roughness: 0.05, transmission: 0.25, ior: 2.417, reflectivity: 1.0, clearcoat: 1.0, transparent: true, opacity: 0.95
+    metalness: 0.85, roughness: 0.15, transparent: false
   });
 
   const starGoldMat = new THREE.MeshPhysicalMaterial({
@@ -139,12 +139,12 @@ export const createMedalRampSystem = (scene) => {
     medalRampList.length = 0;
     medalItems.length = 0;
 
-    // 스테이지 진행 구간에 맞춰 3개 점프대 배치
-    const zPositions = [-1800 + baseZOffset, -4800 + baseZOffset, -7800 + baseZOffset];
+    // 스테이지 진행 구간에 맞춰 3개 점프대 배치 (-1200m, -4000m, -7000m)
+    const zPositions = [-1200 + baseZOffset, -4000 + baseZOffset, -7000 + baseZOffset];
 
     for (let i = 0; i < 3; i++) {
       const rZ = zPositions[i];
-      const rX = (Math.random() - 0.5) * 120;
+      const rX = (Math.random() - 0.5) * 50; // 주행 경로 근처(±25m)에 선명하게 출현!
       const meshGroup = createMedalKickerMesh(rX, rZ);
       const medalItem = spawnMedalOnRamp(rX, rZ);
 

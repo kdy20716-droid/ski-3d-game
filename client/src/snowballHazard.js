@@ -30,7 +30,7 @@ export const createSnowballHazardSystem = (scene) => {
 
   // ── 1. 스테이지별 스폰 설정 (큼직한 웅장한 크기!) ─────────────────
   const getStageConfig = (stageNum) => {
-    if (stageNum <= 2) return null; // Stage 1~2 비활성
+    if (stageNum <= 2) return null; // Stage 1~2 비활성 (게임 디자인 의도)
 
     switch (stageNum) {
       case 3:

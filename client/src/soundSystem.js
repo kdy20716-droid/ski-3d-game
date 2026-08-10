@@ -512,7 +512,6 @@ class SoundManager {
   // 11. 🎵 MP3/OGG BGM 재생 엔진 (Stage 10/11 및 메인 테마 음악 자동 로드 & 무한 루프)
   playBGM(trackName = 'stage10') {
     this.ensureContext();
-    this.currentBGMTrack = trackName;
     if (this.bgmMuted) return; // 음소거 상태면 로드/재생 시도조차 하지 않음
 
     if (this.currentBGMTrack === trackName && this.bgmAudio && !this.bgmAudio.paused) return;
@@ -521,9 +520,11 @@ class SoundManager {
 
     const possiblePaths = [
       `client/assets/audio/bgm/${trackName}.mp3`,
+      `assets/audio/bgm/${trackName}.mp3`,
+      `./client/assets/audio/bgm/${trackName}.mp3`,
+      `./assets/audio/bgm/${trackName}.mp3`,
       `client/assets/audio/bgm/${trackName}.ogg`,
-      `client/assets/audio/bgm/${trackName}_finale.mp3`,
-      `client/assets/audio/bgm/${trackName}_bonus.mp3`,
+      `assets/audio/bgm/${trackName}.ogg`,
     ];
 
     const audio = new Audio();

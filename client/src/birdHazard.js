@@ -118,10 +118,9 @@ export const createBirdHazardSystem = (scene) => {
 
   // 🦅 업데이트 루프
   const update = (playerZ, playerX, playerY, stageNum, dt, time, onBirdHit) => {
-    // 1) 스폰 쿨다운 타이머 (연사총 방지 적정 쿨다운 제어)
+    // 1) 스폰 쿨다운 타이머 (연사총 방지 적정 쿨다운 제어 - Stage 2부터 출현)
     if (stageNum >= 2) {
       spawnTimer += dt;
-      // 스테이지 2~3: 6.5초, 스테이지 4~6: 5.2초, 스테이지 7~9: 4.2초, 스테이지 10: 3.5초
       let interval = 6.5;
       if (stageNum === 10) interval = 3.5;
       else if (stageNum >= 7) interval = 4.2;

@@ -90,6 +90,8 @@ export const updateOpeningCutscene = (G, dt, camera, skier, ui, getTerrainY, ava
     G.avalancheGraceTimer = 3.0;
     G.avalancheZ = G.pz + 95.0;
     if (avalancheSystem) avalancheSystem.updateAvalanche(G.avalancheZ);
+    if (ui && ui.setHUDVisible) ui.setHUDVisible(true);
+    if (ui && ui.showSkipHint) ui.showSkipHint(false);
 
     // 카메라 좌표 100% 인게임 3인칭 뷰와 일치화
     G.cx = G.px; G.cy = G.py + CFG.CAM_H; G.cz = G.pz + CFG.CAM_D;

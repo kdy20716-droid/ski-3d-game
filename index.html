@@ -3,28 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D SKI AVALANCHE — 초고속 3D 스키 아발란체</title>
-    <meta name="description" content="산사태를 탈출하라! 목숨을 건 초고속 3D 알파인 스키 탈출 게임. 전 세계 실시간 랭킹에 도전하세요!" />
+    <title>SNOWFALL — 스노우폴 3D 스키</title>
+    <meta
+      name="description"
+      content="산사태를 탈출하라! 목숨을 건 초고속 3D 알파인 스키 탈출 게임. 전 세계 실시간 랭킹에 도전하세요!"
+    />
 
     <!-- ⛷️ 3D 스키 게임 파비콘 (Favicon 404 해결) -->
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=27.0.0" />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=27.0.0" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="favicon.png?v=27.0.0"
+    />
     <link rel="apple-touch-icon" href="favicon.png?v=27.0.0" />
 
     <!-- 🎬 SNS 링크 공유 미리보기 (Open Graph & Twitter Meta Tags - Discord & KakaoTalk Absolute URL Spec) -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://kdy20716-droid.github.io/ski-3d-game/" />
-    <meta property="og:title" content="3D SKI AVALANCHE — 초고속 3D 스키 아발란체" />
-    <meta property="og:description" content="산사태를 탈출하라! 목숨을 건 초고속 3D 스키 탈출 레이스. 전 세계 실시간 리더보드 도전!" />
-    <meta property="og:image" content="https://kdy20716-droid.github.io/ski-3d-game/og_preview.jpg?v=37.0.0" />
-    <meta property="og:image:secure_url" content="https://kdy20716-droid.github.io/ski-3d-game/og_preview.jpg?v=37.0.0" />
+    <meta
+      property="og:url"
+      content="https://kdy20716-droid.github.io/ski-3d-game/"
+    />
+    <meta
+      property="og:title"
+      content="3D SKI AVALANCHE — 초고속 3D 스키 아발란체"
+    />
+    <meta
+      property="og:description"
+      content="산사태를 탈출하라! 목숨을 건 초고속 3D 스키 탈출 레이스. 전 세계 실시간 리더보드 도전!"
+    />
+    <meta
+      property="og:image"
+      content="https://kdy20716-droid.github.io/ski-3d-game/og_preview.jpg?v=37.0.0"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://kdy20716-droid.github.io/ski-3d-game/og_preview.jpg?v=37.0.0"
+    />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="675" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="3D SKI AVALANCHE — 초고속 3D 스키 아발란체" />
-    <meta name="twitter:description" content="산사태를 탈출하라! 3D 스키 아발란체 레이싱" />
-    <meta name="twitter:image" content="https://kdy20716-droid.github.io/ski-3d-game/og_preview.jpg?v=37.0.0" />
+    <meta
+      name="twitter:title"
+      content="3D SKI AVALANCHE — 초고속 3D 스키 아발란체"
+    />
+    <meta
+      name="twitter:description"
+      content="산사태를 탈출하라! 3D 스키 아발란체 레이싱"
+    />
+    <meta
+      name="twitter:image"
+      content="https://kdy20716-droid.github.io/ski-3d-game/og_preview.jpg?v=37.0.0"
+    />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Outfit:wght@300;400;700;900&display=swap"
@@ -186,9 +218,13 @@
             id="btnControls"
             style="
               margin-top: 12px;
-              background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(200, 230, 255, 0.05) 100%);
+              background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.12) 0%,
+                rgba(200, 230, 255, 0.05) 100%
+              );
               border: 1px solid rgba(0, 240, 255, 0.45);
-              color: #00F0FF;
+              color: #00f0ff;
               box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
             "
           >
@@ -237,9 +273,36 @@
     <!-- Character Select Screen (메인 화면과 동일한 블러 배경) -->
     <div class="screen off" id="scCharSelect">
       <!-- 📢 화면 상단 붕- 떠오르는 캐릭터 선택 전용 토스트 알림 -->
-      <div id="charSelToast" style="position: fixed; top: 70px; left: 50%; transform: translate(-50%, -10px); z-index: 25000; font-size: 15px; text-align: center; background: rgba(5, 15, 35, 0.92); padding: 10px 24px; border-radius: 30px; border: 1.5px solid #FF8800; box-shadow: 0 0 25px rgba(255, 136, 0, 0.5); pointer-events: none; opacity: 0; transition: opacity 0.35s ease, transform 0.35s ease;">
-        <span id="charSelToastTitle" style="color: #FF9900; font-weight: 900;">모든 장애물을 무시 하고 달립니다</span>
-        <span id="charSelToastSub" style="color: #FFD700; font-size: 12px; margin-left: 8px;">(도전모드 기록이 되지않습니다)</span>
+      <div
+        id="charSelToast"
+        style="
+          position: fixed;
+          top: 70px;
+          left: 50%;
+          transform: translate(-50%, -10px);
+          z-index: 25000;
+          font-size: 15px;
+          text-align: center;
+          background: rgba(5, 15, 35, 0.92);
+          padding: 10px 24px;
+          border-radius: 30px;
+          border: 1.5px solid #ff8800;
+          box-shadow: 0 0 25px rgba(255, 136, 0, 0.5);
+          pointer-events: none;
+          opacity: 0;
+          transition:
+            opacity 0.35s ease,
+            transform 0.35s ease;
+        "
+      >
+        <span id="charSelToastTitle" style="color: #ff9900; font-weight: 900"
+          >모든 장애물을 무시 하고 달립니다</span
+        >
+        <span
+          id="charSelToastSub"
+          style="color: #ffd700; font-size: 12px; margin-left: 8px"
+          >(도전모드 기록이 되지않습니다)</span
+        >
       </div>
 
       <div class="charsel-header">
@@ -249,8 +312,29 @@
       <div class="charsel-grid" id="charSelGrid">
         <!-- JS로 동적 생성 -->
       </div>
-      <div class="charsel-footer" style="margin-top: 16px; margin-bottom: 24px; z-index: 20; pointer-events: all;">
-        <button class="btn" id="btnConfirmChar" style="margin: 0; padding: 14px 48px; font-size: 14px; letter-spacing: 3px; background: linear-gradient(135deg, #00F0FF 0%, #0077FF 100%); border-color: #00F0FF; color: #FFFFFF; box-shadow: 0 0 30px rgba(0, 200, 255, 0.6);">
+      <div
+        class="charsel-footer"
+        style="
+          margin-top: 16px;
+          margin-bottom: 24px;
+          z-index: 20;
+          pointer-events: all;
+        "
+      >
+        <button
+          class="btn"
+          id="btnConfirmChar"
+          style="
+            margin: 0;
+            padding: 14px 48px;
+            font-size: 14px;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #00f0ff 0%, #0077ff 100%);
+            border-color: #00f0ff;
+            color: #ffffff;
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.6);
+          "
+        >
           SELECT CHARACTER / 캐릭터 선택하기
         </button>
       </div>
@@ -278,7 +362,11 @@
         id="btnQuit"
         style="
           margin-top: 12px;
-          background: linear-gradient(135deg, rgba(255, 50, 50, 0.85) 0%, rgba(200, 20, 20, 0.95) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba(255, 50, 50, 0.85) 0%,
+            rgba(200, 20, 20, 0.95) 100%
+          );
           border-color: rgba(255, 100, 100, 0.6);
           box-shadow: 0 0 20px rgba(255, 50, 50, 0.45);
         "
@@ -291,9 +379,13 @@
     <div class="screen off" id="scRecordPopup">
       <div class="record-popup-card">
         <div class="record-popup-badge">NEW RECORD!</div>
-        <div class="record-popup-title" id="lblRecordPopupTitle">🏆 랭킹 등록!</div>
-        <div class="record-popup-desc" id="lblRecordPopupDesc">축하합니다! 신기록을 달성했습니다. 전 세계 랭킹표에 이름을 남겨보세요!</div>
-        
+        <div class="record-popup-title" id="lblRecordPopupTitle">
+          🏆 랭킹 등록!
+        </div>
+        <div class="record-popup-desc" id="lblRecordPopupDesc">
+          축하합니다! 신기록을 달성했습니다. 전 세계 랭킹표에 이름을 남겨보세요!
+        </div>
+
         <div class="record-stats-box">
           <div class="record-stat-item">
             <span class="record-stat-label">SCORE</span>
@@ -323,23 +415,53 @@
 
           <div class="record-input-wrap">
             <label class="record-label">NICKNAME / 닉네임</label>
-            <input type="text" id="popNicknameInput" class="record-input" maxlength="14" placeholder="닉네임 입력 (최대 14자)" />
+            <input
+              type="text"
+              id="popNicknameInput"
+              class="record-input"
+              maxlength="14"
+              placeholder="닉네임 입력 (최대 14자)"
+            />
           </div>
         </div>
 
         <div class="record-btn-group">
-          <button class="btn-record-submit" id="btnRecordSubmit">REGISTER 🚀</button>
+          <button class="btn-record-submit" id="btnRecordSubmit">
+            REGISTER 🚀
+          </button>
           <button class="btn-record-skip" id="btnRecordSkip">SKIP</button>
         </div>
       </div>
     </div>
 
     <!-- 🎮 게임 플레이 조작법 키보드 안내 모달 (Z-Index: 30000) -->
-    <div class="screen off" id="scControls" style="z-index: 30000;">
-      <div class="record-popup-card" style="max-width: 580px; text-align: center; border-color: #00F0FF; box-shadow: 0 0 45px rgba(0, 240, 255, 0.4);">
-        <div style="font-size: 38px; margin-bottom: 4px;">🎮</div>
-        <div class="record-popup-title" id="lblControlsTitle" style="color: #00F0FF; font-size: 22px;">🎮 조작 방법</div>
-        <div class="record-popup-desc" id="lblControlsDesc" style="color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 18px;">
+    <div class="screen off" id="scControls" style="z-index: 30000">
+      <div
+        class="record-popup-card"
+        style="
+          max-width: 580px;
+          text-align: center;
+          border-color: #00f0ff;
+          box-shadow: 0 0 45px rgba(0, 240, 255, 0.4);
+        "
+      >
+        <div style="font-size: 38px; margin-bottom: 4px">🎮</div>
+        <div
+          class="record-popup-title"
+          id="lblControlsTitle"
+          style="color: #00f0ff; font-size: 22px"
+        >
+          🎮 조작 방법
+        </div>
+        <div
+          class="record-popup-desc"
+          id="lblControlsDesc"
+          style="
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            margin-bottom: 18px;
+          "
+        >
           키보드로 스키어를 자유자재로 제어하여 거대 산사태를 탈출하세요!
         </div>
 
@@ -358,8 +480,12 @@
               <span class="keycap">→</span>
             </div>
             <div class="key-guide-info">
-              <div class="key-guide-label" id="lblKeyTurn">방향 전환 & 가속 / 감속</div>
-              <div class="key-guide-sub" id="lblKeyTurnSub">Turn Left/Right & Speed Control</div>
+              <div class="key-guide-label" id="lblKeyTurn">
+                방향 전환 & 가속 / 감속
+              </div>
+              <div class="key-guide-sub" id="lblKeyTurnSub">
+                Turn Left/Right & Speed Control
+              </div>
             </div>
           </div>
 
@@ -371,8 +497,12 @@
               <span class="keycap">A</span> / <span class="keycap">D</span>
             </div>
             <div class="key-guide-info">
-              <div class="key-guide-label" id="lblKeyDrift">고속 드리프트 급회전</div>
-              <div class="key-guide-sub" id="lblKeyDriftSub">High-Speed Drift Turn</div>
+              <div class="key-guide-label" id="lblKeyDrift">
+                고속 드리프트 급회전
+              </div>
+              <div class="key-guide-sub" id="lblKeyDriftSub">
+                High-Speed Drift Turn
+              </div>
             </div>
           </div>
 
@@ -382,8 +512,12 @@
               <span class="keycap space">SPACEBAR</span>
             </div>
             <div class="key-guide-info">
-              <div class="key-guide-label" id="lblKeyJump">점프 게이지 차지 & 도약</div>
-              <div class="key-guide-sub" id="lblKeyJumpSub">Charge & Launch Manual Jump</div>
+              <div class="key-guide-label" id="lblKeyJump">
+                점프 게이지 차지 & 도약
+              </div>
+              <div class="key-guide-sub" id="lblKeyJumpSub">
+                Charge & Launch Manual Jump
+              </div>
             </div>
           </div>
 
@@ -393,31 +527,59 @@
               <span class="keycap wide">ESC</span>
             </div>
             <div class="key-guide-info">
-              <div class="key-guide-label" id="lblKeyPause">게임 일시 정지 (Pause)</div>
-              <div class="key-guide-sub" id="lblKeyPauseSub">Pause / Resume Game (ESC)</div>
+              <div class="key-guide-label" id="lblKeyPause">
+                게임 일시 정지 (Pause)
+              </div>
+              <div class="key-guide-sub" id="lblKeyPauseSub">
+                Pause / Resume Game (ESC)
+              </div>
             </div>
           </div>
         </div>
 
-        <button class="btn" id="btnControlsClose" style="margin-top: 22px; padding: 12px 48px; font-size: 14px;">
+        <button
+          class="btn"
+          id="btnControlsClose"
+          style="margin-top: 22px; padding: 12px 48px; font-size: 14px"
+        >
           OK / 확인
         </button>
       </div>
     </div>
 
-
     <!-- 🏂 베타 테스터 전용 10스테이지 완주 축하 화면 (메뉴로 돌아가기 버튼 전용 노출) -->
     <div class="screen off" id="scBetaClear">
-      <div class="screen-sub" style="color: #FF9900;">BETA TEST COMPLETE</div>
-      <div class="over-title" style="background: linear-gradient(135deg, #FFD700, #FF8800); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+      <div class="screen-sub" style="color: #ff9900">BETA TEST COMPLETE</div>
+      <div
+        class="over-title"
+        style="
+          background: linear-gradient(135deg, #ffd700, #ff8800);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
         STAGE 10 FINALE! 🏆
       </div>
       <div class="over-stats" id="betaClearStats">
-        🏆 <strong>BETA TESTER CHAMPION CLEAR!</strong><br>
-        모든 장애물 무적 테스트 코스를 완주했습니다!<br>
-        <span style="color: #FFD700; font-size: 13px;">(도전 모드 공식 랭킹 기록은 등록되지 않습니다)</span>
+        🏆 <strong>BETA TESTER CHAMPION CLEAR!</strong><br />
+        모든 장애물 무적 테스트 코스를 완주했습니다!<br />
+        <span style="color: #ffd700; font-size: 13px"
+          >(도전 모드 공식 랭킹 기록은 등록되지 않습니다)</span
+        >
       </div>
-      <button class="btn" id="btnBetaClearQuit" style="margin-top: 24px; padding: 14px 44px; font-size: 14px; background: linear-gradient(135deg, #00F0FF 0%, #0077FF 100%); border-color: #00F0FF; color: #FFFFFF; box-shadow: 0 0 30px rgba(0, 200, 255, 0.6);">
+      <button
+        class="btn"
+        id="btnBetaClearQuit"
+        style="
+          margin-top: 24px;
+          padding: 14px 44px;
+          font-size: 14px;
+          background: linear-gradient(135deg, #00f0ff 0%, #0077ff 100%);
+          border-color: #00f0ff;
+          color: #ffffff;
+          box-shadow: 0 0 30px rgba(0, 200, 255, 0.6);
+        "
+      >
         MAIN MENU / 메뉴로 돌아가기
       </button>
     </div>
@@ -427,10 +589,14 @@
       <div class="over-title">WIPEOUT!</div>
       <div class="over-stats" id="overStats"></div>
       <button class="btn" id="btnRestart">TRY AGAIN</button>
-      <button class="btn btn-secondary" id="btnOverQuit" style="margin-top: 14px;">MAIN MENU</button>
+      <button
+        class="btn btn-secondary"
+        id="btnOverQuit"
+        style="margin-top: 14px"
+      >
+        MAIN MENU
+      </button>
     </div>
-
-
 
     <!-- 메인 모듈 -->
     <script type="module" src="client/src/main.js?v=57.0.0"></script>

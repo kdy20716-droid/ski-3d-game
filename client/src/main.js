@@ -15,33 +15,14 @@ import { createAvalancheSystem } from './avalancheSystem.js?v=57.0.0';
 import { updateOpeningCutscene, updateVictoryCeremony } from './cinematic.js?v=57.0.0';
 import { soundFx } from './soundSystem.js';
 import { loadSelectedCharacter } from './characters.js?v=57.0.0';
-
+import { createSnowballHazardSystem } from './snowballHazard.js?v=57.0.0';
+import { createRockySnowballHazardSystem } from './rockySnowballHazard.js?v=57.0.0';
+import { createBirdHazardSystem } from './birdHazard.js?v=57.0.0';
+import { createExplodingSnowballHazardSystem } from './explodingSnowballHazard.js?v=57.0.0';
+import { createMedalRampSystem } from './medalRamp.js?v=57.0.0';
+import { triggerMedalFlyToScoreAnimation } from './medalAnimation.js?v=57.0.0';
 
 window.soundFx = soundFx;
-
-// ✅ 현재 파일에서 쓰는 미정의 시스템 생성자들을 안전하게 대체
-function createMissingSystem() {
-  return {
-    reset() {},
-    update() {},
-    checkCollisionAndLaunch() {},
-    resetStageMedalRamps() {},
-    medalRampList: [],
-    rampList: [],
-    resetEnvironment() {}
-  };
-}
-
-const createMedalRampSystem = () => createMissingSystem();
-const createSnowballHazardSystem = () => createMissingSystem();
-const createRockySnowballHazardSystem = () => createMissingSystem();
-const createBirdHazardSystem = () => createMissingSystem();
-const createExplodingSnowballHazardSystem = () => createMissingSystem();
-
-function triggerMedalFlyToScoreAnimation(count, onScore, onToast) {
-  if (typeof onScore === 'function') onScore(count * 100);
-  if (typeof onToast === 'function') onToast(`MEDAL +${count * 100}`, true);
-}
 
 // ─────────────────────────────────────────
 //  RENDERER & SCENE SETUP
@@ -336,6 +317,7 @@ window.addEventListener('keydown', e => {
     if (avalancheSystem) avalancheSystem.updateAvalanche(G.avalancheZ);
     if (skierData && skierData.updateSurpriseBadge3D) skierData.updateSurpriseBadge3D('off');
     if (ui && ui.showSkipHint) ui.showSkipHint(false);
+    if (ui && ui.setHUDVisible) ui.setHUDVisible(true);
   }
 
   // 🤫 개발자 전용 3초 홀드 워프 타이머 시작 (도전 모드 진행 중에는 공정 랭킹을 위해 금지)
@@ -419,6 +401,8 @@ const startGame = (mode = 'challenge') => {
   if (explodingSnowballHazardSystem && explodingSnowballHazardSystem.reset) explodingSnowballHazardSystem.reset();
 
   if (ui) ui.showScreen('game', '', mode);
+  if (ui && ui.updateScore) ui.updateScore(0);
+  if (ui && ui.setHUDVisible) ui.setHUDVisible(!G.isOpeningCutscene);
   if (ui && ui.initRaceBar) ui.initRaceBar(STAGES); // 🏁 레이스 진행 바 깃발 초기화
   if (ui && ui.updateRaceBar) ui.updateRaceBar(0, 100000, G.isOpeningCutscene); // 시작 위치
   if (ui && ui.showVictoryOverlay) ui.showVictoryOverlay(false);

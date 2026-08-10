@@ -414,6 +414,16 @@ export const setupUI = (handlers) => {
     playerEl.style.left = `${pctInTrack * 100}%`;
   };
 
+  const setHUDVisible = (visible) => {
+    const hudEl = document.getElementById('hud');
+    const barsEl = document.getElementById('bars');
+    const raceBarEl = document.getElementById('raceBar');
+    const display = visible ? '' : 'none';
+    if (hudEl) hudEl.style.display = display;
+    if (barsEl) barsEl.style.display = display;
+    if (raceBarEl) raceBarEl.style.display = visible ? 'flex' : 'none';
+  };
+
   const showScreen = (type, statsText = '', mode = 'challenge') => {
     const raceBarEl = document.getElementById('raceBar');
     const scrBetaClear = document.getElementById('scBetaClear');
@@ -421,10 +431,11 @@ export const setupUI = (handlers) => {
 
     if (type === 'start') {
       scrStart.classList.remove('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
-      if (raceBarEl) raceBarEl.style.display = 'none';
+      setHUDVisible(false);
       setMangaSpeedLines(false);
     } else if (type === 'game') {
       scrStart.classList.add('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
+      setHUDVisible(true);
       if (raceBarEl) {
         raceBarEl.style.display = (mode === 'endless') ? 'none' : 'flex';
       }
@@ -436,12 +447,12 @@ export const setupUI = (handlers) => {
     } else if (type === 'over') {
       document.getElementById('overStats').innerHTML = statsText;
       scrOver.classList.remove('off');
-      if (raceBarEl) raceBarEl.style.display = 'none';
+      setHUDVisible(false);
       setMangaSpeedLines(false); // 게임 오버 시 스피드 라인 100% 비활성화!
     } else if (type === 'betaClear') {
       if (scrBetaClear) scrBetaClear.classList.remove('off');
       scrStart.classList.add('off'); scrPause.classList.add('off'); scrOver.classList.add('off');
-      if (raceBarEl) raceBarEl.style.display = 'none';
+      setHUDVisible(false);
       setMangaSpeedLines(false);
     }
   };
@@ -1057,7 +1068,7 @@ export const setupUI = (handlers) => {
   initMainCharPreview(loadSelectedCharacter());
 
   return {
-    showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI,
+    showScreen, updateHUD, showToast, showBonusToast, setMangaSpeedLines, setBoosterUI, setHUDVisible,
     showSurpriseBadge, showVictoryOverlay, showSkipHint, triggerDissolveRespawn, setDangerVignette,
     updateDriftChargeUI, updateStageTitle, updateCornerWarningUI, updateMedalHUD,
     initRaceBar, updateRaceBar, updateScore, updateRacePlayerAvatar, renderLeaderboard,
