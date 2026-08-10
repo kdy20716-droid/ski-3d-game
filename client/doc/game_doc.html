@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SNOWFALL — 프로젝트 소개서</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&amp;family=Noto+Sans+KR:wght@300;400;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      body {
+        font-family: "Noto Sans KR", "Outfit", sans-serif;
+        background: #06000f;
+        color: #e8e0f0;
+        width: 210mm;
+      }
+
+      /* COVER */
+      .cover {
+        width: 210mm;
+        height: 297mm;
+        background: linear-gradient(
+          160deg,
+          #0a001a 0%,
+          #0d0520 40%,
+          #03050f 100%
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
+      }
+      .cover-glow {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 70% 50% at 50% 30%,
+            rgba(0, 160, 255, 0.08) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 60% 60% at 20% 80%,
+            rgba(120, 0, 200, 0.07) 0%,
+            transparent 70%
+          );
+      }
+      .c-line {
+        width: 80mm;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 220, 255, 0.6),
+          transparent
+        );
+        margin-bottom: 12mm;
+        position: relative;
+        z-index: 1;
+      }
+      .c-tag {
+        font-family: "Outfit", sans-serif;
+        font-size: 9pt;
+        font-weight: 700;
+        letter-spacing: 6px;
+        color: rgba(0, 220, 255, 0.7);
+        text-transform: uppercase;
+        margin-bottom: 6mm;
+        position: relative;
+        z-index: 1;
+      }
+      .c-title {
+        font-family: "Outfit", sans-serif;
+        font-size: 52pt;
+        font-weight: 900;
+        background: linear-gradient(160deg, #fff, #a0d8ff, #60b0ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 3mm;
+        position: relative;
+        z-index: 1;
+      }
+      .c-sub {
+        font-family: "Outfit", sans-serif;
+        font-size: 10pt;
+        font-weight: 300;
+        letter-spacing: 3px;
+        color: rgba(180, 220, 255, 0.6);
+        text-transform: uppercase;
+        margin-bottom: 14mm;
+        position: relative;
+        z-index: 1;
+      }
+      .c-line2 {
+        width: 40mm;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 180, 60, 0.5),
+          transparent
+        );
+        margin-bottom: 14mm;
+        position: relative;
+        z-index: 1;
+      }
+      .c-doc {
+        font-size: 13pt;
+        font-weight: 700;
+        color: rgba(255, 200, 100, 0.9);
+        letter-spacing: 2px;
+        margin-bottom: 3mm;
+        position: relative;
+        z-index: 1;
+      }
+      .c-doc2 {
+        font-size: 9pt;
+        font-weight: 300;
+        color: rgba(200, 180, 230, 0.5);
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 1;
+      }
+      .c-mtn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80mm;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          rgba(10, 0, 25, 0.6),
+          #06000f
+        );
+      }
+      .c-mtn svg {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        opacity: 0.15;
+      }
+      .c-foot {
+        position: absolute;
+        bottom: 12mm;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 8pt;
+        color: rgba(150, 130, 180, 0.4);
+        letter-spacing: 1px;
+        z-index: 1;
+      }
+
+      /* PAGE */
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        background: linear-gradient(160deg, #07000e, #090115);
+        padding: 16mm 16mm 12mm;
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
+      }
+      .page::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1mm;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 200, 255, 0.5),
+          rgba(200, 100, 255, 0.3),
+          transparent
+        );
+      }
+      .ph {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10mm;
+        padding-bottom: 4mm;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .ph-brand {
+        font-family: "Outfit", sans-serif;
+        font-size: 11pt;
+        font-weight: 900;
+        letter-spacing: 3px;
+        background: linear-gradient(90deg, #60c8ff, #a080ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .ph-num {
+        font-size: 8pt;
+        color: rgba(150, 130, 180, 0.4);
+        letter-spacing: 1px;
+      }
+
+      .sec {
+        margin-bottom: 9mm;
+      }
+      .sec-t {
+        font-family: "Outfit", sans-serif;
+        font-size: 10.5pt;
+        font-weight: 900;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 4mm;
+      }
+      .cyan {
+        color: #00d8ff;
+      }
+      .gold {
+        color: #ffd060;
+      }
+      .purple {
+        color: #c080ff;
+      }
+      .green {
+        color: #00ffb0;
+      }
+      .orange {
+        color: #ff8040;
+      }
+      .sbar {
+        height: 2px;
+        border-radius: 2px;
+        margin-bottom: 5mm;
+      }
+      .bcyan {
+        background: linear-gradient(90deg, #00d8ff, transparent);
+      }
+      .bgold {
+        background: linear-gradient(90deg, #ffd060, transparent);
+      }
+      .bpurple {
+        background: linear-gradient(90deg, #c080ff, transparent);
+      }
+      .bgreen {
+        background: linear-gradient(90deg, #00ffb0, transparent);
+      }
+      .borange {
+        background: linear-gradient(90deg, #ff8040, transparent);
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 4mm;
+        padding: 5mm 6mm;
+        margin-bottom: 4mm;
+      }
+      .row {
+        display: flex;
+        gap: 4mm;
+        margin-bottom: 4mm;
+      }
+      .half {
+        flex: 1;
+        margin-bottom: 0 !important;
+      }
+
+      p,
+      li {
+        font-size: 9pt;
+        font-weight: 300;
+        line-height: 1.85;
+        color: rgba(220, 210, 240, 0.85);
+      }
+      ul {
+        padding-left: 4mm;
+        list-style: none;
+      }
+      ul li::before {
+        content: "▸ ";
+        color: rgba(100, 180, 255, 0.6);
+        font-size: 8pt;
+      }
+      strong {
+        font-weight: 700;
+        color: #fff;
+      }
+      .hl {
+        color: #00d8ff;
+        font-weight: 700;
+      }
+      .hlg {
+        color: #ffd060;
+        font-weight: 700;
+      }
+
+      .key-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3mm;
+      }
+      .key-row {
+        display: flex;
+        align-items: center;
+        gap: 3mm;
+      }
+      .key {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 2mm;
+        padding: 1mm 3mm;
+        font-family: "Outfit", sans-serif;
+        font-size: 8pt;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.9);
+        min-width: 9mm;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .kd {
+        font-size: 8.5pt;
+        color: rgba(200, 190, 220, 0.8);
+      }
+
+      .stage-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2.5mm;
+      }
+      .sc {
+        border-radius: 2mm;
+        padding: 2mm;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .sc .n {
+        font-family: "Outfit", sans-serif;
+        font-size: 7pt;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 1mm;
+      }
+      .sc .nm {
+        font-size: 7pt;
+        color: rgba(200, 190, 220, 0.75);
+        line-height: 1.3;
+      }
+
+      .srow {
+        display: flex;
+        align-items: center;
+        gap: 3mm;
+        padding: 2mm 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .srow:last-child {
+        border-bottom: none;
+      }
+      .si {
+        font-size: 13pt;
+        width: 7mm;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .sp {
+        font-family: "Outfit", sans-serif;
+        font-size: 10pt;
+        font-weight: 900;
+        color: #ffd060;
+        min-width: 14mm;
+        flex-shrink: 0;
+      }
+      .sd {
+        font-size: 8.5pt;
+        color: rgba(200, 190, 220, 0.75);
+      }
+
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 3mm;
+      }
+      .step {
+        display: flex;
+        align-items: flex-start;
+        gap: 4mm;
+      }
+      .sn {
+        width: 7mm;
+        height: 7mm;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0050a0, #0080ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Outfit", sans-serif;
+        font-size: 8pt;
+        font-weight: 900;
+        color: #fff;
+        flex-shrink: 0;
+        margin-top: 0.5mm;
+      }
+      .sc2 {
+        flex: 1;
+      }
+      .stit {
+        font-size: 9pt;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5mm;
+      }
+      .sbody {
+        font-size: 8.5pt;
+        color: rgba(200, 190, 220, 0.75);
+        line-height: 1.6;
+      }
+      code {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1mm;
+        padding: 0.3mm 2mm;
+        font-family: "Courier New", monospace;
+        font-size: 8pt;
+        color: #7ddff8;
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2mm;
+        margin-top: 3mm;
+      }
+      .tag {
+        background: rgba(80, 80, 160, 0.2);
+        border: 1px solid rgba(120, 100, 200, 0.3);
+        border-radius: 2mm;
+        padding: 1mm 3mm;
+        font-family: "Outfit", sans-serif;
+        font-size: 8pt;
+        font-weight: 700;
+        color: rgba(180, 160, 255, 0.9);
+      }
+
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 표지 -->
+    <div class="cover">
+      <div class="cover-glow"></div>
+      <div class="c-line"></div>
+      <div class="c-tag">Web Game Project</div>
+      <div class="c-title">SNOWFALL</div>
+      <div class="c-sub">Escape the Avalanche · High-Speed Alpine Descent</div>
+      <div class="c-line2"></div>
+      <div class="c-doc">프로젝트 소개서</div>
+      <div class="c-doc2">게임 개요 · 플레이 방법 · 실행 방법</div>
+      <div class="c-mtn">
+        <svg viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice">
+          <polygon
+            points="0,200 120,60 240,140 360,20 480,110 600,40 720,130 800,80 800,200"
+            fill="white"
+          />
+        </svg>
+      </div>
+      <div class="c-foot">2026 · SNOWFALL Game Project · Team SKI-3D</div>
+    </div>
+
+    <!-- PAGE 1 : 개요 -->
+    <div class="page">
+      <div class="ph">
+        <div class="ph-brand">SNOWFALL</div>
+        <div class="ph-num">01 / 02</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t cyan">🎮 &nbsp;게임 개요</div>
+        <div class="sbar bcyan"></div>
+        <div class="card">
+          <p>
+            <strong>SNOWFALL</strong>은 눈 덮인 설산을 배경으로 한
+            <strong>웹 기반 3D 알파인 스키 게임</strong>입니다.<br />
+            플레이어는 뒤에서 쏟아지는 <span class="hl">산사태</span>를 피해
+            경사를 내려가며, 다이아몬드와 메달을 수집해 점수를 쌓습니다.<br />
+            새벽부터 오로라 밤까지 <span class="hlg">10개의 스테이지</span>를
+            거치며 환경이 실시간으로 전환되는 것이 핵심 콘셉트입니다.
+          </p>
+        </div>
+        <div class="row">
+          <div class="card half">
+            <p
+              style="
+                font-weight: 700;
+                color: #00d8ff;
+                font-size: 9pt;
+                margin-bottom: 2mm;
+              "
+            >
+              장르 &amp; 플랫폼
+            </p>
+            <ul>
+              <li>장르: 무한 러너 · 스키 액션</li>
+              <li>플랫폼: 웹 브라우저 (PC)</li>
+              <li>렌더링: Three.js 3D (WebGL)</li>
+              <li>서버: Node.js · Python HTTP</li>
+            </ul>
+          </div>
+          <div class="card half">
+            <p
+              style="
+                font-weight: 700;
+                color: #ffd060;
+                font-size: 9pt;
+                margin-bottom: 2mm;
+              "
+            >
+              핵심 목표
+            </p>
+            <ul>
+              <li>산사태에 잡히지 않고 생존</li>
+              <li>10스테이지 완주 (총 약 15km)</li>
+              <li>메달 · 다이아몬드 최대 수집</li>
+              <li>드리프트 &amp; 점프 콤보 점수 극대화</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t gold">🏔️ &nbsp;스테이지 구성 (총 10단계)</div>
+        <div class="sbar bgold"></div>
+        <div class="stage-grid">
+          <div class="sc">
+            <div class="n" style="color: #00f0ff">STAGE 1</div>
+            <div class="nm">새벽의 여명</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #ffb855">STAGE 2</div>
+            <div class="nm">상쾌한 아침</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #00e5ff">STAGE 3</div>
+            <div class="nm">화창한 오전</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #33e0ff">STAGE 4</div>
+            <div class="nm">정오의 햇살</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #ffc800">STAGE 5</div>
+            <div class="nm">황금빛 오후</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #ff6022">STAGE 6</div>
+            <div class="nm">황혼의 노을</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #ff3355">STAGE 7</div>
+            <div class="nm">붉은 석양</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #77a0ff">STAGE 8</div>
+            <div class="nm">초저녁 어둠</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #a8c5ff">STAGE 9</div>
+            <div class="nm">별빛 쏟아지는 밤</div>
+          </div>
+          <div class="sc">
+            <div class="n" style="color: #ffd700">STAGE 10</div>
+            <div class="nm">챔피언의 영광</div>
+          </div>
+        </div>
+        <p
+          style="
+            margin-top: 3mm;
+            font-size: 8pt;
+            color: rgba(180, 160, 220, 0.5);
+          "
+        >
+          ※ 각 스테이지마다 하늘색·조명·안개·눈 색상이 실시간으로 전환되며,
+          후반으로 갈수록 속도와 난이도가 상승합니다.
+        </p>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t purple">⭐ &nbsp;주요 게임 요소 &amp; 점수</div>
+        <div class="sbar bpurple"></div>
+        <div class="row">
+          <div class="card half">
+            <div class="srow">
+              <div class="si">🔷</div>
+              <div class="sp">+100 pt</div>
+              <div class="sd">일반 다이아몬드</div>
+            </div>
+            <div class="srow">
+              <div class="si">🟥</div>
+              <div class="sp">+300 pt</div>
+              <div class="sd">레드 다이아몬드</div>
+            </div>
+            <div class="srow">
+              <div class="si">🌟</div>
+              <div class="sp">+500 pt</div>
+              <div class="sd">황금 다이아몬드 (반짝임)</div>
+            </div>
+          </div>
+          <div class="card half">
+            <div class="srow">
+              <div class="si">★</div>
+              <div class="sp">+3,000~</div>
+              <div class="sd">메달 1개 (관문 통과 시 지급)</div>
+            </div>
+            <div class="srow">
+              <div class="si">💨</div>
+              <div class="sp">콤보</div>
+              <div class="sd">드리프트 게이지 차징 보너스</div>
+            </div>
+            <div class="srow">
+              <div class="si">🎿</div>
+              <div class="sp">보정</div>
+              <div class="sd">점프대 스턴트 &amp; 속도 부스터</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t green">⚙️ &nbsp;기술 스택</div>
+        <div class="sbar bgreen"></div>
+        <div class="card">
+          <div class="tags">
+            <span class="tag">Three.js r165</span>
+            <span class="tag">WebGL</span>
+            <span class="tag">Vanilla JS (ES Modules)</span>
+            <span class="tag">HTML5 / CSS3</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">Python HTTP Server</span>
+            <span class="tag">Web Audio API</span>
+            <span class="tag">CSS Animation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2 : 플레이 방법 + 실행 방법 -->
+    <div class="page">
+      <div class="ph">
+        <div class="ph-brand">SNOWFALL</div>
+        <div class="ph-num">02 / 02</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t cyan">🕹️ &nbsp;플레이 방법</div>
+        <div class="sbar bcyan"></div>
+        <div class="card" style="margin-bottom: 4mm">
+          <p
+            style="
+              font-weight: 700;
+              color: #fff;
+              font-size: 9pt;
+              margin-bottom: 3mm;
+            "
+          >
+            조작 키
+          </p>
+          <div class="key-grid">
+            <div class="key-row">
+              <span class="key">←</span><span class="key">→</span
+              ><span class="kd">좌우 방향 전환</span>
+            </div>
+            <div class="key-row">
+              <span class="key">SPACE</span
+              ><span class="kd">홀드 → 점프 (충전 시간에 따라 높이 결정)</span>
+            </div>
+            <div class="key-row">
+              <span class="key">SHIFT</span><span class="key">+← →</span
+              ><span class="kd">드리프트 게이지 차징</span>
+            </div>
+            <div class="key-row">
+              <span class="key">ESC</span
+              ><span class="kd">일시정지 / 재개</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <p
+            style="
+              font-weight: 700;
+              color: #fff;
+              font-size: 9pt;
+              margin-bottom: 3mm;
+            "
+          >
+            게임 흐름
+          </p>
+          <ul>
+            <li>
+              게임 시작 시 오프닝 컷씬이 재생되고, 즉시 산사태가 따라옵니다.
+            </li>
+            <li>
+              <strong>다이아몬드 아치 게이트</strong>를 통과하면 점수 획득.
+              색상이 밝을수록 고점수입니다.
+            </li>
+            <li>
+              스테이지 중 <strong>메달 점프대(★)</strong>에서 메달을 최대
+              3개까지 수집할 수 있습니다.
+            </li>
+            <li>
+              <strong>관문(깃발 게이트)</strong>을 통과하면 다음 스테이지로
+              전환되며, 수집한 메달이 점수판으로 날아가 보너스 점수가
+              지급됩니다.
+            </li>
+            <li>
+              나무에 충돌하면 속도가 0이 되고 5초 무적 상태로 리스폰됩니다.
+            </li>
+            <li>
+              산사태에 따라잡히면 게임 오버. <strong>10스테이지 완주</strong>가
+              최종 목표입니다.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t gold">🔧 &nbsp;주요 시스템</div>
+        <div class="sbar bgold"></div>
+        <div class="row">
+          <div class="card half">
+            <p
+              style="
+                font-weight: 700;
+                color: #ffd060;
+                font-size: 8.5pt;
+                margin-bottom: 2mm;
+              "
+            >
+              드리프트 시스템
+            </p>
+            <p style="font-size: 8.5pt">
+              SHIFT + 방향키로 드리프트 게이지를 충전하면 게이지가 가득 찰 때
+              순간 부스터가 발동됩니다.
+            </p>
+          </div>
+          <div class="card half">
+            <p
+              style="
+                font-weight: 700;
+                color: #00ffb0;
+                font-size: 8.5pt;
+                margin-bottom: 2mm;
+              "
+            >
+              점프 시스템
+            </p>
+            <p style="font-size: 8.5pt">
+              SPACE 홀드 시간에 따라 점프 높이가 결정됩니다. 눈덩이 장애물을
+              밟으면 바운스 점프가 가능합니다.
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="card half">
+            <p
+              style="
+                font-weight: 700;
+                color: #c080ff;
+                font-size: 8.5pt;
+                margin-bottom: 2mm;
+              "
+            >
+              메달 수집
+            </p>
+            <p style="font-size: 8.5pt">
+              각 스테이지에 메달 점프대 3개가 배치됩니다. 관문 통과 시 보너스
+              점수(+3,000 / +6,000 / +10,000)로 전환됩니다.
+            </p>
+          </div>
+          <div class="card half">
+            <p
+              style="
+                font-weight: 700;
+                color: #ff8040;
+                font-size: 8.5pt;
+                margin-bottom: 2mm;
+              "
+            >
+              레이스 진행도 UI
+            </p>
+            <p style="font-size: 8.5pt">
+              상단 바에 현재 위치와 스테이지 깃발이 표시됩니다. 🎿 아이콘이
+              실시간으로 이동하며 최종 도착점은 체커보드로 표시됩니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t orange">🚀 &nbsp;실행 방법</div>
+        <div class="sbar borange"></div>
+        <div class="card">
+          <div class="steps">
+            <div class="step">
+              <div class="sn">1</div>
+              <div class="sc2">
+                <div class="stit">서버 접속</div>
+                <div class="sbody">
+                  <code>https://kdy20716-droid.github.io/ski-3d-game/</code>를
+                  실행합니다.
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="sn">2</div>
+              <div class="sc2">
+                <div class="stit">캐릭터 선택 후 게임 시작</div>
+                <div class="sbody">
+                  시작 화면에서 캐릭터를 선택하고
+                  <strong>PLAY GAME</strong> 버튼을 클릭합니다.
+                </div>
+              </div>
+            </div>
+          </div>
+          <p
+            style="
+              margin-top: 4mm;
+              font-size: 8pt;
+              color: rgba(180, 160, 220, 0.45);
+            "
+          >
+            ※ WebGL을 지원하는 최신 브라우저 권장 · 인터넷 연결 필요 (Three.js
+            CDN 로드)
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
