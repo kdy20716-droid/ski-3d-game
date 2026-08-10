@@ -135,23 +135,24 @@ export const createRockySnowballHazardSystem = (scene) => {
 
   // ── 메인 업데이트 ───────────────────────────────────────────────
   const update = (G, dt, onScoreAdd, showToast) => {
-    // 5스테이지 이상부터만 발동 (G.stage >= 5)
-    if (G.stage < 5 || G.isCutscene) {
+    const currentStage = G.effectiveStage || G.stage;
+    // 5스테이지 이상부터만 발동
+    if (currentStage < 5 || G.isCutscene) {
       cleanupFarObjects(G.pz, dt);
       return;
     }
 
     // 스폰 쿨다운 (Stage 5: ~4.5초, Stage 10: ~2.0초 올-랜덤 난입)
-    const cooldown = Math.max(2.0, 4.8 - (G.stage - 5) * 0.55);
+    const cooldown = Math.max(2.0, 4.8 - (currentStage - 5) * 0.55);
     spawnTimer += dt;
 
     if (spawnTimer >= cooldown) {
       spawnTimer = 0;
       if (!G.isCrashed && G.play && !G.dead) {
         // 🪨 스테이지별 스폰 개수: Stage 5~6 = 1개, Stage 7~8 = 2개, Stage 9~10 = 3개 동시 스폰!
-        const count = G.stage >= 9 ? 3 : (G.stage >= 7 ? 2 : 1);
+        const count = currentStage >= 9 ? 3 : (currentStage >= 7 ? 2 : 1);
         for (let c = 0; c < count; c++) {
-          spawnRockySnowball(G.px, G.pz, G.spd, G.stage);
+          spawnRockySnowball(G.px, G.pz, G.spd, currentStage);
         }
       }
     }

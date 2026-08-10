@@ -523,8 +523,6 @@ class SoundManager {
       `assets/audio/bgm/${trackName}.mp3`,
       `./client/assets/audio/bgm/${trackName}.mp3`,
       `./assets/audio/bgm/${trackName}.mp3`,
-      `client/assets/audio/bgm/${trackName}.ogg`,
-      `assets/audio/bgm/${trackName}.ogg`,
     ];
 
     const audio = new Audio();

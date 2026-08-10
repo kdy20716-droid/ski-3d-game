@@ -429,8 +429,8 @@ const startGame = (mode = 'challenge') => {
   env.spawnFlagGate(G.nextFlagDist);
   if (ui) ui.showToast(t('escapeToastTitle'), t('escapeToastSub'));
 
-  // 🎵 1~11 스테이지 전용 BGM 자동 재생 연동 (무한모드일 경우 stage11 BGM, 도전모드 시작 시 stage1 BGM)
-  const startBgmTrack = (mode === 'endless') ? 'stage11' : 'stage1';
+  // 🎵 무한모드/도전모드 모두 stage1 BGM으로 시원하게 출발!
+  const startBgmTrack = 'stage1';
   if (soundFx && soundFx.playBGM) soundFx.playBGM(startBgmTrack);
 };
 
@@ -544,9 +544,13 @@ const update = (dt, time) => {
     G.jumpCharge = 0;
   }
 
+  // 🏔️ 1~10스테이지까지는 난이도 정상 상향, 11스테이지부터는 1스테이지 배경으로 순환하되 난이도만 10스테이지 고정!
+  G.effectiveStage = Math.min(10, G.stage);
+  const calcStage = G.effectiveStage;
+
   // 🏎️ 동적 최고 속도 계산 (원래의 340+ km/h 초고속 속도감 복구!)
   const isBoosterActive = G.boosterTimer > 0;
-  const currentMaxSpd = CFG.MAX_SPD + (G.stage - 1) * 5.0 + (isBoosterActive ? 35.0 : 0);
+  const currentMaxSpd = CFG.MAX_SPD + (calcStage - 1) * 5.0 + (isBoosterActive ? 35.0 : 0);
 
   // ⚡ 만화 방사형 흑백 집중선 오버레이 연출 (차징 중엔 꺼지고, 순수 부스트 주행 시만 고정 발동!)
   const isShiftPressing = keys.has('ShiftLeft') || keys.has('ShiftRight');
@@ -559,7 +563,7 @@ const update = (dt, time) => {
     driftRes = driftSystem.update(G, keys, dt, ui, soundFx);
   }
 
-  const targetSpd = Math.min(currentMaxSpd, (G.boosterTimer > 0 ? currentMaxSpd : CFG.BASE_SPD) + (G.stage-1)*5 + G.elapsed*1.8);
+  const targetSpd = Math.min(currentMaxSpd, (G.boosterTimer > 0 ? currentMaxSpd : CFG.BASE_SPD) + (calcStage-1)*5 + G.elapsed*1.8);
   if (accel) G.spd = Math.min(currentMaxSpd, G.spd + CFG.ACCEL * dt * 4.2);
   else if (brake) G.spd = Math.max(8, G.spd - CFG.ACCEL * dt * 7.5);
   else G.spd += (targetSpd - G.spd) * dt * (G.boosterTimer > 0 ? 2.5 : 0.6);
@@ -792,12 +796,12 @@ const update = (dt, time) => {
 
   // 1) 1스테이지는 65% 속도로 아주 여유롭게, 스테이지가 올라갈수록 서서히 속도 상향!
   const isGrace = G.avalancheGraceTimer > 0;
-  const stageSpeedFactor = 0.65 + Math.min(0.24, (G.stage - 1) * 0.026); // Stage 1: 0.65 ➔ Stage 10: 0.89
+  const stageSpeedFactor = 0.65 + Math.min(0.24, (calcStage - 1) * 0.026); // Stage 1: 0.65 ➔ Stage 10: 0.89
   const baseAvSpd = currentMaxSpd * (isGrace ? 0.15 : stageSpeedFactor);
   let currentAvSpd = baseAvSpd;
 
   // 2) 스테이지별 최소/안전 거리: Stage 1 = 95m (최고 여유) ➔ Stage 10 = 20m (서서히 짧아짐!)
-  const targetSafetyGap = Math.max(20.0, 95.0 - (G.stage - 1) * 8.3);
+  const targetSafetyGap = Math.max(20.0, 95.0 - (calcStage - 1) * 8.3);
   const currentGap = Math.abs(G.pz - G.avalancheZ);
 
   // 3) 플레이어가 멀어져 targetSafetyGap 이상 벌어졌을 때만 천천히 추격
@@ -854,8 +858,8 @@ const update = (dt, time) => {
       triggerStageTransition(stageIdx);
       if (ui) ui.updateStageTitle(G.stage, sNextName, sNext.textColor); // 3초간 시원하게 각 테마 네온 컬러로 상단에 노출!
 
-      // 🎵 각 스테이지별 음원 (stage1 ~ stage11) 루프 재생 전환!
-      const nextBgmTrack = 'stage' + Math.min(11, G.stage);
+      // 🎵 각 스테이지별 음원 무한 순환!
+      const nextBgmTrack = 'stage' + ((stageIdx % 10) + 1);
       if (soundFx && soundFx.playBGM) soundFx.playBGM(nextBgmTrack);
 
       // 2. 🥇 메달 빠져나와 점수판으로 흡수되는 애니메이션 재생!
@@ -888,7 +892,7 @@ const update = (dt, time) => {
 
   // 🦅 공중 새 기믹 (베타테스터 플레이 중에도 새가 시원하게 날아오며 100% 노출! 단, 넉백 공격만 무적 통과)
   if (birdHazardSystem && G.play && !G.isOpeningCutscene && !G.isVictoryCeremony) {
-    birdHazardSystem.update(G.pz, G.px, G.py, G.stage, dt, time, (type) => {
+    birdHazardSystem.update(G.pz, G.px, G.py, G.effectiveStage, dt, time, (type) => {
       if (G.selectedChar !== 'beta' && G.invincibleTimer <= 0) {
         G.pz += 6.0; // 뒤로 넉백!
         G.spd = Math.max(0, G.spd - 15.0);
@@ -907,7 +911,7 @@ const update = (dt, time) => {
 
   // 💥 나무/바위 충돌 시 뒤로 넉백 보정 (베타테스터 캐릭터는 장애물 충돌 무적 통과!)
   if (G.selectedChar !== 'beta') {
-    const hitRadiusMult = 1.45 + Math.min(0.35, (G.stage - 1) * 0.05);
+    const hitRadiusMult = 1.45 + Math.min(0.35, (calcStage - 1) * 0.05);
     for (const tree of env.treeList) {
       const dx = G.px - tree.x, dz = G.pz - tree.z;
       if (dx*dx + dz*dz < tree.r2 * hitRadiusMult && !G.inAir) {

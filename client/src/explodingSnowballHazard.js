@@ -146,8 +146,9 @@ export const createExplodingSnowballHazardSystem = (scene, camera) => {
 
   // 💣 메인 업데이트 (돌눈덩이 물리 + 다가오기 + 밟기 불발 + 3.8초 미해제 시 폭발 넉백)
   const update = (G, dt, soundFx, ui) => {
+    const currentStage = G.effectiveStage || G.stage;
     // 7스테이지 이상 전용 (10스테이지 올-랜덤 난입)
-    if (G.stage < 7 || G.isOpeningCutscene || G.isVictoryCeremony) {
+    if (currentStage < 7 || G.isOpeningCutscene || G.isVictoryCeremony) {
       return;
     }
 

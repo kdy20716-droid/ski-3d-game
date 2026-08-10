@@ -400,8 +400,15 @@ export const setupUI = (handlers) => {
     updateRacePlayerAvatar(selectedCharId);
   };
 
+  let currentGameMode = 'challenge';
+
   // 🏁 레이스 진행 바 업데이트 — 3D 인게임 실제 위치와 깃발 관문 시각적 100% 1:1 동기화!
   const updateRaceBar = (currentDist, totalDist = 100000, isCutscene = false) => {
+    const raceBarEl = document.getElementById('raceBar');
+    if (currentGameMode === 'endless') {
+      if (raceBarEl) raceBarEl.style.display = 'none';
+      return;
+    }
     const playerEl = document.getElementById('racePlayer');
     if (!playerEl) return;
 
@@ -414,14 +421,15 @@ export const setupUI = (handlers) => {
     playerEl.style.left = `${pctInTrack * 100}%`;
   };
 
-  const setHUDVisible = (visible) => {
+  const setHUDVisible = (visible, mode = currentGameMode) => {
+    if (mode) currentGameMode = mode;
     const hudEl = document.getElementById('hud');
     const barsEl = document.getElementById('bars');
     const raceBarEl = document.getElementById('raceBar');
     const display = visible ? '' : 'none';
     if (hudEl) hudEl.style.display = display;
     if (barsEl) barsEl.style.display = display;
-    if (raceBarEl) raceBarEl.style.display = visible ? 'flex' : 'none';
+    if (raceBarEl) raceBarEl.style.display = (visible && currentGameMode !== 'endless') ? 'flex' : 'none';
   };
 
   const showScreen = (type, statsText = '', mode = 'challenge') => {

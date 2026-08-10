@@ -136,7 +136,8 @@ export const createSnowballHazardSystem = (scene) => {
 
   // ── 4. 메인 업데이트 루프 ───────────────────────────────────────
   const update = (G, dt, onWarningUpdate, onScoreAdd, showToast) => {
-    const stageCfg = getStageConfig(G.stage);
+    const currentStage = G.effectiveStage || G.stage;
+    const stageCfg = getStageConfig(currentStage);
 
     if (!stageCfg || G.isCutscene) {
       if (onWarningUpdate) onWarningUpdate({ show: false });
@@ -164,7 +165,7 @@ export const createSnowballHazardSystem = (scene) => {
 
     if (spawnTimer >= stageCfg.cooldown) {
       spawnTimer = 0;
-      spawnSnowballGroup(G.px, G.pz, G.spd, G.stage);
+      spawnSnowballGroup(G.px, G.pz, G.spd, currentStage);
     }
 
     // ── 눈덩이 물리: 내 좌/우 뒤에서 빠른 속도로 출발해 전방으로 굴러가다 천천히 감속 ─
